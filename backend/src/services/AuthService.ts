@@ -69,7 +69,8 @@ export class AuthService {
     public getAvailability() {
         return {
             discord: !!this.discordOAuth2Provider,
-            google: !!this.googleOAuth2Provider
+            google: !!this.googleOAuth2Provider,
+            github: !!this.githubOAuth2Provider
         }
     }
 
