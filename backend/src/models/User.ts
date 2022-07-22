@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Community } from "./Community";
 import { Session } from "./Session";
 import { UserConnection } from "./UserConnection";
 
@@ -12,6 +13,17 @@ export class User {
 
     @OneToMany(()=>Session, session=>session.user)
     sessions!: Promise<Session[]>
+
+    @ManyToMany(()=>Community)
+    @JoinTable({
+        name: 'community_member'
+    })
+    communities!: Promise<Community[]>
+
+    /*
+    @OneToMany(()=>CommunityMember, cm=>cm.user)
+    members!: Promise<CommunityMember[]>
+    */
 
     @Column()
     username!: string
