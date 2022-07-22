@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { User } from "./User";
 
 export enum UserConnectionType {
@@ -23,6 +23,9 @@ export class UserConnection {
 
     @Column()
     foreignUsername!: string
+
+    @CreateDateColumn()
+    createdAt!: Date
 
     public toDisplay() {
         return {
