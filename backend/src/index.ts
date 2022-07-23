@@ -2,8 +2,7 @@ import 'reflect-metadata'
 import { createDataSource } from './createDataSource'
 import { createServer } from "./createServer"
 import Logger from "./Logger"
-import { MockOAuth2Provider } from './services/OAuth2Providers/MockOAuth2Provider'
-import { DiscordOAuth2Provider } from './services/OAuth2Providers/DiscordOAuth2Provider'
+import { DiscordOAuth2Provider, MockOAuth2Provider } from './services/OAuth2Providers'
 import { loadConfig } from './config'
 import { UserStorage } from './services/UserStorage'
 import { AuthService } from './services/AuthService'
