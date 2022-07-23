@@ -26,7 +26,18 @@ describe('OAuth2 tests', () => {
         expect(user).toBeDefined()
     })
 
-    it('allows to have multiple user connections', async () => {
+    it('disallows to use invalid oauth2 code', async () => {
+        const {app} = await createTestServer()
+        const res1 = await supertest(app)
+            .post('/auth/discord')
+            .set('Content-Type', 'application/json')
+            .send({
+                code: 'invalidcode'
+            })
+            .expect(400)
+    })
+
+    it('allows to have multiple user connections and remove one of them', async () => {
         const {app} = await createTestServer()
         const res1 = await supertest(app)
             .post('/auth/discord')
@@ -58,6 +69,11 @@ describe('OAuth2 tests', () => {
         expect(user.connections instanceof Array).toBeTruthy()
         expect(user.connections.length).toBe(2)
 
+        const res4 = await supertest(app)
+            .delete('/auth/github')
+            .set('Authorization', `Bearer: ${token}`)
+            .expect(204)
+
     })
 
     it('disallows to delete last user connection', async () => {
@@ -88,5 +104,41 @@ describe('OAuth2 tests', () => {
                 code: 'aaa'
             })
             .expect(503)
+    })
+
+    it('allows to login', async () => {
+        const {app} = await createTestServer()
+
+        const res1 = await supertest(app)
+            .post('/auth/discord')
+            .set('Content-Type', 'application/json')
+            .send({
+                code: 'masn000'
+            })
+            .expect(200)
+
+        const token1 = res1.body.token as string
+
+        const res2 = await supertest(app)
+            .post('/auth/discord')
+            .set('Content-Type', 'application/json')
+            .send({
+                code: 'masn000'
+            })
+            .expect(200)
+
+        const token2 = res2.body.token as string
+
+        expect(token1 === token2).toBe(false)
+        
+        const res3 = await supertest(app)
+            .get('/user/@me')
+            .set('Authorization', `Bearer: ${token1}`)
+            .expect(200)
+        
+        const sessions = res3.body.sessions
+        
+        expect(sessions.length).toBe(2)
+
     })
 })
