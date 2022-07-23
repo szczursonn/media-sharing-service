@@ -2,12 +2,12 @@ import 'reflect-metadata'
 import { createDataSource } from './createDataSource'
 import { createServer } from "./createServer"
 import Logger from "./Logger"
-import { SessionManager } from './services/SessionManager'
 import { MockOAuth2Provider } from './services/OAuth2Providers/MockOAuth2Provider'
 import { DiscordOAuth2Provider } from './services/OAuth2Providers/DiscordOAuth2Provider'
 import { loadConfig } from './config'
 import { UserStorage } from './services/UserStorage'
 import { AuthService } from './services/AuthService'
+import { SessionStorage } from './services/SessionStorage'
 
 const DEFAULT_PORT = 3000
 
@@ -30,8 +30,7 @@ const main = async () => {
     Logger.info('Connected to database')
     
     const userStorage = new UserStorage(dataSource)
-
-    const sessionManager = new SessionManager(dataSource, config.jwtSecret)
+    const sessionStorage = new SessionStorage(dataSource)
 
     const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
         ? new DiscordOAuth2Provider({
@@ -47,8 +46,9 @@ const main = async () => {
     const githubOAuth2Provider = new MockOAuth2Provider()
 
     const authService = new AuthService({
-        sessionManager,
         userStorage,
+        sessionStorage,
+        jwtSecret: config.jwtSecret,
         discordOAuth2Provider,
         googleOAuth2Provider,
         githubOAuth2Provider
@@ -56,7 +56,6 @@ const main = async () => {
 
     const app = await createServer({
         userStorage,
-        sessionManager,
         authService
     })
         

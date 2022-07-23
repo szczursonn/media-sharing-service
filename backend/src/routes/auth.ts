@@ -1,13 +1,21 @@
 import { Express, Router, Request, Response } from 'express'
 import { CannotRemoveLastUserConnectionError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError } from '../errors'
 import Logger from '../Logger'
+import { requiresAuth } from '../middlewares'
 import { UserConnectionType } from '../models/UserConnection'
 import { AuthService } from '../services/AuthService'
-import { SessionManager } from '../services/SessionManager'
 import { extractToken } from '../utils/extractToken'
-import { requiresAuth } from '../middlewares'
 
-export const setupAuthRoutes = (app: Express, sessionManager: SessionManager, authService: AuthService): Express => {
+export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, authService: AuthService): Express => {
+
+    /**
+     * Prefix: /auth
+     * Routes:
+     * - POST /<oauth2provider> - login/register with oauth2 provider ex. google, discord
+     * - DELETE /<oauth2provider> - disconnect oauth2 provider from the account
+     * - DELETE / - end session
+     * - GET /availability - returns info about oauth2 provider availability
+     */
 
     const oauthExchange = (type: UserConnectionType) => async (req: Request, res: Response) => {
         const code = req.body?.code
@@ -24,7 +32,7 @@ export const setupAuthRoutes = (app: Express, sessionManager: SessionManager, au
             if (!token) {
                 return res.json(await authService.loginOrRegisterWithOAuth2(code, type))
             } else {
-                const userId = await sessionManager.validate(token)
+                const [userId] = await authService.validate(token)
                 await authService.addConnection(userId, code, type)
                 return res.sendStatus(204)
             }
@@ -40,7 +48,7 @@ export const setupAuthRoutes = (app: Express, sessionManager: SessionManager, au
         }
     }
 
-    const removeConnection = (type: UserConnectionType) => requiresAuth(sessionManager, async (req, res, userId) => {
+    const removeConnection = (type: UserConnectionType) => requiresAuth(async (req, res, userId) => {
         try {
             await authService.removeConnection(userId, type)
             return res.sendStatus(204)
@@ -63,6 +71,18 @@ export const setupAuthRoutes = (app: Express, sessionManager: SessionManager, au
 
     router.post('/github', oauthExchange(UserConnectionType.Github))
     router.delete('/github', removeConnection(UserConnectionType.Github))
+    
+    router.delete('/', requiresAuth(async (req, res, userId) => {
+        const sessionId = req.body.sessionId
+
+        if (typeof sessionId !== 'number') return res.sendStatus(400)
+
+        try {
+            await authService.invalidateSession(sessionId, userId)
+        } catch (err) {
+            return res.sendStatus(500)
+        }
+    }))
 
     router.get('/availability', (req, res) => {
         res.json(authService.getAvailability())

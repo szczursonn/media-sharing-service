@@ -1,14 +1,14 @@
 import { Express, Router } from 'express'
 import Logger from '../Logger'
-import { SessionManager } from '../services/SessionManager'
 import { UserStorage } from '../services/UserStorage'
 import { requiresAuth } from '../middlewares'
+import { AuthService } from '../services/AuthService'
 
-export const setupUserRoutes = (app: Express, sessionManager: SessionManager, userStorage: UserStorage) => {
+export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, authService: AuthService, userStorage: UserStorage) => {
 
     const router = Router()
 
-    router.get('/:id', requiresAuth(sessionManager, async (req, res, userId) => {
+    router.get('/:id', requiresAuth(async (req, res, userId) => {
         try {
             const isMe = req.params.id === '@me'
             const queryId = isMe  ? userId : parseInt(req.params.id)
@@ -22,7 +22,7 @@ export const setupUserRoutes = (app: Express, sessionManager: SessionManager, us
         }
     }))
 
-    router.delete('/:id', requiresAuth(sessionManager, async (req, res, userId) => {
+    router.delete('/:id', requiresAuth(async (req, res, userId) => {
         try {
             const id = parseInt(req.params.id)
             if (isNaN(id)) return res.sendStatus(400)

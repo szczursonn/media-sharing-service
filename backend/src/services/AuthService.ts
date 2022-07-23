@@ -1,30 +1,36 @@
-import { CannotRemoveLastUserConnectionError, OAuth2ProviderUnavailableError } from "../errors";
+import { CannotRemoveLastUserConnectionError, InvalidSessionError, OAuth2ProviderUnavailableError } from "../errors";
+import { Session } from "../models/Session";
 import { User } from "../models/User";
 import { UserConnection, UserConnectionType } from "../models/UserConnection";
-import { AccessToken, OAuth2Profile } from "../types";
-import { SessionManager } from "./SessionManager";
+import { AccessToken, OAuth2Profile, TokenPayload } from "../types";
+import { SessionStorage } from "./SessionStorage";
 import { UserStorage } from "./UserStorage";
+import jwt from 'jsonwebtoken'
+import { validateTokenPayload } from "../types/validators";
 
 export interface OAuth2Provider {
     exchange(code: string): Promise<OAuth2Profile>
 }
 
 export class AuthService {
-    private sessionManager: SessionManager
     private userStorage: UserStorage
+    private sessionStorage: SessionStorage
+    private jwtSecret: string
     private discordOAuth2Provider?: OAuth2Provider
     private googleOAuth2Provider?: OAuth2Provider
     private githubOAuth2Provider?: OAuth2Provider
 
-    public constructor({sessionManager, userStorage, discordOAuth2Provider, googleOAuth2Provider, githubOAuth2Provider}: {
-        sessionManager: SessionManager,
+    public constructor({userStorage, sessionStorage, jwtSecret, discordOAuth2Provider, googleOAuth2Provider, githubOAuth2Provider}: {
         userStorage: UserStorage,
+        sessionStorage: SessionStorage,
+        jwtSecret: string,
         discordOAuth2Provider?: OAuth2Provider,
         googleOAuth2Provider?: OAuth2Provider,
         githubOAuth2Provider?: OAuth2Provider
     }) {
-        this.sessionManager = sessionManager
         this.userStorage = userStorage
+        this.sessionStorage = sessionStorage
+        this.jwtSecret = jwtSecret
         this.discordOAuth2Provider = discordOAuth2Provider
         this.googleOAuth2Provider = googleOAuth2Provider
         this.githubOAuth2Provider = githubOAuth2Provider
@@ -37,9 +43,9 @@ export class AuthService {
         
         const user = await this.userStorage.getByConnection(profile.id, type) ?? await this.createUserFromOAuth2(profile, type)
         
-        const session = await this.sessionManager.createSession(user.id)
+        const [_, token] = await this.createSession(user.id)
 
-        return this.sessionManager.generateSessionToken(session.id, user.id)
+        return token
     }
 
     public async addConnection(userId: number, code: string, type: UserConnectionType): Promise<UserConnection> {
@@ -66,6 +72,24 @@ export class AuthService {
         await this.userStorage.removeConnection(userId, type)
     }
 
+    public async validate(token: string): Promise<[number, number]> {
+        const payload = jwt.verify(token, this.jwtSecret) as TokenPayload
+        if (!validateTokenPayload(payload)) throw new Error()
+        const session = await this.sessionStorage.getById(payload.sessionId)
+        if (!session) throw new InvalidSessionError()
+
+        return [payload.userId, payload.sessionId]
+    }
+
+    public async invalidateSession(sessionId: number, userId: number) {
+        const session = await this.sessionStorage.getById(sessionId)
+        if (!session) throw new Error()
+
+        if (session.userId !== userId) throw new Error()
+
+        await this.sessionStorage.delete(sessionId)
+    }
+
     public getAvailability() {
         return {
             discord: !!this.discordOAuth2Provider,
@@ -85,6 +109,20 @@ export class AuthService {
         connection.type = type
         
         return await this.userStorage.saveWithConnection(user, connection)
+    }
+
+    private async createSession(userId: number): Promise<[Session, AccessToken]> {
+        const newSession = new Session()
+        newSession.userId = userId
+        const session = await this.sessionStorage.save(newSession)
+        
+        const payload: TokenPayload = {
+            userId: userId,
+            sessionId: session.id
+        }
+        const token = jwt.sign(payload, this.jwtSecret)
+
+        return [session, {token}]
     }
 
     private getOAuth2Service(type: UserConnectionType): OAuth2Provider {
