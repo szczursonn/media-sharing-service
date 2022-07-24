@@ -2,7 +2,7 @@ import cors from 'cors'
 import express from 'express'
 import { createTestDataSource } from './createDataSource'
 import Logger from './Logger'
-import { createRequiresAuth } from './middlewares'
+import { createRequiresAuth, httpLogger } from './middlewares'
 import { setupAuthRoutes, setupUserRoutes } from './routes'
 import { AuthService } from './services/AuthService'
 import { MockOAuth2Provider } from './services/OAuth2Providers'
@@ -20,7 +20,7 @@ export const createServer = async ({
 
     app.use(cors())
     app.use(express.json())
-    app.use(Logger.middleware())
+    app.use(httpLogger)
 
     const requiresAuth = createRequiresAuth(authService)
     

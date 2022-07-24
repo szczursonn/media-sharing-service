@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import { NextFunction, Request, Response } from 'express'
 
 enum LogLevel {
     INFO = 'INFO',
@@ -55,13 +54,6 @@ class Logger {
 
     public static debug(msg: string) {
         this._log(msg, LogLevel.DEBUG)
-    }
-
-    public static middleware() {
-        return (req: Request, res: Response, next: NextFunction) => {
-            Logger.debug(`HTTP ${req.method} : ${req.path}`)
-            next()
-        }
     }
 
 }
