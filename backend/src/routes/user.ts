@@ -1,10 +1,16 @@
 import { Express, Router } from 'express'
 import Logger from '../Logger'
-import { UserStorage } from '../services/UserStorage'
 import { requiresAuth } from '../middlewares'
-import { AuthService } from '../services/AuthService'
+import { UserService } from '../services/UserService'
 
-export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, authService: AuthService, userStorage: UserStorage) => {
+/**
+ * GET /<userId> - returns user
+ * GET /@me - returns current user
+ * PATCH /@me - modifies current user
+ * DELETE /@me - deletes current user
+ */
+
+export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userService: UserService) => {
 
     const router = Router()
 
@@ -12,7 +18,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, authSe
         try {
             const isMe = req.params.id === '@me'
             const queryId = isMe  ? userId : parseInt(req.params.id)
-            const user = await userStorage.getById(queryId)
+            const user = await userService.getUserById(queryId)
             if (!user) return res.sendStatus(404)
 
             return res.json(await user.toDisplay(isMe))
@@ -22,12 +28,13 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, authSe
         }
     }))
 
-    router.delete('/:id', requiresAuth(async (req, res, userId) => {
+    router.patch('/@me', requiresAuth(async (req, res, userId) => {
+        res.sendStatus(500)
+    }))
+
+    router.delete('/@me', requiresAuth(async (req, res, userId) => {
         try {
-            const id = parseInt(req.params.id)
-            if (isNaN(id)) return res.sendStatus(400)
-            if (id !== userId) return res.sendStatus(401)
-            await userStorage.remove(id)
+            await userService.removeUser(userId)
             res.sendStatus(204)
         } catch (err) {
             Logger.err(String(err))

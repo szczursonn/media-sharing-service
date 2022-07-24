@@ -7,13 +7,14 @@ import { setupAuthRoutes, setupUserRoutes } from './routes'
 import { AuthService } from './services/AuthService'
 import { MockOAuth2Provider } from './services/OAuth2Providers'
 import { SessionStorage } from './services/SessionStorage'
+import { UserService } from './services/UserService'
 import { UserStorage } from './services/UserStorage'
 
 export const createServer = async ({
-    userStorage,
+    userService,
     authService
 }: {
-    userStorage: UserStorage
+    userService: UserService
     authService: AuthService
 }) => {
     const app = express()
@@ -25,7 +26,7 @@ export const createServer = async ({
     const requiresAuth = createRequiresAuth(authService)
     
     setupAuthRoutes(app, requiresAuth, authService)
-    setupUserRoutes(app, requiresAuth, authService, userStorage)
+    setupUserRoutes(app, requiresAuth, userService)
 
     return app
 }
@@ -43,9 +44,12 @@ export const createTestServer = async () => {
         googleOAuth2Provider: undefined,
         githubOAuth2Provider: new MockOAuth2Provider()
     })
+    const userService = new UserService({
+        userStorage
+    })
 
     const app = await createServer({
-        userStorage,
+        userService,
         authService
     })
 

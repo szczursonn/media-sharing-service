@@ -7,6 +7,7 @@ import { loadConfig } from './config'
 import { UserStorage } from './services/UserStorage'
 import { AuthService } from './services/AuthService'
 import { SessionStorage } from './services/SessionStorage'
+import { UserService } from './services/UserService'
 
 const DEFAULT_PORT = 3000
 
@@ -52,10 +53,13 @@ const main = async () => {
         googleOAuth2Provider,
         githubOAuth2Provider
     })
+    const userService = new UserService({
+        userStorage
+    })
 
     const app = await createServer({
-        userStorage,
-        authService
+        authService,
+        userService
     })
         
     app.listen(config.port, () => {
