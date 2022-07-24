@@ -1,11 +1,6 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { UserConnectionType } from "../types";
 import { User } from "./User";
-
-export enum UserConnectionType {
-    Google = 'google',
-    Discord = 'discord',
-    Github = 'github'
-}
 
 @Entity()
 export class UserConnection {

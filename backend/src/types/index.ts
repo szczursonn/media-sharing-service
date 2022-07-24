@@ -13,3 +13,5 @@ export type TokenPayload = {
     userId: number,
     sessionId: number
 }
+
+export type UserConnectionType = 'google' | 'discord' | 'github'

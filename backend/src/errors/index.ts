@@ -1,4 +1,4 @@
-import { UserConnectionType } from "../models/UserConnection";
+import { UserConnectionType } from "../types"
 
 export class OAuth2ProviderUnavailableError extends Error {
     public type: UserConnectionType

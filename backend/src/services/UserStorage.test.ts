@@ -1,6 +1,7 @@
 import { createDataSource } from "../createDataSource"
 import { User } from "../models/User"
-import { UserConnection, UserConnectionType } from "../models/UserConnection"
+import { UserConnection } from "../models/UserConnection"
+import { UserConnectionType } from "../types"
 import { UserStorage } from "./UserStorage"
 
 describe('UserStorage tests', () => {
@@ -25,7 +26,7 @@ describe('UserStorage tests', () => {
     })
 
     it('allows to remove a connection', async () => {
-        const type = UserConnectionType.Discord
+        const type = 'discord'
 
         const userStorage = await thereIsUserStorage()
         const user = await userStorage.saveWithConnection(
@@ -42,7 +43,7 @@ describe('UserStorage tests', () => {
 
     it('allows to get user by connection', async () => {
         const foreignId = '34242343'
-        const type = UserConnectionType.Discord
+        const type = 'discord'
 
         const userStorage = await thereIsUserStorage()
         await userStorage.saveWithConnection(
@@ -58,9 +59,9 @@ describe('UserStorage tests', () => {
     it('allows to add multiple connections to user', async () => {
         const userStorage = await thereIsUserStorage()
         const user = await userStorage.save(thereIsUser('mario'))
-        const con1 = thereIsConnection(UserConnectionType.Discord)
+        const con1 = thereIsConnection('discord')
         con1.userId = user.id
-        const con2 = thereIsConnection(UserConnectionType.Google)
+        const con2 = thereIsConnection('google')
         con2.userId = user.id
         await userStorage.saveConnection(con1)
         await userStorage.saveConnection(con2)
@@ -82,7 +83,7 @@ const thereIsUser = (username: string) => {
 }
 
 const thereIsConnection = (type?: UserConnectionType, foreignId?: string) => {
-    if (!type) type = UserConnectionType.Discord
+    if (!type) type = 'discord'
     if (!foreignId) foreignId = (Math.random()*10000).toString().split('.')[0]
     const con = new UserConnection()
     con.foreignId = foreignId

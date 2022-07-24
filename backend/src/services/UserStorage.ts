@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { User } from "../models/User";
-import { UserConnection, UserConnectionType } from "../models/UserConnection";
+import { UserConnection } from "../models/UserConnection";
+import { UserConnectionType } from "../types";
 
 export class UserStorage {
     private dataSource: DataSource

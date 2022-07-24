@@ -2,8 +2,8 @@ import { Express, Router, Request, Response } from 'express'
 import { CannotRemoveLastUserConnectionError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
-import { UserConnectionType } from '../models/UserConnection'
 import { AuthService } from '../services/AuthService'
+import { UserConnectionType } from '../types'
 import { extractToken } from '../utils/extractToken'
 
 export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, authService: AuthService): Express => {
@@ -63,14 +63,14 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, authSe
 
     const router = Router()
 
-    router.post('/discord', oauthExchange(UserConnectionType.Discord))
-    router.delete('/discord', removeConnection(UserConnectionType.Discord))
+    router.post('/discord', oauthExchange('discord'))
+    router.delete('/discord', removeConnection('discord'))
 
-    router.post('/google', oauthExchange(UserConnectionType.Google))
-    router.delete('/google', removeConnection(UserConnectionType.Google))
+    router.post('/google', oauthExchange('google'))
+    router.delete('/google', removeConnection('google'))
 
-    router.post('/github', oauthExchange(UserConnectionType.Github))
-    router.delete('/github', removeConnection(UserConnectionType.Github))
+    router.post('/github', oauthExchange('github'))
+    router.delete('/github', removeConnection('github'))
     
     router.delete('/', requiresAuth(async (req, res, userId) => {
         const sessionId = req.body.sessionId

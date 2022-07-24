@@ -1,8 +1,8 @@
 import { CannotRemoveLastUserConnectionError, InvalidSessionError, OAuth2ProviderUnavailableError } from "../errors";
 import { Session } from "../models/Session";
 import { User } from "../models/User";
-import { UserConnection, UserConnectionType } from "../models/UserConnection";
-import { AccessToken, OAuth2Profile, TokenPayload } from "../types";
+import { UserConnection } from "../models/UserConnection";
+import { AccessToken, OAuth2Profile, TokenPayload, UserConnectionType } from "../types";
 import { SessionStorage } from "./SessionStorage";
 import { UserStorage } from "./UserStorage";
 import jwt from 'jsonwebtoken'
@@ -90,7 +90,7 @@ export class AuthService {
         await this.sessionStorage.delete(sessionId)
     }
 
-    public getAvailability() {
+    public getAvailability(): { [key in UserConnectionType]: boolean } {
         return {
             discord: !!this.discordOAuth2Provider,
             google: !!this.googleOAuth2Provider,
@@ -127,14 +127,14 @@ export class AuthService {
 
     private getOAuth2Service(type: UserConnectionType): OAuth2Provider {
         switch (type) {
-            case UserConnectionType.Discord:
-                if (!this.discordOAuth2Provider) throw new OAuth2ProviderUnavailableError(UserConnectionType.Discord)
+            case 'discord':
+                if (!this.discordOAuth2Provider) throw new OAuth2ProviderUnavailableError('discord')
                 return this.discordOAuth2Provider
-            case UserConnectionType.Google:
-                if (!this.googleOAuth2Provider) throw new OAuth2ProviderUnavailableError(UserConnectionType.Google)
+            case 'google':
+                if (!this.googleOAuth2Provider) throw new OAuth2ProviderUnavailableError('google')
                 return this.googleOAuth2Provider
-            case UserConnectionType.Github:
-                if (!this.githubOAuth2Provider) throw new OAuth2ProviderUnavailableError(UserConnectionType.Github)
+            case 'github':
+                if (!this.githubOAuth2Provider) throw new OAuth2ProviderUnavailableError('github')
                 return this.githubOAuth2Provider
         }
     }
