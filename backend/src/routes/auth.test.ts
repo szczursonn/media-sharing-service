@@ -17,7 +17,7 @@ describe('OAuth2 tests', () => {
         expect(typeof token).toBe('string')
 
         const res2 = await supertest(app)
-            .get('/user/@me')
+            .get('/users/@me')
             .set('Authorization', `Bearer: ${token}`)
             .expect(200)
 
@@ -37,7 +37,7 @@ describe('OAuth2 tests', () => {
             .expect(400)
     })
 
-    it('allows to have multiple user connections and remove one of them', async () => {
+    it('allows to add multiple user connections thru oauth2 providers', async () => {
         const {app} = await createTestServer()
         const res1 = await supertest(app)
             .post('/auth/discord')
@@ -58,41 +58,16 @@ describe('OAuth2 tests', () => {
                 code: 'omamaleeee'
             })
             .expect(204)
-        
+
         const res3 = await supertest(app)
-            .get('/user/@me')
+            .get('/users/@me/connections')
             .set('Authorization', `Bearer: ${token}`)
             .expect(200)
 
-        const user = res3.body
-        expect(user.connections).toBeDefined()
-        expect(user.connections instanceof Array).toBeTruthy()
-        expect(user.connections.length).toBe(2)
-
-        const res4 = await supertest(app)
-            .delete('/auth/github')
-            .set('Authorization', `Bearer: ${token}`)
-            .expect(204)
-
-    })
-
-    it('disallows to delete last user connection', async () => {
-        const {app} = await createTestServer()
-        const res1 = await supertest(app)
-            .post('/auth/discord')
-            .set('Content-Type', 'application/json')
-            .send({
-                code: 'masnoooo123'
-            })
-            .expect(200)
-        
-        const token = res1.body.token as string
-        expect(typeof token).toBe('string')
-
-        const res2 = await supertest(app)
-            .delete('/auth/discord')
-            .set('Authorization', `Bearer: ${token}`)
-            .expect(409)
+        const connections = res3.body
+        expect(connections).toBeDefined()
+        expect(connections instanceof Array).toBeTruthy()
+        expect(connections.length).toBe(2)
     })
 
     it('disallows to use unavailable oauth2 provider', async () => {
@@ -132,13 +107,44 @@ describe('OAuth2 tests', () => {
         expect(token1 === token2).toBe(false)
         
         const res3 = await supertest(app)
-            .get('/user/@me')
+            .get('/auth/sessions')
             .set('Authorization', `Bearer: ${token1}`)
             .expect(200)
         
-        const sessions = res3.body.sessions
+        const sessions = res3.body
         
         expect(sessions.length).toBe(2)
 
+    })
+
+    it('allows to terminate session', async () => {
+        const {app} = await createTestServer()
+
+        const res1 = await supertest(app)
+            .post('/auth/discord')
+            .set('Content-Type', 'application/json')
+            .send({
+                code: 'masn000'
+            })
+            .expect(200)
+
+        const token1 = res1.body.token as string
+
+        const res2 = await supertest(app)
+            .get('/auth/sessions')
+            .set('Authorization', `Bearer: ${token1}`)
+            .expect(200)
+        
+        const sessionId = res2.body[0].id
+
+        const res3 = await supertest(app)
+            .delete(`/auth/sessions/${sessionId}`)
+            .set('Authorization', `Bearer: ${token1}`)
+            .expect(204)
+        
+        const res4 = await supertest(app)
+            .get('/auth/sessions')
+            .set('Authorization', `Bearer: ${token1}`)
+            .expect(403)
     })
 })

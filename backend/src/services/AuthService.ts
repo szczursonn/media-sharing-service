@@ -1,4 +1,4 @@
-import { CannotRemoveLastUserConnectionError, InvalidSessionError, OAuth2ProviderUnavailableError } from "../errors";
+import { InvalidSessionError, OAuth2ProviderUnavailableError } from "../errors";
 import { Session } from "../models/Session";
 import { User } from "../models/User";
 import { UserConnection } from "../models/UserConnection";
@@ -62,16 +62,6 @@ export class AuthService {
         return await this.userStorage.saveConnection(connection)
     }
 
-    public async removeConnection(userId: number, type: UserConnectionType) {
-        const user = await this.userStorage.getById(userId)
-        if (!user) throw new Error()
-
-        const connections = await user.connections
-
-        if (connections.length < 2) throw new CannotRemoveLastUserConnectionError()
-        await this.userStorage.removeConnection(userId, type)
-    }
-
     public async validate(token: string): Promise<[number, number]> {
         const payload = jwt.verify(token, this.jwtSecret) as TokenPayload
         if (!validateTokenPayload(payload)) throw new Error()
@@ -79,6 +69,10 @@ export class AuthService {
         if (!session) throw new InvalidSessionError()
 
         return [payload.userId, payload.sessionId]
+    }
+
+    public async getUserSessions(userId: number): Promise<Session[]> {
+        return await this.sessionStorage.getUserSessions(userId)
     }
 
     public async invalidateSession(sessionId: number, userId: number) {

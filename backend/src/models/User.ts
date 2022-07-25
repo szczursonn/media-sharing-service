@@ -8,7 +8,7 @@ export class User {
     @PrimaryGeneratedColumn()
     id!: number
 
-    @OneToMany(()=>UserConnection, userConnection=>userConnection.user, {cascade: true})
+    @OneToMany(()=>UserConnection, userConnection=>userConnection.user)
     connections!: Promise<UserConnection[]>
 
     @OneToMany(()=>Session, session=>session.user)
@@ -34,17 +34,13 @@ export class User {
     @CreateDateColumn()
     createdAt!: Date
 
-    public async toDisplay(withPrivates: boolean = false) {
-
-        const privates = withPrivates ? await Promise.all([this.sessions, this.connections]) : undefined
+    public toDisplay() {
 
         return {
             id: this.id,
             username: this.username,
             avatarUrl: this.avatarUrl,
-            createdAt: this.createdAt,
-            sessions: privates ? privates[0].map(s=>s.toDisplay()) : undefined,
-            connections: privates ? privates[1].map(c=>c.toDisplay()) : undefined
+            createdAt: this.createdAt
         }
     }
 }

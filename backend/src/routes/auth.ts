@@ -1,5 +1,5 @@
 import { Express, Router, Request, Response } from 'express'
-import { CannotRemoveLastUserConnectionError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError } from '../errors'
+import { OAuth2InvalidCodeError, OAuth2ProviderUnavailableError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
 import { AuthService } from '../services/AuthService'
@@ -12,8 +12,8 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, authSe
      * Prefix: /auth
      * Routes:
      * - POST /<oauth2provider> - login/register with oauth2 provider ex. google, discord
-     * - DELETE /<oauth2provider> - disconnect oauth2 provider from the account
-     * - DELETE / - end session
+     * - GET /sessions - returns current user sessions
+     * - DELETE /sessions/<sessionId> - terminates session
      * - GET /availability - returns info about oauth2 provider availability
      */
 
@@ -48,38 +48,32 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, authSe
         }
     }
 
-    const removeConnection = (type: UserConnectionType) => requiresAuth(async (req, res, userId) => {
-        try {
-            await authService.removeConnection(userId, type)
-            return res.sendStatus(204)
-        } catch (err) {
-            if (err instanceof CannotRemoveLastUserConnectionError) {
-                return res.sendStatus(409)
-            }
-            Logger.err(String(err))
-            return res.sendStatus(500)
-        }
-    })
-
     const router = Router()
 
     router.post('/discord', oauthExchange('discord'))
-    router.delete('/discord', removeConnection('discord'))
 
     router.post('/google', oauthExchange('google'))
-    router.delete('/google', removeConnection('google'))
 
     router.post('/github', oauthExchange('github'))
-    router.delete('/github', removeConnection('github'))
     
-    router.delete('/', requiresAuth(async (req, res, userId) => {
-        const sessionId = req.body.sessionId
-
-        if (typeof sessionId !== 'number') return res.sendStatus(400)
-
+    router.get('/sessions', requiresAuth(async (req, res, userId) => {
         try {
-            await authService.invalidateSession(sessionId, userId)
+            const sessions = await authService.getUserSessions(userId)
+            return res.json(sessions)
         } catch (err) {
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.delete('/sessions/:sessionId', requiresAuth(async (req, res, userId) => {
+        try {
+            const sessionId = parseInt(req.params.sessionId)
+            if (isNaN(sessionId)) return res.sendStatus(400)
+            await authService.invalidateSession(sessionId, userId)
+            return res.sendStatus(204)
+        } catch (err) {
+            Logger.err(String(err))
             return res.sendStatus(500)
         }
     }))

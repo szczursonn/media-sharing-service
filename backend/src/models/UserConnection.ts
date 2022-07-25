@@ -10,7 +10,7 @@ export class UserConnection {
     @PrimaryColumn()
     type!: UserConnectionType
 
-    @ManyToOne(()=>User, user=>user.connections, { nullable: false })
+    @ManyToOne(()=>User, user=>user.connections, { nullable: false, onDelete: 'CASCADE' })
     user!: Promise<User>
 
     @PrimaryColumn()

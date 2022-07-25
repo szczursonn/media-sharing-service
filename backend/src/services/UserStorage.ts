@@ -24,6 +24,12 @@ export class UserStorage {
         return await connection?.user ?? null
     }
 
+    public async getConnectionsByUserId(userId: number): Promise<UserConnection[]> {
+        return await this.dataSource.manager.findBy(UserConnection, {
+            userId
+        })
+    }
+
     public async save(user: User): Promise<User> {
         return await this.dataSource.manager.save(user)
     }

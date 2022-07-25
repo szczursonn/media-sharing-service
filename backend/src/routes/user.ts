@@ -1,13 +1,17 @@
 import { Express, Router } from 'express'
+import { CannotRemoveLastUserConnectionError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
 import { UserService } from '../services/UserService'
 
 /**
+ * Prefix: /users
  * GET /<userId> - returns user
  * GET /@me - returns current user
  * PATCH /@me - modifies current user
  * DELETE /@me - deletes current user
+ * GET /@me/connections - retuns current user connections
+ * DELETE /@me/connections/<userConnection>
  */
 
 export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userService: UserService) => {
@@ -20,8 +24,31 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
             const user = await userService.getUserById(queryId)
             if (!user) return res.sendStatus(404)
 
-            return res.json(await user.toDisplay(isMe))
+            return res.json(user.toDisplay())
         } catch (err) {
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.get('/@me/connections', requiresAuth(async (req, res, userId) => {
+        try {
+            return res.json(await userService.getUserConnections(userId))
+        } catch (err) {
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.delete('/@me/connections/:connection', requiresAuth(async (req, res, userId) => {
+        try {
+            const type = req.params.connection
+            if (type !== 'discord' && type !== 'google' && type !== 'github') return res.sendStatus(400)
+            await userService.removeConnection(userId, type)
+        } catch (err) {
+            if (err instanceof CannotRemoveLastUserConnectionError) {
+                return res.sendStatus(409)
+            }
             Logger.err(String(err))
             return res.sendStatus(500)
         }
@@ -34,6 +61,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
             const user = await userService.modifyUser(userId, {username: newUsername})
             return res.json(user)
         } catch (err) {
+            Logger.err(String(err))
             return res.sendStatus(500)
         }
         
@@ -49,6 +77,6 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
         }
     }))
 
-    app.use('/user', router)
+    app.use('/users', router)
     return app
 }
