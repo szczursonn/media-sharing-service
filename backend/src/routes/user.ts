@@ -11,7 +11,6 @@ import { UserService } from '../services/UserService'
  */
 
 export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userService: UserService) => {
-
     const router = Router()
 
     router.get('/:id', requiresAuth(async (req, res, userId) => {
@@ -29,7 +28,15 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
     }))
 
     router.patch('/@me', requiresAuth(async (req, res, userId) => {
-        res.sendStatus(500)
+        try {
+            const newUsername = typeof req.body.userame === 'string' ? req.body.username as string : undefined
+
+            const user = await userService.modifyUser(userId, {username: newUsername})
+            return res.json(user)
+        } catch (err) {
+            return res.sendStatus(500)
+        }
+        
     }))
 
     router.delete('/@me', requiresAuth(async (req, res, userId) => {
@@ -43,6 +50,5 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
     }))
 
     app.use('/user', router)
-
     return app
 }
