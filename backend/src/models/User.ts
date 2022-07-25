@@ -34,13 +34,4 @@ export class User {
     @CreateDateColumn()
     createdAt!: Date
 
-    public toDisplay() {
-
-        return {
-            id: this.id,
-            username: this.username,
-            avatarUrl: this.avatarUrl,
-            createdAt: this.createdAt
-        }
-    }
 }

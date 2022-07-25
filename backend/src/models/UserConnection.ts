@@ -22,11 +22,4 @@ export class UserConnection {
     @CreateDateColumn()
     createdAt!: Date
 
-    public toDisplay() {
-        return {
-            id: this.foreignId,
-            username: this.foreignUsername,
-            type: this.type
-        }
-    }
 }

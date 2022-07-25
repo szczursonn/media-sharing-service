@@ -15,10 +15,4 @@ export class Session {
     @CreateDateColumn()
     createdAt!: Date
 
-    public toDisplay() {
-        return {
-            id: this.id,
-            createdAt: this.createdAt
-        }
-    }
 }

@@ -24,7 +24,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
             const user = await userService.getUserById(queryId)
             if (!user) return res.sendStatus(404)
 
-            return res.json(user.toDisplay())
+            return res.json(user)
         } catch (err) {
             Logger.err(String(err))
             return res.sendStatus(500)
