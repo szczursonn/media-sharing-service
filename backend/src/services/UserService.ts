@@ -17,6 +17,11 @@ export class UserService {
     }
 
     public async modifyUser(userId: number, {username}: {username?: string}): Promise<User> {
-        throw new Error()
+        const user = await this.userStorage.getById(userId)
+        if (user === null) throw new Error()
+
+        if (username) user.username = username
+        
+        return await this.userStorage.save(user)
     }
 }
