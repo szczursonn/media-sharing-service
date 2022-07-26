@@ -26,18 +26,22 @@ describe('UserStorage tests', () => {
     })
 
     it('allows to remove a connection', async () => {
+        const userStorage = await thereIsUserStorage()
 
         await userStorage.removeConnection(3, 'github')
         
-        const connections = await UserStorage.getConnectionsByUserId(3)
+        const connections = await userStorage.getConnectionsByUserId(3)
         expect(connections.length).toBe(2)
         expect(connections.find(c=>c.type==='github')).toBe(undefined)
     })
 
     it('allows to get user by connection', async () => {
+        const userStorage = await thereIsUserStorage()
+
         const user = await userStorage.getByConnection('maciusgamer#2022', 'discord')
+
         expect(user).toBeTruthy()
-        expect(user.id).toBe(1)
+        expect(user!.id).toBe(1)
         
     })
 

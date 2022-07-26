@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from "../errors";
 import { CommunityStorage } from "./CommunityStorage";
-import { Community } from "./models/Community"
+import { Community } from "../models/Community"
 
 export class CommunityService {
     private communityStorage: CommunityStorage

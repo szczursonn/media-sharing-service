@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
 import { Community } from "./Community";
 
+@Entity()
 export class CommunityInvite {
     // https://github.com/ai/nanoid/
     // the id that appears in the url

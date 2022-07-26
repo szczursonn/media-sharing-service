@@ -20,14 +20,15 @@ export class CommunityStorage {
         const user = await this.dataSource.manager.findOneBy(User, {
             id: userId
         })
+        if (!user) throw new Error()
         return await user.communities
     }
-    
-    public async save(community: Community) {
+
+    public async save(community: Community): Promise<Community> {
         return await this.dataSource.manager.save(community)
     }
 
-    public async saveNew(community: Community) {
+    public async saveNew(community: Community): Promise<Community> {
         return await this.dataSource.transaction(async transaction => {
             const savedCommunity = await transaction.save(community)
             const comMember = new CommunityMember()
@@ -35,6 +36,12 @@ export class CommunityStorage {
             comMember.communityId = savedCommunity.id
             await transaction.save(comMember)
             return savedCommunity
+        })
+    }
+
+    public async remove(communityId: number): Promise<void> {
+        await this.dataSource.manager.delete(Community, {
+            id: communityId
         })
     }
 

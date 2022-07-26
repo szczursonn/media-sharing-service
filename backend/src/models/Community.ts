@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, JoinTable, OneToOne, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, OneToOne, ManyToMany, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { CommunityInvite } from "./CommunityInvite";
 import { User } from "./User";
 
 @Entity()
@@ -20,6 +21,9 @@ export class Community {
 
     @Column()
     ownerId!: number
+
+    @OneToMany(()=>CommunityInvite, ci=>ci.community)
+    invites!: Promise<CommunityInvite[]>
 
     /*
     @OneToMany(()=>CommunityMember, cm=>cm.community)

@@ -1,4 +1,6 @@
 import { DataSource } from "typeorm";
+import { Community } from "../models/Community";
+import { CommunityMember } from "../models/CommunityMember";
 import { User } from "../models/User";
 import { UserConnection } from "../models/UserConnection";
 import { UserConnectionType } from "../types";
@@ -51,8 +53,25 @@ export class UserStorage {
     }
 
     public async remove(userId: number): Promise<void> {
-        await this.dataSource.manager.delete(User, {
-            id: userId
+        await this.dataSource.transaction(async (transaction) => {
+            const communities = await transaction.findBy(Community, {
+                ownerId: userId
+            })
+
+            await Promise.all(communities.map(async (community) => {
+                const members = await community.users
+                const newOwner = members.find(m=>m.id!==userId)
+                if (newOwner === undefined) {
+                    await transaction.remove(community)
+                } else {
+                    community.ownerId = newOwner.id
+                    await transaction.save(community)
+                }
+            }))
+
+            await transaction.delete(User, {
+                id: userId
+            })
         })
     }
 

@@ -11,8 +11,9 @@ export class UserService {
     private userStorage: UserStorage
     private communityStorage: CommunityStorage
 
-    public constructor({userStorage}: {userStorage: UserStorage, communityStorage: CommunityStorage}) {
+    public constructor({userStorage, communityStorage}: {userStorage: UserStorage, communityStorage: CommunityStorage}) {
         this.userStorage = userStorage
+        this.communityStorage = communityStorage
     }
 
     public async getUserById(userId: number): Promise<User> {

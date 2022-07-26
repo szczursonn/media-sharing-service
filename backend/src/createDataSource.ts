@@ -32,7 +32,7 @@ export const createDataSource = async (): Promise<DataSource> => {
     return dataSource
 }
 
-export const createTestDataSource = async (useMockData?: boolean = true): Promise<DataSource> => {
+export const createTestDataSource = async (useMockData: boolean = true): Promise<DataSource> => {
     const dataSource = new DataSource({
         type: 'better-sqlite3',
         database: ':memory:',
@@ -71,6 +71,7 @@ export const createTestDataSource = async (useMockData?: boolean = true): Promis
  * - User id: 4, username: 'afro'
  * -- UserConnection foreignId: 'afro#1234', type: 'discord'
  * -- Session id: 3
+ * 
  * // Community with 3 members
  * - Community id: 1, ownerId: 3, name: 'firma sztos official'
  * -- Member userId: 1
@@ -95,6 +96,7 @@ const insertMockData = async (dataSource: DataSource) => {
 
     const con = async (userId: number, foreignId: string, type: UserConnectionType) => {
         const c = new UserConnection()
+        c.userId = userId
         c.foreignId = foreignId
         c.type = type
         c.foreignUsername = `foreignuser-${type}-${foreignId}`
@@ -104,13 +106,15 @@ const insertMockData = async (dataSource: DataSource) => {
     const session = async (userId: number, sessionId: number) => {
         const s = new Session()
         s.userId = userId
-        s.sessionId = sessionId
+        s.id = sessionId
         return await m.save(s)
     }
 
     const comm = async (communityId: number, ownerId: number, name: string) => {
         const c = new Community()
         c.id = communityId
+        c.ownerId = ownerId
+        c.name = name
         return await m.save(c)
     }
 
