@@ -8,6 +8,8 @@ import { UserStorage } from './services/UserStorage'
 import { AuthService } from './services/AuthService'
 import { SessionStorage } from './services/SessionStorage'
 import { UserService } from './services/UserService'
+import { CommunityStorage } from './services/CommunityStorage'
+import { CommunityService } from './services/CommunityService'
 
 const DEFAULT_PORT = 3000
 
@@ -31,6 +33,7 @@ const main = async () => {
     
     const userStorage = new UserStorage(dataSource)
     const sessionStorage = new SessionStorage(dataSource)
+    const communityStorage = new CommunityStorage(dataSource)
 
     const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
         ? new DiscordOAuth2Provider({
@@ -54,12 +57,15 @@ const main = async () => {
         githubOAuth2Provider
     })
     const userService = new UserService({
-        userStorage
+        userStorage,
+        communityStorage
     })
+    const communityService = new CommunityService(communityStorage)
 
     const app = await createServer({
         authService,
-        userService
+        userService,
+        communityService
     })
         
     app.listen(config.port, () => {
