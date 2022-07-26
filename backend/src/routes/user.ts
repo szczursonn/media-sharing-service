@@ -1,4 +1,5 @@
 import { Express, Router } from 'express'
+import { ResourceNotFoundError } from '../errors'
 import { CannotRemoveLastUserConnectionError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
@@ -24,10 +25,9 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
             const isMe = req.params.id === '@me'
             const queryId = isMe  ? userId : parseInt(req.params.id)
             const user = await userService.getUserById(queryId)
-            if (!user) return res.sendStatus(404)
-
             return res.json(user)
         } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             Logger.err(String(err))
             return res.sendStatus(500)
         }
@@ -37,6 +37,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
         try {
             return res.json(await userService.getUserConnections(userId))
         } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             Logger.err(String(err))
             return res.sendStatus(500)
         }

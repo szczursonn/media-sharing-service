@@ -5,6 +5,7 @@ import { UserConnection } from "../models/UserConnection";
 import { UserConnectionType } from "../types";
 import { UserStorage } from "./UserStorage";
 import { CommunityStorage } from "./CommunityStorage";
+import { ResourceNotFoundError } from "../errors"
 
 export class UserService {
     private userStorage: UserStorage
@@ -14,15 +15,20 @@ export class UserService {
         this.userStorage = userStorage
     }
 
-    public async getUserById(userId: number): Promise<User | null> {
-        return await this.userStorage.getById(userId)
+    public async getUserById(userId: number): Promise<User> {
+        const user = await this.userStorage.getById(userId)
+        if (!user) throw new ResourceNotFoundError()
+        return user
     }
 
     public async getUserConnections(userId: number): Promise<UserConnection[]> {
-        return await this.userStorage.getConnectionsByUserId(userId)
+        const connections = await this.userStorage.getConnectionsByUserId(userId)
+        if (connections.length < 1) throw new ResourceNotFoundError()
+        return connections
     }
 
     public async removeUser(userId: number): Promise<void> {
+        // TODO: throw on noop
         return await this.userStorage.remove(userId)
     }
 
@@ -30,13 +36,13 @@ export class UserService {
         const connections = await this.userStorage.getConnectionsByUserId(userId)
 
         if (connections.length < 2) throw new CannotRemoveLastUserConnectionError()
-
+        // TODO: throw on noop
         return await this.userStorage.removeConnection(userId, type)
     }
 
     public async modifyUser(userId: number, {username}: {username?: string}): Promise<User> {
         const user = await this.userStorage.getById(userId)
-        if (user === null) throw new Error()
+        if (user === null) throw new ResourceNotFoundError()
 
         if (username) user.username = username
         
