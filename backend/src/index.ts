@@ -10,6 +10,7 @@ import { SessionStorage } from './services/SessionStorage'
 import { UserService } from './services/UserService'
 import { CommunityStorage } from './services/CommunityStorage'
 import { CommunityService } from './services/CommunityService'
+import { GithubOAuth2Provider } from './services/OAuth2Providers/GithubOAuth2Provider'
 
 const DEFAULT_PORT = 3000
 
@@ -44,9 +45,13 @@ const main = async () => {
         : undefined
     if (!discordOAuth2Provider) Logger.warn('Discord OAuth2 configuration missing, will be unavailable')
 
-    const googleOAuth2Provider = new MockOAuth2Provider()
+    const googleOAuth2Provider = undefined
+    if (!googleOAuth2Provider) Logger.warn('Google OAuth2 not implemented, will be unavailable')
 
-    const githubOAuth2Provider = new MockOAuth2Provider()
+    const githubOAuth2Provider = (config.github.clientId && config.github.clientSecret && config.github.redirectUri)
+        ? new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)
+        : undefined
+    if (!githubOAuth2Provider) Logger.warn('Github OAuth2 configuration missing, will be unavailable')
 
     const authService = new AuthService({
         userStorage,
