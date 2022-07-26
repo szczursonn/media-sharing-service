@@ -17,14 +17,14 @@ describe('UserService tests', () => {
     it('throws when attempting to delete non existing user', async () => {
         const userService = await thereIsUserService()
 
-        expect(userService.removeUser(999)).rejects.toThrowError(ResourceNotFoundError)
+        await expect(userService.removeUser(999)).rejects.toThrowError(ResourceNotFoundError)
     })
 
     it('allows to remove user', async () => {
         const userService = await thereIsUserService()
 
         await userService.removeUser(3)
-        expect(userService.getUserById(3)).rejects.toThrowError(ResourceNotFoundError)
+        await expect(userService.getUserById(3)).rejects.toThrowError(ResourceNotFoundError)
     })
 
     it('allows to change users username', async () => {
@@ -51,7 +51,7 @@ describe('UserService tests', () => {
     it('disallows to remove last user connection', async () => {
         const userService = await thereIsUserService()
 
-        expect(userService.removeConnection(1, 'discord')).rejects.toThrowError(CannotRemoveLastUserConnectionError)
+        await expect(userService.removeConnection(1, 'discord')).rejects.toThrowError(CannotRemoveLastUserConnectionError)
 
         const connections = await userService.getUserConnections(1)
         expect(connections.length).toBe(1)
@@ -89,7 +89,7 @@ describe('UserService tests', () => {
     it('disallows user to leave the community he isnt in', async () => {
         const userService = await thereIsUserService()
 
-        expect(userService.leaveCommunity(4, 1)).rejects.toThrowError(ResourceNotFoundError)
+        await expect(userService.leaveCommunity(4, 1)).rejects.toThrowError(ResourceNotFoundError)
     })
 })
 
