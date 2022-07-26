@@ -29,16 +29,17 @@ export class UserService {
     }
 
     public async removeUser(userId: number): Promise<void> {
-        // TODO: throw on noop
-        return await this.userStorage.remove(userId)
+        const deleted = await this.userStorage.remove(userId)
+        if (!deleted) throw new ResourceNotFoundError()
     }
 
-    public async removeConnection(userId: number, type: UserConnectionType) {
+    public async removeConnection(userId: number, type: UserConnectionType): Promise<void> {
         const connections = await this.userStorage.getConnectionsByUserId(userId)
 
         if (connections.length < 2) throw new CannotRemoveLastUserConnectionError()
-        // TODO: throw on noop
-        return await this.userStorage.removeConnection(userId, type)
+        
+        const deleted = await this.userStorage.removeConnection(userId, type)
+        if (!deleted) throw new ResourceNotFoundError()
     }
 
     public async modifyUser(userId: number, {username}: {username?: string}): Promise<User> {
@@ -51,8 +52,8 @@ export class UserService {
     }
 
     public async leaveCommunity(userId: number, communityId: number): Promise<void> {
-        // TODO: throw if nothing was deleted
-        await this.communityStorage.removeMember(userId, communityId)
+        const deleted = await this.communityStorage.removeMember(userId, communityId)
+        if (!deleted) throw new ResourceNotFoundError()
     }
 
     public async getUserCommunities(userId: number): Promise<Community[]> {

@@ -96,6 +96,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
             await userService.removeUser(userId)
             return res.sendStatus(204)
         } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             Logger.err(String(err))
             return res.sendStatus(500)
         }

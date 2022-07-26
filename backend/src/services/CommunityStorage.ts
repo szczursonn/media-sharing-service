@@ -45,10 +45,12 @@ export class CommunityStorage {
         })
     }
 
-    public async removeMember(userId: number, communityId: number) {
-        await this.dataSource.manager.delete(CommunityMember, {
+    public async removeMember(userId: number, communityId: number): Promise<boolean> {
+        const {affected} = await this.dataSource.manager.delete(CommunityMember, {
             userId,
             communityId
         })
+        if (typeof affected === 'number' && affected === 0) return false
+        return true
     }
 }

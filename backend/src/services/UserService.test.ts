@@ -14,6 +14,12 @@ describe('UserService tests', () => {
         expect(user.username).toBe('maciek')
     })
 
+    it('throws when attempting to delete non existing user', async () => {
+        const userService = await thereIsUserService()
+
+        expect(userService.removeUser(999)).rejects.toThrowError(ResourceNotFoundError)
+    })
+
     it('allows to remove user', async () => {
         const userService = await thereIsUserService()
 
