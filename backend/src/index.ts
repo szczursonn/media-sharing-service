@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { createDataSource } from './createDataSource'
 import { createServer } from "./createServer"
 import Logger from "./Logger"
-import { DiscordOAuth2Provider, GithubOAuth2Provider } from './services/OAuth2Providers'
+import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider } from './services/OAuth2Providers'
 import { loadConfig } from './config'
 import { UserStorage } from './services/UserStorage'
 import { AuthService } from './services/AuthService'
@@ -44,8 +44,10 @@ const main = async () => {
         : undefined
     if (!discordOAuth2Provider) Logger.warn('Discord OAuth2 configuration missing, will be unavailable')
 
-    const googleOAuth2Provider = undefined
-    if (!googleOAuth2Provider) Logger.warn('Google OAuth2 not implemented, will be unavailable')
+    const googleOAuth2Provider = (config.google.clientId && config.google.clientSecret && config.google.redirectUri)
+        ? new GoogleOAuth2Provider(config.google.clientId, config.google.clientSecret, config.google.redirectUri)
+        : undefined
+    if (!googleOAuth2Provider) Logger.warn('Google OAuth2 configuration missing, will be unavailable')
 
     const githubOAuth2Provider = (config.github.clientId && config.github.clientSecret && config.github.redirectUri)
         ? new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)

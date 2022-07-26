@@ -20,6 +20,11 @@ export const loadConfig = () => {
             clientSecret: process.env['GITHUB_CLIENTSECRET'],
             redirectUri: process.env['GITHUB_REDIRECTURI']
         },
+        google: {
+            clientId: process.env['GOOGLE_CLIENTID'],
+            clientSecret: process.env['GOOGLE_CLIENTSECRET'],
+            redirectUri: process.env['GOOGLE_REDIRECTURI']
+        },
         database: {
 
         },
