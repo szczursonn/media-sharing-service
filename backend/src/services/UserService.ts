@@ -1,13 +1,16 @@
 import { CannotRemoveLastUserConnectionError } from "../errors";
 import { User } from "../models/User";
+import { Community } from "../models/Community";
 import { UserConnection } from "../models/UserConnection";
 import { UserConnectionType } from "../types";
 import { UserStorage } from "./UserStorage";
+import { CommunityStorage } from "./CommunityStorage";
 
 export class UserService {
     private userStorage: UserStorage
+    private communityStorage: CommunityStorage
 
-    public constructor({userStorage}: {userStorage: UserStorage}) {
+    public constructor({userStorage}: {userStorage: UserStorage, communityStorage: CommunityStorage}) {
         this.userStorage = userStorage
     }
 
@@ -38,5 +41,14 @@ export class UserService {
         if (username) user.username = username
         
         return await this.userStorage.save(user)
+    }
+
+    public async leaveCommunity(userId: number, communityId: number): Promise<void> {
+        // TODO: throw if nothing was deleted
+        await this.communityStorage.removeMember(userId, communityId)
+    }
+
+    public async getUserCommunities(userId: number): Promise<Community[]> {
+        return await this.communityStorage.getByUserId(userId)
     }
 }

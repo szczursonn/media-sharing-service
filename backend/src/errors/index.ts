@@ -14,3 +14,5 @@ export class OAuth2InvalidCodeError extends Error {}
 export class CannotRemoveLastUserConnectionError extends Error {}
 
 export class InvalidSessionError extends Error {}
+
+export class ResourceNotFoundError extends Error {}

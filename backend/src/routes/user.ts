@@ -11,7 +11,9 @@ import { UserService } from '../services/UserService'
  * PATCH /@me - modifies current user
  * DELETE /@me - deletes current user
  * GET /@me/connections - retuns current user connections
- * DELETE /@me/connections/<userConnection>
+ * DELETE /@me/connections/<userConnection> - removes a user connection
+ * GET /@me/communities - return communities that the current user is in
+ * GET /@me/communities/<communityId> - leaves the community
  */
 
 export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userService: UserService) => {
@@ -54,6 +56,27 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
         }
     }))
 
+    router.get('/@me/communities', requiresAuth(async (req, res, userId) => {
+        try {
+            return await userService.getUserCommunities(userId)
+        } catch (err) {
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.delete('/@me/communities/:id', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.id)
+            if (isNaN(communityId)) return res.sendStatus(400)
+            await userService.leaveCommunity(userId, communityId)
+            return res.sendStatus(204)
+        } catch (err) {
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
     router.patch('/@me', requiresAuth(async (req, res, userId) => {
         try {
             const newUsername = typeof req.body.userame === 'string' ? req.body.username as string : undefined
@@ -70,7 +93,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
     router.delete('/@me', requiresAuth(async (req, res, userId) => {
         try {
             await userService.removeUser(userId)
-            res.sendStatus(204)
+            return res.sendStatus(204)
         } catch (err) {
             Logger.err(String(err))
             return res.sendStatus(500)
