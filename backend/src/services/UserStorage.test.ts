@@ -1,4 +1,4 @@
-import { createDataSource } from "../createDataSource"
+import { createTestDataSource } from "../createDataSource"
 import { User } from "../models/User"
 import { UserConnection } from "../models/UserConnection"
 import { UserConnectionType } from "../types"
@@ -17,42 +17,27 @@ describe('UserStorage tests', () => {
     it('allows to save a new user with connection', async () => {
         const userStorage = await thereIsUserStorage()
         const user = thereIsUser('mario')
-        const con = thereIsConnection()
+        const con = thereIsConnection('discord')
         const savedUser = await userStorage.saveWithConnection(user, con)
 
-        const connections = await savedUser.connections
+        const connections = await userStorage.getConnectionsByUserId(savedUser.id)
 
         expect(connections.length).toBe(1)
     })
 
     it('allows to remove a connection', async () => {
-        const type = 'discord'
 
-        const userStorage = await thereIsUserStorage()
-        const user = await userStorage.saveWithConnection(
-            thereIsUser('mario'), 
-            thereIsConnection(type)
-        )
-
-        await userStorage.removeConnection(user.id, type)
-
-        const user2 = await userStorage.getById(user.id)
-        const connections = await user2!.connections
-        expect(connections.length).toBe(0)
+        await userStorage.removeConnection(3, 'github')
+        
+        const connections = await UserStorage.getConnectionsByUserId(3)
+        expect(connections.length).toBe(2)
+        expect(connections.find(c=>c.type==='github')).toBe(undefined)
     })
 
     it('allows to get user by connection', async () => {
-        const foreignId = '34242343'
-        const type = 'discord'
-
-        const userStorage = await thereIsUserStorage()
-        await userStorage.saveWithConnection(
-            thereIsUser('mario'), 
-            thereIsConnection(type, foreignId)
-        )
-
-        const user = await userStorage.getByConnection(foreignId, type)
+        const user = await userStorage.getByConnection('maciusgamer#2022', 'discord')
         expect(user).toBeTruthy()
+        expect(user.id).toBe(1)
         
     })
 
@@ -66,13 +51,13 @@ describe('UserStorage tests', () => {
         await userStorage.saveConnection(con1)
         await userStorage.saveConnection(con2)
 
-        const connections = await (await userStorage.getById(user.id))!.connections
+        const connections = await userStorage.getConnectionsByUserId(user.id)
         expect(connections.length).toBe(2)
     })
 })
 
 const thereIsUserStorage = async () => {
-    const dataSource = await createDataSource()
+    const dataSource = await createTestDataSource()
     return new UserStorage(dataSource)
 }
 
@@ -82,8 +67,7 @@ const thereIsUser = (username: string) => {
     return user
 }
 
-const thereIsConnection = (type?: UserConnectionType, foreignId?: string) => {
-    if (!type) type = 'discord'
+const thereIsConnection = (type: UserConnectionType, foreignId?: string) => {
     if (!foreignId) foreignId = (Math.random()*10000).toString().split('.')[0]
     const con = new UserConnection()
     con.foreignId = foreignId
