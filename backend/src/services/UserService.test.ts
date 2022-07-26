@@ -66,6 +66,31 @@ describe('UserService tests', () => {
         expect(connections1.length).toBe(1)
         expect(connections2.length).toBe(2)
     })
+
+    it('allows to get user communities', async () => {
+        const userService = await thereIsUserService()
+
+        const communities = await userService.getUserCommunities(1)
+
+        expect(communities.length).toBe(2)
+    })
+
+    it('allows user to leave the community', async () => {
+        const userService = await thereIsUserService()
+
+        await userService.leaveCommunity(1, 1)
+
+        const communities = await userService.getUserCommunities(1)
+
+        expect(communities.map(c=>c.id).includes(1)).toBe(false)
+
+    })
+
+    it('disallows user to leave the community he isnt in', async () => {
+        const userService = await thereIsUserService()
+
+        expect(userService.leaveCommunity(4, 1)).rejects.toThrowError(ResourceNotFoundError)
+    })
 })
 
 const thereIsUserService = async () => {
