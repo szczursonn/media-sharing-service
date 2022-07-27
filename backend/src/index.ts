@@ -4,11 +4,8 @@ import { createServer } from "./createServer"
 import Logger from "./Logger"
 import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider } from './services/OAuth2Providers'
 import { loadConfig } from './config'
-import { UserStorage } from './services/UserStorage'
 import { AuthService } from './services/AuthService'
-import { SessionStorage } from './services/SessionStorage'
 import { UserService } from './services/UserService'
-import { CommunityStorage } from './services/CommunityStorage'
 import { CommunityService } from './services/CommunityService'
 
 const DEFAULT_PORT = 3000
@@ -30,10 +27,6 @@ const main = async () => {
 
     const dataSource = await createDataSource()
     Logger.info('Connected to database')
-    
-    const userStorage = new UserStorage(dataSource)
-    const sessionStorage = new SessionStorage(dataSource)
-    const communityStorage = new CommunityStorage(dataSource)
 
     const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
         ? new DiscordOAuth2Provider({
@@ -55,18 +48,14 @@ const main = async () => {
     if (!githubOAuth2Provider) Logger.warn('Github OAuth2 configuration missing, will be unavailable')
 
     const authService = new AuthService({
-        userStorage,
-        sessionStorage,
+        dataSource,
         jwtSecret: config.jwtSecret,
         discordOAuth2Provider,
         googleOAuth2Provider,
         githubOAuth2Provider
     })
-    const userService = new UserService({
-        userStorage,
-        communityStorage
-    })
-    const communityService = new CommunityService(communityStorage)
+    const userService = new UserService(dataSource)
+    const communityService = new CommunityService(dataSource)
 
     const app = await createServer({
         authService,

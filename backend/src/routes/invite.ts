@@ -1,8 +1,6 @@
 import { Express, Router } from 'express'
-import { ResourceNotFoundError } from '../errors'
-import { CannotRemoveLastUserConnectionError } from '../errors'
-import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
+import { InviteService } from '../services/InviteService'
 
 /**
  * Prefix: /invite

@@ -3,33 +3,29 @@ import { Session } from "../models/Session";
 import { User } from "../models/User";
 import { UserConnection } from "../models/UserConnection";
 import { AccessToken, OAuth2Profile, TokenPayload, UserConnectionType } from "../types";
-import { SessionStorage } from "./SessionStorage";
-import { UserStorage } from "./UserStorage";
 import jwt from 'jsonwebtoken'
 import { validateTokenPayload } from "../types/validators";
+import { DataSource } from "typeorm";
 
 export interface OAuth2Provider {
     exchange(code: string): Promise<OAuth2Profile>
 }
 
 export class AuthService {
-    private userStorage: UserStorage
-    private sessionStorage: SessionStorage
+    private dataSource: DataSource
     private jwtSecret: string
     private discordOAuth2Provider?: OAuth2Provider
     private googleOAuth2Provider?: OAuth2Provider
     private githubOAuth2Provider?: OAuth2Provider
 
-    public constructor({userStorage, sessionStorage, jwtSecret, discordOAuth2Provider, googleOAuth2Provider, githubOAuth2Provider}: {
-        userStorage: UserStorage,
-        sessionStorage: SessionStorage,
+    public constructor({dataSource, jwtSecret, discordOAuth2Provider, googleOAuth2Provider, githubOAuth2Provider}: {
+        dataSource: DataSource,
         jwtSecret: string,
         discordOAuth2Provider?: OAuth2Provider,
         googleOAuth2Provider?: OAuth2Provider,
         githubOAuth2Provider?: OAuth2Provider
     }) {
-        this.userStorage = userStorage
-        this.sessionStorage = sessionStorage
+        this.dataSource = dataSource
         this.jwtSecret = jwtSecret
         this.discordOAuth2Provider = discordOAuth2Provider
         this.googleOAuth2Provider = googleOAuth2Provider
@@ -41,7 +37,7 @@ export class AuthService {
 
         const profile = await oauthProvider.exchange(code)
         
-        const user = await this.userStorage.getByConnection(profile.id, type) ?? await this.createUserFromOAuth2(profile, type)
+        const user = await (await this.dataSource.manager.findOneBy(UserConnection, {foreignId: profile.id}))?.user ?? await this.createUserFromOAuth2(profile, type)
         
         const [_, token] = await this.createSession(user.id)
 
@@ -59,29 +55,40 @@ export class AuthService {
         connection.type = type
         connection.userId = userId
         
-        return await this.userStorage.saveConnection(connection)
+        return await this.dataSource.manager.save(connection)
     }
 
     public async validate(token: string): Promise<[number, number]> {
         const payload = jwt.verify(token, this.jwtSecret) as TokenPayload
         if (!validateTokenPayload(payload)) throw new Error()
-        const session = await this.sessionStorage.getById(payload.sessionId)
+
+        const session = await this.dataSource.manager.findOneBy(Session, {
+            id: payload.sessionId
+        })
         if (!session) throw new InvalidSessionError()
 
         return [payload.userId, payload.sessionId]
     }
 
     public async getUserSessions(userId: number): Promise<Session[]> {
-        return await this.sessionStorage.getUserSessions(userId)
+        return await this.dataSource.manager.findBy(Session, {
+            userId
+        })
     }
 
     public async invalidateSession(sessionId: number, userId: number) {
-        const session = await this.sessionStorage.getById(sessionId)
+        const session = await this.dataSource.manager.findOneBy(Session, {
+            userId,
+            id: sessionId
+        })
         if (!session) throw new Error()
 
         if (session.userId !== userId) throw new Error()
 
-        await this.sessionStorage.delete(sessionId)
+        await this.dataSource.manager.delete(Session, {
+            userId,
+            id: sessionId
+        })
     }
 
     public getAvailability(): { [key in UserConnectionType]: boolean } {
@@ -93,22 +100,27 @@ export class AuthService {
     }
 
     private async createUserFromOAuth2(profile: OAuth2Profile, type: UserConnectionType): Promise<User> {
-        const user = new User()
-        user.username = profile.username
-        user.avatarUrl = profile.avatarUrl
+        return await this.dataSource.transaction(async (transaction) => {
+            const user = new User()
+            user.username = profile.username
+            user.avatarUrl = profile.avatarUrl
+            const savedUser = await transaction.save(user)
+                
+            const connection = new UserConnection()
+            connection.foreignId = profile.id
+            connection.foreignUsername = profile.username
+            connection.type = type
+            connection.userId = savedUser.id
+            await transaction.save(connection)
             
-        const connection = new UserConnection()
-        connection.foreignId = profile.id
-        connection.foreignUsername = profile.username
-        connection.type = type
-        
-        return await this.userStorage.saveWithConnection(user, connection)
+            return savedUser
+        })
     }
 
     private async createSession(userId: number): Promise<[Session, AccessToken]> {
         const newSession = new Session()
         newSession.userId = userId
-        const session = await this.sessionStorage.save(newSession)
+        const session = await this.dataSource.manager.save(newSession)
         
         const payload: TokenPayload = {
             userId: userId,

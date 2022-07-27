@@ -1,8 +1,6 @@
 import { createTestDataSource } from "../createDataSource"
 import { CannotRemoveLastUserConnectionError, ResourceNotFoundError } from "../errors"
-import { CommunityStorage } from "./CommunityStorage"
 import { UserService } from "./UserService"
-import { UserStorage } from "./UserStorage"
 
 describe('UserService tests', () => {
     it('allows to get user by id', async () => {
@@ -95,8 +93,6 @@ describe('UserService tests', () => {
 
 const thereIsUserService = async () => {
     const dataSource = await createTestDataSource()
-    const userStorage = new UserStorage(dataSource)
-    const communityStorage = new CommunityStorage(dataSource)
-    const userService = new UserService({userStorage, communityStorage})
+    const userService = new UserService(dataSource)
     return userService
 }

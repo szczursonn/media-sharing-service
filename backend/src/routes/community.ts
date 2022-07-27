@@ -66,9 +66,8 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, c
 
     router.delete('/:id/invites/:inviteId', requiresAuth(async (req, res, userId) => {
         try {
-            const inviteId = parseInt(req.params.inviteId)
-            if (isNaN(inviteId)) return res.sendStatus(400)
-            await communityService.removeInvite(1, userId)
+            const inviteId = req.params.inviteId
+            await communityService.removeInvite(inviteId, userId)
             return res.sendStatus(204)
         } catch (err) {
             Logger.err(String(err))

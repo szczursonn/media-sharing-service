@@ -1,7 +1,6 @@
 import { createTestDataSource } from "../createDataSource"
 import { ResourceNotFoundError } from "../errors"
 import { CommunityService } from "./CommunityService"
-import { CommunityStorage } from "./CommunityStorage"
 
 describe('CommunityService tests', () => {
     it('allows to get community by id', async () => {
@@ -30,7 +29,6 @@ describe('CommunityService tests', () => {
 
 const thereIsCommunityService = async () => {
     const dataSource = await createTestDataSource()
-    const communityStorage = new CommunityStorage(dataSource)
-    const communityService = new CommunityService(communityStorage)
+    const communityService = new CommunityService(dataSource)
     return communityService
 }

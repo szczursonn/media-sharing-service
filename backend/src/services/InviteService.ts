@@ -1,15 +1,21 @@
+import { DataSource } from "typeorm";
+import { ResourceNotFoundError } from "../errors";
 import { CommunityInvite } from "../models/CommunityInvite";
-import { CommunityStorage } from "./CommunityStorage";
 
 export class InviteService {
-    private communityStorage: CommunityStorage
+    private dataSource: DataSource
 
-    public constructor(communityStorage: CommunityStorage) {
-        this.communityStorage = communityStorage
+    public constructor(dataSource: DataSource) {
+        this.dataSource = dataSource
+        
     }
 
-    public getInvite(inviteId: string): Promise<CommunityInvite> {
-        await this.communityStorage.getInvite(inviteId)
+    public async getInvite(inviteId: string): Promise<CommunityInvite> {
+        const invite = await this.dataSource.manager.findOneBy(CommunityInvite, {
+            id: inviteId
+        })
+        if (!invite) throw new ResourceNotFoundError()
+        return invite
     }
 
 }
