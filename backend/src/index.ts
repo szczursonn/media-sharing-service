@@ -7,6 +7,7 @@ import { loadConfig } from './config'
 import { AuthService } from './services/AuthService'
 import { UserService } from './services/UserService'
 import { CommunityService } from './services/CommunityService'
+import { InviteService } from './services/InviteService'
 
 const DEFAULT_PORT = 3000
 
@@ -56,11 +57,13 @@ const main = async () => {
     })
     const userService = new UserService(dataSource)
     const communityService = new CommunityService(dataSource)
+    const inviteService = new InviteService(dataSource)
 
     const app = await createServer({
         authService,
         userService,
-        communityService
+        communityService,
+        inviteService
     })
         
     app.listen(config.port, () => {

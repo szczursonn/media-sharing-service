@@ -16,7 +16,7 @@ export class CommunityInvite {
     communityId!: number
 
     @OneToOne(()=>User, {onDelete: 'SET NULL', nullable: true})
-    inviter!: Promise<User|null>
+    inviter!: Promise<User>
 
     @Column()
     inviterId?: number
