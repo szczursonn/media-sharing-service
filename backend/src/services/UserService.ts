@@ -51,6 +51,29 @@ export class UserService {
         return await this.userStorage.save(user)
     }
 
+    public async joinCommunity(userId: number, inviteId: string): Promise<void> {
+        const invite = await this.communityStorage.getInvite(inviteId)
+        if (!invite) throw ResourceNotFoundError()
+        if (invite.expiresAt < new Date()) {
+            await this.communityStorage.removeInvite(inviteId)
+            throw new ResourceNotFoundError()
+        }
+
+        invite.uses++
+
+        const member = new CommunityMember()
+        member.communityId = invite.communityId
+        member.userId = userId
+
+        await this.communityStorage.saveMember(member)
+
+        if (invite.maxUses !== null && invite.uses>=invite.maxUses) {
+            await this.communityStorage.removeInvite(inviteId)
+        } else {
+            await this.communityStorage.saveInvite(invite)
+        }
+    }
+
     public async leaveCommunity(userId: number, communityId: number): Promise<void> {
         const deleted = await this.communityStorage.removeMember(userId, communityId)
         if (!deleted) throw new ResourceNotFoundError()

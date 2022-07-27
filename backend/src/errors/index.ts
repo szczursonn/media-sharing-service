@@ -16,3 +16,5 @@ export class CannotRemoveLastUserConnectionError extends Error {}
 export class InvalidSessionError extends Error {}
 
 export class ResourceNotFoundError extends Error {}
+
+export class InsufficientPermissionsError extends Error {}

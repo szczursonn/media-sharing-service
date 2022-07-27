@@ -1,5 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { Community } from "./Community";
+import { User } from './User';
 
 @Entity()
 export class CommunityInvite {
@@ -14,10 +15,18 @@ export class CommunityInvite {
     @Column()
     communityId!: number
 
-    // TODO: default value 0
-    @Column()
-    uses!: number
+    @OneToOne(()=>User, {onDelete: 'CASCADE'})
+    inviter!: Promise<User>
 
     @Column()
-    expiresAt!: Date
+    inviterId!: number
+
+    @Column({nullable: true})
+    maxUses?: number
+    
+    @Column({default: 0})
+    uses!: number
+
+    @Column({nullable: true})
+    expiresAt?: Date
 }

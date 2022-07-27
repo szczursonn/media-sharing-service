@@ -1,4 +1,4 @@
-import { CreateDateColumn, Entity, OneToOne, PrimaryColumn } from "typeorm";
+import { CreateDateColumn, Column, Entity, OneToOne, PrimaryColumn } from "typeorm";
 import { Community } from "./Community";
 import { User } from "./User";
 
@@ -16,6 +16,9 @@ export class CommunityMember {
     @OneToOne(()=>User, {onDelete: 'CASCADE'})
     user!: Promise<User>
     
+    @Column({default: false})
+    canUpload!: boolean
+
     @CreateDateColumn()
     createdAt!: Date
 }

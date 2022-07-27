@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { Community } from "../models/Community";
+import { CommunityInvite } from "../models/CommunityInvite";
 import { CommunityMember } from "../models/CommunityMember";
 import { User } from "../models/User";
 
@@ -24,6 +25,19 @@ export class CommunityStorage {
         return await user.communities
     }
 
+    public async getMember(communityId: number, userId: number): Promise<CommunityMember | null> {
+        return await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId,
+            communityId
+        })
+    }
+
+    public async getInvite(inviteId: string): Promise<CommunityInvite | null> {
+        return await this.dataSource.manager.findOneBy(CommunityInvite, {
+            id: inviteId
+        })
+    }
+
     public async save(community: Community): Promise<Community> {
         return await this.dataSource.manager.save(community)
     }
@@ -39,6 +53,14 @@ export class CommunityStorage {
         })
     }
 
+    public async saveMember(member: CommunityMember): Promise<CommunityMember> {
+        return await this.dataSource.manager.save(member)
+    }
+
+    public async saveInvite(invite: CommunityInvite): Promise<CommunityInvite> {
+        return await this.dataSource.manager.save(invite)
+    }
+
     public async remove(communityId: number): Promise<void> {
         await this.dataSource.manager.delete(Community, {
             id: communityId
@@ -49,6 +71,14 @@ export class CommunityStorage {
         const {affected} = await this.dataSource.manager.delete(CommunityMember, {
             userId,
             communityId
+        })
+        if (typeof affected === 'number' && affected === 0) return false
+        return true
+    }
+
+    public async removeInvite(inviteId: string) {
+        const {affected} = await this.dataSource.manager.delete(CommunityInvite, {
+            id: inviteId
         })
         if (typeof affected === 'number' && affected === 0) return false
         return true
