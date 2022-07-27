@@ -15,11 +15,11 @@ export class CommunityInvite {
     @Column()
     communityId!: number
 
-    @OneToOne(()=>User, {onDelete: 'CASCADE'})
-    inviter!: Promise<User>
+    @OneToOne(()=>User, {onDelete: 'SET NULL', nullable: true})
+    inviter!: Promise<User|null>
 
     @Column()
-    inviterId!: number
+    inviterId?: number
 
     @Column({nullable: true})
     maxUses?: number

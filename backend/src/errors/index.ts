@@ -18,3 +18,7 @@ export class InvalidSessionError extends Error {}
 export class ResourceNotFoundError extends Error {}
 
 export class InsufficientPermissionsError extends Error {}
+
+export class AlreadyAMemberError extends Error {}
+
+export class OwnerCannotLeaveCommunityError extends Error {}

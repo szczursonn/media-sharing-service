@@ -5,6 +5,7 @@ import { UserConnection } from "./models/UserConnection";
 import { Community } from "./models/Community";
 import { UserConnectionType } from "./types";
 import { CommunityMember } from "./models/CommunityMember";
+import { CommunityInvite } from "./models/CommunityInvite";
 
 export const createDataSource = async (): Promise<DataSource> => {
     /*
@@ -77,9 +78,13 @@ export const createTestDataSource = async (useMockData: boolean = true): Promise
  * -- Member userId: 1
  * -- Member userId: 2
  * -- Member userId: 3
+ * -- Invite id: 'aaa', inviterId: 3, maxUses: undefined, expiresAt: Date.now()-10000 (expired)
+ * -- Invite id: 'bbb', inviterId: 3, maxUses: undefined, expiresAt: Date.now()+10000
+ * -- Invite id: 'ccc', inviterId: 3, maxUses: 2, expiresAt: undefined
  * /// Community with only the owner
  * - Community id: 2, ownerId: 1, name: 'csgopolskapl.pl'
  * -- Member userId: 1
+ * -- Invite id: 'abc', inviterId: 1, maxUses: 1, expiresAt: null
  */
 
 const insertMockData = async (dataSource: DataSource) => {
@@ -125,6 +130,16 @@ const insertMockData = async (dataSource: DataSource) => {
         return await m.save(x)
     }
 
+    const invite = async (inviteId: string, communityId: number, inviterId: number, maxUses: number|undefined, expiresAt: Date|undefined) => {
+        const i = new CommunityInvite()
+        i.id=inviteId
+        i.communityId=communityId
+        i.inviterId=inviterId
+        i.maxUses=maxUses
+        i.expiresAt=expiresAt
+        return m.save(i)
+    }
+
     await user(1, 'maciek')
     await con(1, 'maciusgamer#2022', 'discord')
     await session(1, 1)
@@ -148,8 +163,11 @@ const insertMockData = async (dataSource: DataSource) => {
     await member(1, 3)
     await member(1, 2)
     await member(1, 1)
+    await invite('aaa', 1, 3, undefined, new Date(Date.now()-10000))
+    await invite('bbb', 1, 3, undefined, new Date(Date.now()+10000))
+    await invite('ccc', 1, 3, 2, undefined)
 
     await comm(2, 1, 'csgopolskapl.pl')
     await member(2, 1)
+    await invite('abc', 2, 1, 1, undefined)
 }
-

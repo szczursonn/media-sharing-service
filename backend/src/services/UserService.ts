@@ -1,4 +1,4 @@
-import { CannotRemoveLastUserConnectionError } from "../errors";
+import { AlreadyAMemberError, CannotRemoveLastUserConnectionError, OwnerCannotLeaveCommunityError } from "../errors";
 import { User } from "../models/User";
 import { Community } from "../models/Community";
 import { UserConnection } from "../models/UserConnection";
@@ -74,6 +74,13 @@ export class UserService {
             throw new ResourceNotFoundError()
         }
 
+        const isMember = !!(await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId,
+            communityId: invite.communityId
+        }))
+
+        if (isMember) throw new AlreadyAMemberError()
+
         invite.uses++
 
         const member = new CommunityMember()
@@ -94,6 +101,13 @@ export class UserService {
     }
 
     public async leaveCommunity(userId: number, communityId: number): Promise<void> {
+
+        const community = await this.dataSource.manager.findOneBy(Community, {
+            id: communityId
+        })
+        if (!community) throw new ResourceNotFoundError()
+        if (community.ownerId === userId) throw new OwnerCannotLeaveCommunityError()
+
         const delResult = await this.dataSource.manager.delete(CommunityMember, {
             userId,
             communityId
