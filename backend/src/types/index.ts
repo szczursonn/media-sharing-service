@@ -28,6 +28,8 @@ export type AppServices = {
     userService: UserService
 }
 
+export type MediaType = 'image' | 'video'
+
 // WIP - TYPES TO BE RETURNED FROM SERVICES INSTEAD OF TYPEORM CLASSES
 
 type User = {

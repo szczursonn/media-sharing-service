@@ -25,6 +25,9 @@ export class Community {
     @OneToMany(()=>CommunityInvite, ci=>ci.community)
     invites!: Promise<CommunityInvite[]>
 
+    @OneToMany(()=>Media, media=>media.community)
+    media!: Promise<Media[]>
+
     /*
     @OneToMany(()=>CommunityMember, cm=>cm.community)
     members!: Promise<CommunityMember[]>
