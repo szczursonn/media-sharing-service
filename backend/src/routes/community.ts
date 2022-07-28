@@ -10,6 +10,7 @@ import { AppServices } from '../types'
  * - GET /<communityId> - returns community with given id
  * - POST / - creates a new community
  * - POST /<communityId>/invites - creates new invite
+ * - DELETE /<communityId>/members/<memberId> - kicks user from community
  */
 
 export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {communityService, inviteService}: AppServices) => {
@@ -59,6 +60,21 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
             if (err instanceof InsufficientPermissionsError) {
                 return res.sendStatus(403)
             }
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.delete('/:communityId/members/:userId', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.communityId)
+            const kickedId = parseInt(req.params.userId)
+            if (isNaN(communityId) || isNaN(kickedId)) return res.sendStatus(400)
+            await communityService.kickUser(communityId, kickedId, userId)
+            return res.sendStatus(204)
+        } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
+            if (err instanceof InsufficientPermissionsError) return res.sendStatus(403)
             Logger.err(String(err))
             return res.sendStatus(500)
         }

@@ -27,6 +27,21 @@ export class CommunityService {
         return await user.communities
     }
 
+    public async kickUser(communityId: number, userId: number, kickerId: number): Promise<void> {
+        const community = await this.dataSource.manager.findOneBy(Community, {
+            id: communityId
+        })
+        if (!community) throw new ResourceNotFoundError()
+        // only the owner can kick users
+        if (community.ownerId !== kickerId) throw new InsufficientPermissionsError()
+
+        const delResult = await this.dataSource.manager.delete(CommunityMember, {
+            userId,
+            communityId
+        })
+        if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
+    }
+
     public async createCommunity(ownerId: number, name: string): Promise<Community> {
         return await this.dataSource.transaction(async transaction => {
             const com = new Community()
