@@ -27,3 +27,56 @@ export type AppServices = {
     inviteService: InviteService,
     userService: UserService
 }
+
+// WIP - TYPES TO BE RETURNED FROM SERVICES INSTEAD OF TYPEORM CLASSES
+
+type User = {
+    id: number
+    username: string
+    avatarUrl: string | null
+    connections: UserConnection[] | null
+    sessions: Session[] | null
+    createdAt: Date
+}
+
+type Community = {
+    id: number
+    name: string
+    ownerId: number
+    createdAt: Date
+}
+
+type UserConnection = {
+    type: UserConnectionType
+    foreignId: string
+    foreignUsername: string
+    createdAt: Date
+}
+
+type Session = {
+    id: number
+    deviceName: string
+    createdAt: Date
+}
+
+type CommunityMember = {
+    user: User
+    canUpload: boolean
+    joinedAt: Date
+}
+
+// GET /invites/:id
+type CommunityInvitePublicInfo = {
+    id: string
+    inviter: User | null
+    community: Community
+}
+
+// GET /communities/:communityId/invites
+type CommunityInvite = {
+    id: string
+    inviter: User | null
+    uses: number
+    maxUses: number | null
+    expiresAt: Date | null
+}

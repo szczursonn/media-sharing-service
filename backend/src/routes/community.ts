@@ -9,6 +9,7 @@ import { AppServices } from '../types'
  * Prefix: /communities
  * - GET /<communityId> - returns community with given id
  * - POST / - creates a new community
+ * - GET /<communityId/invities - returns community invites
  * - POST /<communityId>/invites - creates new invite
  * - GET /<communityId/members - returns community members
  * - DELETE /<communityId>/members/<memberId> - kicks user from community
@@ -37,6 +38,21 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
             const community = await communityService.createCommunity(userId, name)
             return res.json(community)
         } catch (err) {
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.get('/:id/invites', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.id)
+            if (isNaN(communityId)) return res.sendStatus(400)
+
+            const invites = await this.inviteService.getCommunityInvites(communityId, userId)
+
+            return res.json(invites)
+        } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             Logger.err(String(err))
             return res.sendStatus(500)
         }

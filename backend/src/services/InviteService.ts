@@ -28,6 +28,17 @@ export class InviteService {
         }
     }
 
+    public async getCommunityInvites(communityId: number, getterId: number) {
+        const community = await this.dataSource.manager.findOneBy(Community, {
+            id: communityId
+        })
+        if (!community) throw new ResourceNotFoundError()
+
+        const invites = await community.invites
+
+        return invites
+    }
+
     public async createInvite(communityId: number, inviterId: number, validTime: number | null, maxUses: number | null): Promise<CommunityInvite> {
 
         const community = await this.dataSource.manager.findOneBy(Community, {
