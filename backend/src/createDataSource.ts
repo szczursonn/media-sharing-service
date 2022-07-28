@@ -61,13 +61,13 @@ export const createTestDataSource = async (useMockData: boolean = true): Promise
  * - User id: 2, username: 'mario'
  * -- UserConnection foreignId: 'marianczello007', type: 'github'
  * -- UserConnection foreignId: 'abcxd1', type: 'google'
+ * -- Session id: 4
+ * -- Session id: 5
  * /// User with 3 connections, 2 sessions, owner of 1 community, member of 1
  * - User id: 3, username: 'robson'
  * -- UserConnection foreignId: 'rozkminka#1850', type: 'discord'
  * -- UserConnection foreignId: 'robsonfirmasztos', type: 'github'
  * -- UserConnection foreignId: 'goblinek666', type: 'google'
- * -- Session id: 4
- * -- Session id: 5
  * /// User with 1 connection, 1 session, member of 0 communities
  * - User id: 4, username: 'afro'
  * -- UserConnection foreignId: 'afro#1234', type: 'discord'

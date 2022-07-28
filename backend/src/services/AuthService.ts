@@ -48,7 +48,7 @@ export class AuthService {
         const oauthProvider = this.getOAuth2Service(type)
 
         const profile = await oauthProvider.exchange(code)
-
+        
         const connection = new UserConnection()
         connection.foreignId = profile.id
         connection.foreignUsername = profile.username
@@ -81,7 +81,7 @@ export class AuthService {
             userId,
             id: sessionId
         })
-        if (!session) throw new Error()
+        if (!session) throw new ResourceNotFoundError()
 
         if (session.userId !== userId) throw new Error()
 
