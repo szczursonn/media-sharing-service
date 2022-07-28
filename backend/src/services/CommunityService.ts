@@ -27,6 +27,15 @@ export class CommunityService {
         return await user.communities
     }
 
+    public async getCommunityMembers(communityId: number, getterId: number): Promise<any> {
+        const members = await this.dataSource.manager.findBy(CommunityMember, {
+            communityId
+        })
+        if (!members.map(m=>m.userId).includes(getterId)) throw new InsufficientPermissionsError()
+        // TODO: return members with user info inside
+        return members
+    }
+
     public async kickUser(communityId: number, userId: number, kickerId: number): Promise<void> {
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
