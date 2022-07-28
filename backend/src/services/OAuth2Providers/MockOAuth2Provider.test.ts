@@ -1,5 +1,5 @@
 import { OAuth2InvalidCodeError } from "../errors"
-import { MockOAuth2Provider } from "./OAuth2Providers"
+import { MockOAuth2Provider } from "./"
 
 describe('Mock OAuth2 Provider tests', () => {
     it('returns profile', async () => {
