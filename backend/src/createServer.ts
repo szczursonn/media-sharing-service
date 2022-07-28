@@ -2,7 +2,7 @@ import cors from 'cors'
 import express from 'express'
 import { createTestDataSource } from './createDataSource'
 import { createRequiresAuth, httpLogger } from './middlewares'
-import { setupAuthRoutes, setupInviteRoutes, setupUserRoutes, setupCommunityRoutes } from './routes'
+import { setupRoutes } from './routes'
 import { setupCommunityRoutes } from './routes/community'
 import { AuthService } from './services/AuthService'
 import { CommunityService } from './services/CommunityService'
@@ -25,10 +25,12 @@ export const createServer = async ({
 
     const requiresAuth = createRequiresAuth(authService)
     
-    setupAuthRoutes(app, requiresAuth, authService)
-    setupUserRoutes(app, requiresAuth, userService)
-    setupCommunityRoutes(app, requiresAuth, communityService)
-    setupInviteRoutes(app, requiresAuth, inviteService)
+    setupRoutes(app, requiresAuth, {
+        authService,
+        userService,
+        communityService,
+        inviteService
+    })
 
     return app
 }
