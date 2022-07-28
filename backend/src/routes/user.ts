@@ -4,6 +4,7 @@ import { CannotRemoveLastUserConnectionError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
 import { UserService } from '../services/UserService'
+import { AppServices } from '../types'
 
 /**
  * Prefix: /users
@@ -14,11 +15,10 @@ import { UserService } from '../services/UserService'
  * GET /@me/connections - retuns current user connections
  * DELETE /@me/connections/<userConnection> - removes a user connection
  * GET /@me/communities - return communities that the current user is in
- * POST /@me/communities/<communityId> - joins the community
  * DELETE /@me/communities/<communityId> - leaves the community
  */
 
-export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userService: UserService) => {
+export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userService, inviteService, authService, communityService}: AppServices) => {
     const router = Router()
 
     router.get('/:id', requiresAuth(async (req, res, userId) => {
@@ -36,7 +36,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
 
     router.get('/@me/connections', requiresAuth(async (req, res, userId) => {
         try {
-            return res.json(await userService.getUserConnections(userId))
+            return res.json(await authService.getUserConnections(userId))
         } catch (err) {
             if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             Logger.err(String(err))
@@ -48,7 +48,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
         try {
             const type = req.params.connection
             if (type !== 'discord' && type !== 'google' && type !== 'github') return res.sendStatus(400)
-            await userService.removeConnection(userId, type)
+            await authService.removeConnection(userId, type)
         } catch (err) {
             if (err instanceof CannotRemoveLastUserConnectionError) {
                 return res.sendStatus(409)
@@ -60,19 +60,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, userSe
 
     router.get('/@me/communities', requiresAuth(async (req, res, userId) => {
         try {
-            return await userService.getUserCommunities(userId)
-        } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
-        }
-    }))
-
-    router.post('/@me/communities/<communityId>', requiresAuth(async (req, res, userId) => {
-        try {
-            const inviteId = req.body.inviteId
-            if (typeof inviteId !== 'string') return res.sendStatus(400)
-            await userService.joinCommunity(userId, inviteId)
-            return res.sendStatus(204)
+            return await communityService.getUserCommunities(userId)
         } catch (err) {
             Logger.err(String(err))
             return res.sendStatus(500)

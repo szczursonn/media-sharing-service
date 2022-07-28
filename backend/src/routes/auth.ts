@@ -3,10 +3,11 @@ import { OAuth2InvalidCodeError, OAuth2ProviderUnavailableError } from '../error
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
 import { AuthService } from '../services/AuthService'
+import { AppServices } from '../types'
 import { UserConnectionType } from '../types'
 import { extractToken } from '../utils/extractToken'
 
-export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, authService: AuthService): Express => {
+export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authService}: AppServices): Express => {
 
     /**
      * Prefix: /auth

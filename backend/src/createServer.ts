@@ -9,18 +9,14 @@ import { CommunityService } from './services/CommunityService'
 import { InviteService } from './services/InviteService'
 import { MockOAuth2Provider } from './services/OAuth2Providers'
 import { UserService } from './services/UserService'
+import { AppServices } from './types'
 
 export const createServer = async ({
     authService,
     userService,
     communityService,
     inviteService
-}: {
-    authService: AuthService
-    userService: UserService
-    communityService: CommunityService
-    inviteService: InviteService
-}) => {
+}: AppServices) => {
     const app = express()
 
     app.use(cors())
@@ -32,7 +28,7 @@ export const createServer = async ({
     setupAuthRoutes(app, requiresAuth, authService)
     setupUserRoutes(app, requiresAuth, userService)
     setupCommunityRoutes(app, requiresAuth, communityService)
-    setupInviteRoutes(app, inviteService)
+    setupInviteRoutes(app, requiresAuth, inviteService)
 
     return app
 }

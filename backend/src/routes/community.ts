@@ -3,16 +3,16 @@ import { ResourceNotFoundError, InsufficientPermissionsError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
 import { CommunityService } from '../services/CommunityService'
+import { AppServices } from '../types'
 
 /**
  * Prefix: /communities
  * - GET /<communityId> - returns community with given id
  * - POST / - creates a new community
  * - POST /<communityId>/invites - creates new invite
- * - DELETE /<communityId>/invites/<inviteId> - invalidates an invite
  */
 
-export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, communityService: CommunityService) => {
+export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {communityService, inviteService}: AppServices) => {
     const router = Router()
 
     router.get('/:id', requiresAuth(async (req, res, userId) => {
@@ -53,23 +53,12 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, c
                 (typeof validTime !== 'number' && typeof validTime !== 'undefined')
             ) return res.sendStatus(400)
 
-            const invite = await communityService.createInvite(communityId, userId, validTime ?? null, maxUses ?? null)
+            const invite = await inviteService.createInvite(communityId, userId, validTime ?? null, maxUses ?? null)
             return res.json(invite)
         } catch (err) {
             if (err instanceof InsufficientPermissionsError) {
                 return res.sendStatus(403)
             }
-            Logger.err(String(err))
-            return res.sendStatus(500)
-        }
-    }))
-
-    router.delete('/:id/invites/:inviteId', requiresAuth(async (req, res, userId) => {
-        try {
-            const inviteId = req.params.inviteId
-            await communityService.removeInvite(inviteId, userId)
-            return res.sendStatus(204)
-        } catch (err) {
             Logger.err(String(err))
             return res.sendStatus(500)
         }

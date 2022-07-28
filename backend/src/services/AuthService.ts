@@ -1,4 +1,4 @@
-import { InvalidSessionError, OAuth2ProviderUnavailableError } from "../errors";
+import { InvalidSessionError, ResourceNotFoundError, OAuth2ProviderUnavailableError, CannotRemoveLastUserConnectionError } from "../errors";
 import { Session } from "../models/Session";
 import { User } from "../models/User";
 import { UserConnection } from "../models/UserConnection";
@@ -88,6 +88,27 @@ export class AuthService {
         await this.dataSource.manager.delete(Session, {
             userId,
             id: sessionId
+        })
+    }
+
+    public async getUserConnections(userId: number): Promise<UserConnection[]> {
+        const connections = await this.dataSource.manager.findBy(UserConnection, {
+            userId
+        })
+        if (connections.length === 0) throw new ResourceNotFoundError()
+        return connections
+    }
+
+    public async removeConnection(userId: number, type: UserConnectionType): Promise<void> {
+        const connections = await this.dataSource.manager.findBy(UserConnection, {
+            userId
+        })
+
+        if (connections.length < 2) throw new CannotRemoveLastUserConnectionError()
+        
+        await this.dataSource.manager.delete(UserConnection, {
+            userId,
+            type
         })
     }
 
