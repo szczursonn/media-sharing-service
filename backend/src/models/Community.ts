@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinTable, OneToOne, ManyToMany, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { CommunityInvite } from "./CommunityInvite";
+import { Media } from "./Media";
 import { User } from "./User";
 
 @Entity()

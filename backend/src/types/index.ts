@@ -1,7 +1,7 @@
-import { AuthService } from './services/AuthService'
-import { CommunityService } from './services/CommunityService'
-import { InviteService } from './services/InviteService'
-import { UserService } from './services/UserService'
+import { AuthService } from '../services/AuthService'
+import { CommunityService } from '../services/CommunityService'
+import { InviteService } from '../services/InviteService'
+import { UserService } from '../services/UserService'
 
 export type AccessToken = {
     token: string

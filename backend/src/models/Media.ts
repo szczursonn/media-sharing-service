@@ -1,5 +1,7 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { MediaType } from "../types";
+import { Community } from "./Community";
+import { User } from "./User";
 
 @Entity()
 export class Media {

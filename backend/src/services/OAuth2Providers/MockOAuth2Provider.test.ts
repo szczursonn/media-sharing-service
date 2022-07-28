@@ -1,4 +1,4 @@
-import { OAuth2InvalidCodeError } from "../errors"
+import { OAuth2InvalidCodeError } from "../../errors"
 import { MockOAuth2Provider } from "./"
 
 describe('Mock OAuth2 Provider tests', () => {

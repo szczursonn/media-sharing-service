@@ -2,7 +2,9 @@ import { DataSource } from "typeorm";
 import { ResourceNotFoundError, InsufficientPermissionsError, AlreadyAMemberError } from "../errors";
 import { Community } from "../models/Community"
 import { CommunityInvite } from "../models/CommunityInvite";
+import { CommunityMember } from "../models/CommunityMember";
 import { User } from "../models/User";
+import nanoid from "nanoid";
 
 export class InviteService {
     private dataSource: DataSource
@@ -33,6 +35,8 @@ export class InviteService {
             id: communityId
         })
         if (!community) throw new ResourceNotFoundError()
+        // only the owner can get invites
+        if(community.ownerId !== getterId) throw new InsufficientPermissionsError()
 
         const invites = await community.invites
 
@@ -48,11 +52,8 @@ export class InviteService {
         // only the owner can create invites
         if (community.ownerId !== inviterId) throw new InsufficientPermissionsError()
 
-        // TODO: FIX THIS SHIT
-        const {nanoid} = await import('nanoid/non-secure')
-
         const inv = new CommunityInvite()
-        inv.id = nanoid(8)
+        inv.id = nanoid.nanoid(8)
         inv.communityId = communityId
         inv.inviterId = inviterId
         inv.expiresAt = validTime === null ? undefined : new Date(Date.now()+validTime)
@@ -61,15 +62,15 @@ export class InviteService {
         return await this.dataSource.manager.save(inv)
     }
 
-    public async removeInvite(inviteId: string, userId: number): Promise<void> {
+    public async removeInvite(inviteId: string, removerId: number): Promise<void> {
 
         const invite = await this.dataSource.manager.findOneBy(CommunityInvite, {
             id: inviteId
         })
         if (!invite) throw new ResourceNotFoundError()
-        if (invite.inviterId !== userId) {
+        if (invite.inviterId !== removerId) {
             const community = await invite.community
-            if (community.ownerId !== userId) throw new InsufficientPermissionsError()
+            if (community.ownerId !== removerId) throw new InsufficientPermissionsError()
         }
 
         await this.dataSource.manager.delete(CommunityInvite, {

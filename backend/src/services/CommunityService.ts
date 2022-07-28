@@ -1,8 +1,8 @@
-import { ResourceNotFoundError } from "../errors";
+import { InsufficientPermissionsError, ResourceNotFoundError } from "../errors";
 import { Community } from "../models/Community"
-import { CommunityInvite } from "../models/CommunityInvite";
 import { DataSource } from "typeorm";
 import { CommunityMember } from "../models/CommunityMember";
+import { User } from "../models/User";
 
 export class CommunityService {
     private dataSource: DataSource

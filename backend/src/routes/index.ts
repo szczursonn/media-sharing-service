@@ -3,6 +3,8 @@ import { AppServices } from '../types'
 import { setupUserRoutes } from './user'
 import { setupInviteRoutes } from './invite'
 import { setupAuthRoutes } from './auth'
+import { Express } from 'express'
+import { requiresAuth } from '../middlewares'
 
 export const setupRoutes = (app: Express, requiresAuth: requiresAuth, services: AppServices) => {
     setupAuthRoutes(app, requiresAuth, services)

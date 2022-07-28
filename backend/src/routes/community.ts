@@ -2,7 +2,6 @@ import { Express, Router } from 'express'
 import { ResourceNotFoundError, InsufficientPermissionsError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
-import { CommunityService } from '../services/CommunityService'
 import { AppServices } from '../types'
 
 /**
@@ -48,7 +47,7 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
             const communityId = parseInt(req.params.id)
             if (isNaN(communityId)) return res.sendStatus(400)
 
-            const invites = await this.inviteService.getCommunityInvites(communityId, userId)
+            const invites = await inviteService.getCommunityInvites(communityId, userId)
 
             return res.json(invites)
         } catch (err) {
@@ -87,7 +86,7 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
             const communityId = parseInt(req.params.communityId)
             if (isNaN(communityId)) return res.sendStatus(400)
 
-            const members = await communityService.getCommunityMembers(communityId)
+            const members = await communityService.getCommunityMembers(communityId, userId)
             return res.json(members)
         } catch (err) {
             if (err instanceof ResourceNotFoundError) return res.sendStatus(404)

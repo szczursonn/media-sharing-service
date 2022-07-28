@@ -1,8 +1,8 @@
 import { Express, Router } from 'express'
 import { ResourceNotFoundError } from '../errors'
 import Logger from '../Logger'
-import { InviteService } from '../services/InviteService'
 import { AppServices } from '../types'
+import { requiresAuth } from '../middlewares'
 
 /**
  * Prefix: /invite
