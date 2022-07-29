@@ -1,7 +1,6 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { MediaType } from "../types";
 import { Album } from "./Album";
-import { Community } from "./Community";
 import { User } from "./User";
 
 @Entity()

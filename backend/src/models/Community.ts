@@ -1,7 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinTable, OneToOne, ManyToMany, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Album } from "./Album";
 import { CommunityInvite } from "./CommunityInvite";
-import { Media } from "./Media";
 import { User } from "./User";
 
 @Entity()
@@ -26,9 +25,6 @@ export class Community {
 
     @OneToMany(()=>CommunityInvite, ci=>ci.community)
     invites!: Promise<CommunityInvite[]>
-
-    @OneToMany(()=>Media, media=>media.community)
-    media!: Promise<Media[]>
 
     @OneToMany(()=>Album, album=>album.community)
     albums!: Promise<Album[]>

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Community } from "./Community";
 import { Media } from "./Media";
 
