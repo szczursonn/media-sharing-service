@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { MediaType } from "../types";
+import { Album } from "./Album";
 import { Community } from "./Community";
 import { User } from "./User";
 
@@ -8,11 +9,11 @@ export class Media {
     @PrimaryColumn()
     filename!: string
 
-    @ManyToOne(()=>Community, com=>com.media, {nullable: false, onDelete: 'CASCADE'})
-    community!: Promise<Community>
+    @ManyToOne(()=>Album, album=>album.media, {nullable: false, onDelete: 'CASCADE'})
+    album!: Promise<Album>
 
     @PrimaryColumn()
-    communityId!: number
+    albumId!: number
 
     @OneToOne(()=>User, {onDelete: 'SET NULL'})
     author!: Promise<User>
