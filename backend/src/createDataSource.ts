@@ -6,6 +6,7 @@ import { Community } from "./models/Community";
 import { UserConnectionType } from "./types";
 import { CommunityMember } from "./models/CommunityMember";
 import { CommunityInvite } from "./models/CommunityInvite";
+import { Album } from "./models/Album";
 
 export const createDataSource = async (): Promise<DataSource> => {
     /*
@@ -123,10 +124,11 @@ const insertMockData = async (dataSource: DataSource) => {
         return await m.save(c)
     }
 
-    const member = async (communityId: number, userId: number) => {
+    const member = async (communityId: number, userId: number, canUpload: boolean = false) => {
         const x = new CommunityMember()
         x.communityId = communityId
         x.userId = userId
+        x.canUpload = canUpload
         return await m.save(x)
     }
 
@@ -138,6 +140,15 @@ const insertMockData = async (dataSource: DataSource) => {
         i.maxUses=maxUses
         i.expiresAt=expiresAt
         return m.save(i)
+    }
+
+    const album = async (albumId: number, name: string, communityId: number) => {
+        const a = new Album()
+        a.id = albumId
+        a.name = name
+        a.communityId = communityId
+
+        return m.save(a)
     }
 
     await user(1, 'maciek')
@@ -160,7 +171,7 @@ const insertMockData = async (dataSource: DataSource) => {
     await session(4, 3)
 
     await comm(1, 3, 'firma sztos official')
-    await member(1, 3)
+    await member(1, 3, true)
     await member(1, 2)
     await member(1, 1)
     await invite('aaa', 1, 3, undefined, new Date(Date.now()-10000))
@@ -168,6 +179,8 @@ const insertMockData = async (dataSource: DataSource) => {
     await invite('ccc', 1, 3, 2, undefined)
 
     await comm(2, 1, 'csgopolskapl.pl')
-    await member(2, 1)
+    await member(2, 1, true)
     await invite('abc', 2, 1, 1, undefined)
+    await album(1, 'melanz1', 2)
+    await album(2, 'melanz2', 2)
 }

@@ -4,6 +4,7 @@ import { createTestDataSource } from './createDataSource'
 import { createRequiresAuth, httpLogger } from './middlewares'
 import { setupRoutes } from './routes'
 import { setupCommunityRoutes } from './routes/community'
+import { AlbumService } from './services/AlbumService'
 import { AuthService } from './services/AuthService'
 import { CommunityService } from './services/CommunityService'
 import { InviteService } from './services/InviteService'
@@ -15,7 +16,8 @@ export const createServer = async ({
     authService,
     userService,
     communityService,
-    inviteService
+    inviteService,
+    albumService
 }: AppServices) => {
     const app = express()
 
@@ -29,7 +31,8 @@ export const createServer = async ({
         authService,
         userService,
         communityService,
-        inviteService
+        inviteService,
+        albumService
     })
 
     return app
@@ -48,12 +51,14 @@ export const createTestServer = async () => {
     const userService = new UserService(dataSource)
     const communityService = new CommunityService(dataSource)
     const inviteService = new InviteService(dataSource)
+    const albumService = new AlbumService(dataSource)
 
     const app = await createServer({
         userService,
         authService,
         communityService,
-        inviteService
+        inviteService,
+        albumService
     })
 
     return {

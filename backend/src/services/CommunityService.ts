@@ -61,6 +61,7 @@ export class CommunityService {
             const comMember = new CommunityMember()
             comMember.userId = savedCommunity.ownerId
             comMember.communityId = savedCommunity.id
+            comMember.canUpload = true
             await transaction.save(comMember)
             
             return savedCommunity

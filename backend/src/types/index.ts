@@ -1,3 +1,4 @@
+import { AlbumService } from '../services/AlbumService'
 import { AuthService } from '../services/AuthService'
 import { CommunityService } from '../services/CommunityService'
 import { InviteService } from '../services/InviteService'
@@ -25,7 +26,8 @@ export type AppServices = {
     authService: AuthService,
     communityService: CommunityService,
     inviteService: InviteService,
-    userService: UserService
+    userService: UserService,
+    albumService: AlbumService
 }
 
 export type MediaType = 'image' | 'video'

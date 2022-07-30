@@ -21,9 +21,6 @@ export class Media {
     authorId!: number
 
     @Column()
-    url!: string
-
-    @Column()
     type!: MediaType
 
     @CreateDateColumn()

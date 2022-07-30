@@ -12,9 +12,12 @@ import { AppServices } from '../types'
  * - POST /<communityId>/invites - creates new invite
  * - GET /<communityId/members - returns community members
  * - DELETE /<communityId>/members/<memberId> - kicks user from community
+ * - GET /<communityId>/albums - returns community albums
+ * - POST /<communityId>/albums - creates an album
+ * - PATCH /<communityId>/albums/<albumId> - edits an album (renames)
  */
 
-export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {communityService, inviteService}: AppServices) => {
+export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {communityService, inviteService, albumService}: AppServices) => {
     const router = Router()
 
     router.get('/:id', requiresAuth(async (req, res, userId) => {
@@ -105,6 +108,51 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
         } catch (err) {
             if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             if (err instanceof InsufficientPermissionsError) return res.sendStatus(403)
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.get('/:communityId/albums', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.communityId)
+            if (isNaN(communityId)) return res.sendStatus(400)
+            return await albumService.getByCommunity(communityId, userId)
+        } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.post('/:communityId/albums', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.communityId)
+            const name = req.body.name
+
+            if (isNaN(communityId) || typeof name !== 'string') return res.sendStatus(400)
+
+            const album = await albumService.create(communityId, name, userId)
+            return res.json(album)
+        } catch (err) {
+            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
+            if (err instanceof InsufficientPermissionsError) return res.sendStatus(403)
+            Logger.err(String(err))
+            return res.sendStatus(500)
+        }
+    }))
+
+    router.patch('/:communityId/albums/:albumId', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.communityId)
+            const albumId = parseInt(req.params.albumId)
+            const name = req.body.name
+
+            if (isNaN(communityId) || isNaN(albumId) || typeof name !== 'string') return res.sendStatus(400)
+
+            const album = await albumService.rename(albumId, name, userId)
+            return res.json(album)
+        } catch (err) {
             Logger.err(String(err))
             return res.sendStatus(500)
         }
