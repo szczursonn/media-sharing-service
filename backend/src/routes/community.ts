@@ -14,7 +14,6 @@ import { AppServices } from '../types'
  * - DELETE /<communityId>/members/<memberId> - kicks user from community
  * - GET /<communityId>/albums - returns community albums
  * - POST /<communityId>/albums - creates an album
- * - PATCH /<communityId>/albums/<albumId> - edits an album (renames)
  */
 
 export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {communityService, inviteService, albumService}: AppServices) => {
@@ -137,22 +136,6 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
         } catch (err) {
             if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
             if (err instanceof InsufficientPermissionsError) return res.sendStatus(403)
-            Logger.err(String(err))
-            return res.sendStatus(500)
-        }
-    }))
-
-    router.patch('/:communityId/albums/:albumId', requiresAuth(async (req, res, userId) => {
-        try {
-            const communityId = parseInt(req.params.communityId)
-            const albumId = parseInt(req.params.albumId)
-            const name = req.body.name
-
-            if (isNaN(communityId) || isNaN(albumId) || typeof name !== 'string') return res.sendStatus(400)
-
-            const album = await albumService.rename(albumId, name, userId)
-            return res.json(album)
-        } catch (err) {
             Logger.err(String(err))
             return res.sendStatus(500)
         }

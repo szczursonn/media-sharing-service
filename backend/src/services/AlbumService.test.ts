@@ -37,4 +37,16 @@ describe('AlbumService tests', () => {
         })
         expect(album.name).toBe('abcdef')
     })
+
+    it('allows to remove album', async () => {
+        await albumService.remove(1, 1)
+        const count = await dataSource.manager.countBy(Album, {
+            id: 1
+        })
+        expect(count).toBe(0)
+    })
+
+    it('disallows to remove album if not the owner of community', async () => {
+        await expect(albumService.remove(5, 2)).rejects.toThrowError(InsufficientPermissionsError)
+    })
 })

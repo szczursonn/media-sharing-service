@@ -62,4 +62,19 @@ export class AlbumService {
         album.name = newName
         return await this.dataSource.manager.save(album)
     }
+
+    public async remove(albumId: number, deleterId: number): Promise<void> {
+        const album = await this.dataSource.manager.findOneBy(Album, {
+            id: albumId
+        })
+        if (!album) throw new ResourceNotFoundError()
+
+        const community = await album.community
+        if (community.ownerId !== deleterId) throw new InsufficientPermissionsError()
+
+        const delResult = await this.dataSource.manager.delete(Album, {
+            id: albumId
+        })
+        if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
+    }
 }

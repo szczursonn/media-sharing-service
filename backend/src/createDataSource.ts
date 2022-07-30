@@ -82,10 +82,13 @@ export const createTestDataSource = async (useMockData: boolean = true): Promise
  * -- Invite id: 'aaa', inviterId: 3, maxUses: undefined, expiresAt: Date.now()-10000 (expired)
  * -- Invite id: 'bbb', inviterId: 3, maxUses: undefined, expiresAt: Date.now()+10000
  * -- Invite id: 'ccc', inviterId: 3, maxUses: 2, expiresAt: undefined
+ * -- Album id: 5, name: 'gigaalbum'
  * /// Community with only the owner
  * - Community id: 2, ownerId: 1, name: 'csgopolskapl.pl'
  * -- Member userId: 1
  * -- Invite id: 'abc', inviterId: 1, maxUses: 1, expiresAt: null
+ * -- Album id: 1, name: 'melanz1'
+ * -- Album id: 2, name: 'melanz2'
  */
 
 const insertMockData = async (dataSource: DataSource) => {
@@ -177,6 +180,7 @@ const insertMockData = async (dataSource: DataSource) => {
     await invite('aaa', 1, 3, undefined, new Date(Date.now()-10000))
     await invite('bbb', 1, 3, undefined, new Date(Date.now()+10000))
     await invite('ccc', 1, 3, 2, undefined)
+    await album(5, 'gigaalbum', 1)
 
     await comm(2, 1, 'csgopolskapl.pl')
     await member(2, 1, true)
