@@ -28,6 +28,11 @@ export const loadConfig = () => {
         database: {
 
         },
+        mediaStorage: {
+            type: process.env['MEDIASTORAGE_TYPE'],
+            googleBucketName: process.env['GOOGLE_STORAGE_BUCKETNAME'],
+            localDirectory: process.env['LOCALSTORAGE_DIR']
+        },
         enviroment: process.env['NODE_ENV'] === 'production' ? 'production' : 'development'
     }
 }

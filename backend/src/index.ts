@@ -2,13 +2,18 @@ import 'reflect-metadata'
 import { createDataSource } from './createDataSource'
 import { createServer } from "./createServer"
 import Logger from "./Logger"
-import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider } from './services/OAuth2Providers'
+import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider, MockOAuth2Provider } from './services/OAuth2Providers'
 import { loadConfig } from './config'
 import { AuthService } from './services/AuthService'
 import { UserService } from './services/UserService'
 import { CommunityService } from './services/CommunityService'
 import { InviteService } from './services/InviteService'
 import { AlbumService } from './services/AlbumService'
+import { MediaService, MediaStorage } from './services/MediaService'
+import { GCPMediaStorage } from './services/MediaStorages/GCPMediaStorage'
+import { Storage } from '@google-cloud/storage'
+import { LocalMediaStorage } from './services/MediaStorages/LocalMediaStorage'
+import { MockMediaStorage } from './services/MediaStorages/MockMediaStorage'
 
 const DEFAULT_PORT = 3000
 
@@ -23,7 +28,7 @@ const main = async () => {
     }
 
     if (!config.jwtSecret) {
-        Logger.fatal('JWT Secret not supplied')
+        Logger.fatal('JWT Secret not supplied [env.JWT_SECRET]')
         process.exit(-1)
     }
 
@@ -48,11 +53,39 @@ const main = async () => {
         ? new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)
         : undefined
     if (!githubOAuth2Provider) Logger.warn('Github OAuth2 configuration missing, will be unavailable')
+    
+    let mediaStorage: MediaStorage
+
+    switch (config.mediaStorage.type) {
+        case 'google':
+            if (config.mediaStorage.googleBucketName === undefined) {
+                Logger.fatal('Missing google cloud storage bucket name [env.GOOGLE_STORAGE_BUCKETNAME]')
+                process.exit(-1)
+            }
+            mediaStorage = new GCPMediaStorage(new Storage(), config.mediaStorage.googleBucketName)
+            Logger.info('Initialized GCP Media Storage')
+            break
+        case 'local':
+            if (config.mediaStorage.localDirectory === undefined) {
+                Logger.fatal('Missing local media storage directory [env.LOCALSTORAGE_DIR]')
+                process.exit(-1)
+            }
+            mediaStorage = new LocalMediaStorage(config.mediaStorage.localDirectory)
+            Logger.info('Initialized Local Media Storage')
+            break
+        case 'mock':
+            mediaStorage = new MockMediaStorage()
+            Logger.info('Initialized Mock Media Storage')
+            break
+        default:
+            Logger.fatal(`No such media storage type: ${config.mediaStorage.type}`)
+            process.exit(-1)
+    }
 
     const authService = new AuthService({
         dataSource,
         jwtSecret: config.jwtSecret,
-        discordOAuth2Provider,
+        discordOAuth2Provider: new MockOAuth2Provider(),    // dev tmp
         googleOAuth2Provider,
         githubOAuth2Provider
     })
@@ -60,13 +93,15 @@ const main = async () => {
     const communityService = new CommunityService(dataSource)
     const inviteService = new InviteService(dataSource)
     const albumService = new AlbumService(dataSource)
+    const mediaService = new MediaService(dataSource, mediaStorage)
 
     const app = await createServer({
         authService,
         userService,
         communityService,
         inviteService,
-        albumService
+        albumService,
+        mediaService
     })
         
     app.listen(config.port, () => {

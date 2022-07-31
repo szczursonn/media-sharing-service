@@ -2,6 +2,7 @@ import { AlbumService } from '../services/AlbumService'
 import { AuthService } from '../services/AuthService'
 import { CommunityService } from '../services/CommunityService'
 import { InviteService } from '../services/InviteService'
+import { MediaService } from '../services/MediaService'
 import { UserService } from '../services/UserService'
 
 export type AccessToken = {
@@ -27,7 +28,8 @@ export type AppServices = {
     communityService: CommunityService,
     inviteService: InviteService,
     userService: UserService,
-    albumService: AlbumService
+    albumService: AlbumService,
+    mediaService: MediaService
 }
 
 export type MediaType = 'image' | 'video'
