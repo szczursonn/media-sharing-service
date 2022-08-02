@@ -1,9 +1,9 @@
 import { Express, Router, Request, Response } from 'express'
-import { OAuth2InvalidCodeError, OAuth2ProviderUnavailableError } from '../errors'
-import Logger from '../Logger'
+import { BadRequestError } from '../errors'
 import { requiresAuth } from '../middlewares'
 import { AppServices } from '../types'
 import { UserConnectionType } from '../types'
+import { genericErrorResponse } from '../utils'
 import { extractToken } from '../utils/extractToken'
 
 export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authService}: AppServices): Express => {
@@ -20,7 +20,7 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authS
     const oauthExchange = (type: UserConnectionType) => async (req: Request, res: Response) => {
         const code = req.body?.code
         if (typeof code !== 'string') {
-            return res.sendStatus(400)
+            throw new BadRequestError()
         }
         
         /**
@@ -37,14 +37,7 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authS
                 return res.sendStatus(204)
             }
         } catch (err) {
-            if (err instanceof OAuth2ProviderUnavailableError) {
-                return res.sendStatus(503)
-            }
-            if (err instanceof OAuth2InvalidCodeError) {
-                return res.sendStatus(400)
-            }
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }
 
@@ -61,20 +54,18 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authS
             const sessions = await authService.getUserSessions(userId)
             return res.json(sessions)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
     router.delete('/sessions/:sessionId', requiresAuth(async (req, res, userId) => {
         try {
             const sessionId = parseInt(req.params.sessionId)
-            if (isNaN(sessionId)) return res.sendStatus(400)
+            if (isNaN(sessionId)) throw new BadRequestError()
             await authService.invalidateSession(sessionId, userId)
             return res.sendStatus(204)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 

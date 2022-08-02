@@ -1,8 +1,9 @@
 import { Express, Router } from 'express'
-import { ResourceNotFoundError } from '../errors'
+import { BadRequestError, ResourceNotFoundError } from '../errors'
 import Logger from '../Logger'
 import { AppServices } from '../types'
 import { requiresAuth } from '../middlewares'
+import { genericErrorResponse } from '../utils'
 
 /**
  * Prefix: /invite
@@ -17,24 +18,18 @@ export const setupInviteRoutes = (app: Express, requiresAuth: requiresAuth, {inv
         try {
             return res.json(await inviteService.getInvite(req.params.id))
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     })
 
     router.post('/:id', requiresAuth(async (req, res, userId) => {
         try {
             const inviteId = req.body.inviteId
-            if (typeof inviteId !== 'string') return res.sendStatus(400)
+            if (typeof inviteId !== 'string') throw new BadRequestError()
             await inviteService.acceptInvite(inviteId, userId)
             return res.sendStatus(204)
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) {
-                return res.sendStatus(404)
-            }
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
@@ -44,8 +39,7 @@ export const setupInviteRoutes = (app: Express, requiresAuth: requiresAuth, {inv
             await inviteService.removeInvite(inviteId, userId)
             return res.sendStatus(204)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 

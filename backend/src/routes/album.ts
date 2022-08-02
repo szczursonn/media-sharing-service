@@ -1,9 +1,9 @@
 import { Express, Router } from 'express'
 import { AppServices } from '../types'
 import { requiresAuth } from '../middlewares'
-import Logger from '../Logger'
 import multer from 'multer'
-import { InsufficientPermissionsError, ResourceNotFoundError } from '../errors'
+import { BadRequestError } from '../errors'
+import { genericErrorResponse } from '../utils'
 
 /**
  * Prefix: /albums
@@ -19,13 +19,12 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
             const albumId = parseInt(req.params.albumId)
             const name = req.body.name
 
-            if (isNaN(albumId) || typeof name !== 'string') return res.sendStatus(400)
+            if (isNaN(albumId) || typeof name !== 'string') throw new BadRequestError()
 
             const album = await albumService.rename(albumId, name, userId)
             return res.json(album)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
@@ -33,13 +32,12 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
         try {
             const albumId = parseInt(req.params.albumId)
 
-            if (isNaN(albumId)) return res.sendStatus(400)
+            if (isNaN(albumId)) throw new BadRequestError()
 
             await albumService.remove(albumId, userId)
             return res.sendStatus(204)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
@@ -48,33 +46,27 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
     router.post('/:albumId/media', upload.single('media'), requiresAuth(async (req, res, userId) => {
         try {
             const albumId = parseInt(req.params.albumId)
-            if (isNaN(albumId)) return res.sendStatus(400)
+            if (isNaN(albumId)) throw new BadRequestError()
             const file = req.file
-            if (!file) return res.sendStatus(400)
+            if (!file) throw new BadRequestError()
 
             const media = await mediaService.upload(albumId, file.originalname, file.buffer, userId)
             return res.json(media)
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
-            if (err instanceof InsufficientPermissionsError) return res.sendStatus(401)
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
     router.delete('/:albumId/media/:filename', requiresAuth( async (req, res, userId) => {
         try {
             const albumId = parseInt(req.params.albumId)
-            if (isNaN(albumId)) return res.sendStatus(400)
+            if (isNaN(albumId)) throw new BadRequestError()
             const filename = req.params.filename
 
             await mediaService.remove(albumId, filename, userId)
             return res.sendStatus(204)
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
-            if (err instanceof InsufficientPermissionsError) return res.sendStatus(401)
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 

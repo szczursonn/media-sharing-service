@@ -1,10 +1,10 @@
 import { Express, Router } from 'express'
-import { ResourceNotFoundError } from '../errors'
+import { BadRequestError, ResourceNotFoundError } from '../errors'
 import { CannotRemoveLastUserConnectionError } from '../errors'
 import Logger from '../Logger'
 import { requiresAuth } from '../middlewares'
-import { UserService } from '../services/UserService'
 import { AppServices } from '../types'
+import { genericErrorResponse } from '../utils'
 
 /**
  * Prefix: /users
@@ -28,9 +28,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
             const user = await userService.getUserById(queryId)
             return res.json(user)
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
@@ -38,23 +36,17 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
         try {
             return res.json(await authService.getUserConnections(userId))
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
     router.delete('/@me/connections/:connection', requiresAuth(async (req, res, userId) => {
         try {
             const type = req.params.connection
-            if (type !== 'discord' && type !== 'google' && type !== 'github') return res.sendStatus(400)
+            if (type !== 'discord' && type !== 'google' && type !== 'github') throw new BadRequestError()
             await authService.removeConnection(userId, type)
         } catch (err) {
-            if (err instanceof CannotRemoveLastUserConnectionError) {
-                return res.sendStatus(409)
-            }
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
@@ -62,20 +54,18 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
         try {
             return await communityService.getUserCommunities(userId)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
     router.delete('/@me/communities/:id', requiresAuth(async (req, res, userId) => {
         try {
             const communityId = parseInt(req.params.id)
-            if (isNaN(communityId)) return res.sendStatus(400)
+            if (isNaN(communityId)) throw new BadRequestError()
             await userService.leaveCommunity(userId, communityId)
             return res.sendStatus(204)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
@@ -86,8 +76,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
             const user = await userService.modifyUser(userId, {username: newUsername})
             return res.json(user)
         } catch (err) {
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
         
     }))
@@ -97,9 +86,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
             await userService.removeUser(userId)
             return res.sendStatus(204)
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) return res.sendStatus(404)
-            Logger.err(String(err))
-            return res.sendStatus(500)
+            return genericErrorResponse(res, err)
         }
     }))
 
