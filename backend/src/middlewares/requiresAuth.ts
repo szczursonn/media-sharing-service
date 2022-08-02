@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { JsonWebTokenError } from "jsonwebtoken";
 import { UnauthenticatedError } from "../errors";
 import { AuthService } from "../services/AuthService";
 import { genericErrorResponse } from "../utils";
@@ -14,6 +15,7 @@ export const createRequiresAuth: (authService: AuthService)=>requiresAuth = (aut
         const [userId, sessionId] = await authService.validate(token)
         return next(req, res, userId, sessionId)
     } catch (err) {
+        if (err instanceof JsonWebTokenError) err = new UnauthenticatedError()
         return genericErrorResponse(res, err)
     }
 }
