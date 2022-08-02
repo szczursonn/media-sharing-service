@@ -33,8 +33,8 @@ const main = async () => {
     }
 
     const dataSource = await createDataSource()
-    Logger.info('Connected to database')
-
+    Logger.info(`Connected to database (${dataSource.driver.options.type})`)
+    
     const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
         ? new DiscordOAuth2Provider({
             clientId: config.discord.clientId,
