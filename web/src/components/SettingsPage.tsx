@@ -1,4 +1,4 @@
-import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material"
+import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useState } from "react"
 import { getUserConnections, getUserSessions, invalidateSession, removeUserConnection } from "../api"
@@ -10,6 +10,7 @@ import githubIcon from '../svg/githubIcon.svg'
 import discordIcon from '../svg/discordIcon.svg'
 import googleIcon from '../svg/googleIcon.svg'
 import { CannotRemoveLastUserConnectionError } from "../errors"
+import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../constants"
 
 export const SettingsPage = () => {
 
@@ -151,6 +152,7 @@ const ConnectionListItem = ({connections, type, onDelete}: {connections: UserCon
             await removeUserConnection(type)
             onDelete()
         } catch (err) {
+            
             setOpenErrorDialog(true)
             if (err instanceof CannotRemoveLastUserConnectionError) setError('Cannot remove the last user connection')
             else setError(String(err))
@@ -171,9 +173,22 @@ const ConnectionListItem = ({connections, type, onDelete}: {connections: UserCon
             break
     }
 
+    let connectUrl: string
+    switch (type) {
+        case 'google':
+            connectUrl=GOOGLE_OAUTH_URL
+            break
+        case 'discord':
+            connectUrl=DISCORD_OAUTH_URL
+            break
+        case 'github':
+            connectUrl=GITHUB_OAUTH_URL
+            break
+    }
+
     const connection = connections.find(con=>con.type===type)
 
-    return <ListItem secondaryAction={<IconButton onClick={()=>setOpenDialog(true)} edge='end'><Clear /></IconButton>}>
+    return <ListItem>
         <ListItemAvatar>
             <Avatar>
                 <img style={{maxHeight: 20}} src={icon} alt={`${type} logo`} />
@@ -181,8 +196,14 @@ const ConnectionListItem = ({connections, type, onDelete}: {connections: UserCon
         </ListItemAvatar>
         {
             connection
-            ? <ListItemText primary={connection.foreignUsername} secondary={`since ${new Date(connection.createdAt).toLocaleDateString()}`}/>
-            : <ListItemText primary='Not connected'/>
+            ? <>
+                <ListItemText primary={connection.foreignUsername} secondary={`since ${new Date(connection.createdAt).toLocaleDateString()}`}/>
+                <Button sx={{marginLeft: 2}} variant='outlined' onClick={()=>setOpenDialog(true)}>Disconnect</Button>
+            </>
+            : <>
+                <ListItemText primary='Not connected'/>
+                <Button sx={{marginLeft: 2}} variant='outlined' onClick={()=>window.location.href = connectUrl}>Connect</Button>
+            </>
         }
         <Backdrop sx={{position: 'absolute'}} open={removing}><CircularProgress color='inherit'/></Backdrop>
         <AreYouSureDialog

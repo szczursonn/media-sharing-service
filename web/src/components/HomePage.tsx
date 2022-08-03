@@ -8,7 +8,7 @@ export const HomePage = () => {
 
     return <Box sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
         <Typography variant="h3">
-            user: {context.user?.username ?? 'null'}
+            user logged in?: {String(!!context.user)}
         </Typography>
     </Box>
 }

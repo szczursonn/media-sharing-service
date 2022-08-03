@@ -17,4 +17,10 @@ export type UserConnection = {
     type: OAuth2Provider
 }
 
+export type Community = {
+    id: number,
+    name: string,
+    createdAt: string
+}
+
 export type OAuth2Provider = 'discord' | 'google' | 'github'

@@ -5,13 +5,15 @@ import { HomePage } from './HomePage';
 import { UserContext } from '../contexts/UserContext';
 import { User } from '../types';
 import { getCurrentUser } from '../api';
-import { Backdrop, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Backdrop, Box, Button, CircularProgress, Grid, Typography } from '@mui/material';
 import { CallbackPage } from './CallbackPage';
 import { NotFoundPage } from './NotFoundPage';
 import { LoginDialog } from './LoginDialog';
 import { SettingsPage } from './SettingsPage';
 import { UnauthenticatedError } from '../errors';
 import { ErrorDialog } from './ErrorDialog';
+import { MyDrawer } from './MyDrawer';
+import { CommunityCreateDialog } from './CommunityCreateDialog';
 
 
 const App = () => {
@@ -51,17 +53,25 @@ const App = () => {
     <div className="App">
       <UserContext.Provider value={contextValue}>
         <MyAppBar onLoginClick={()=>setLoginOpen(true)} />
-        {!loadingUser && <Routes>
-          <Route path='/' element={<HomePage />} />
-          <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />} />
-          <Route path='/callback/:provider' element={<CallbackPage />} />
-          <Route path='*' element={<NotFoundPage />} />
-        </Routes>}
+        <Grid container>
+          <Grid item xs={0.5}>
+            <MyDrawer />
+          </Grid>
+          <Grid item xs={11.5}>
+            <Routes>
+              <Route path='/' element={<HomePage />} />
+              <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />} />
+              <Route path='/callback/:provider' element={<CallbackPage />} />
+              <Route path='*' element={<NotFoundPage />} />
+            </Routes>
+          </Grid>
+        </Grid>
         <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer+1}} open={loadingUser}>
           <CircularProgress color='inherit' />
         </Backdrop>
         <LoginDialog open={loginOpen} onClose={()=>setLoginOpen(false)}/>
         <ErrorDialog open={errorDialogOpen} title='Unexpected error' description={`There was an unexpected error when logging in: ${error}`} onClose={()=>setErrorDialogOpen(false)}/>
+        
       </UserContext.Provider>
     </div>
   );
