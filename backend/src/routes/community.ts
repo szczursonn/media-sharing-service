@@ -103,7 +103,8 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
         try {
             const communityId = parseInt(req.params.communityId)
             if (isNaN(communityId)) throw new BadRequestError()
-            return await albumService.getByCommunity(communityId, userId)
+            const albums = await albumService.getByCommunity(communityId, userId)
+            return res.json(albums)
         } catch (err) {
             return genericErrorResponse(res, err)
         }
