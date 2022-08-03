@@ -1,7 +1,7 @@
-import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material"
+import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
-import { useEffect, useState } from "react"
-import { getUserConnections, getUserSessions, invalidateSession, removeUserConnection } from "../api"
+import { useContext, useEffect, useState } from "react"
+import { getUserConnections, getUserSessions, invalidateSession, removeUserConnection, updateUser } from "../api"
 import { OAuth2Provider, UserConnection, UserSession } from "../types"
 import { Clear, LaptopChromebook } from '@mui/icons-material';
 import { AreYouSureDialog } from "./AreYouSureDialog"
@@ -11,14 +11,31 @@ import discordIcon from '../svg/discordIcon.svg'
 import googleIcon from '../svg/googleIcon.svg'
 import { CannotRemoveLastUserConnectionError } from "../errors"
 import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../constants"
+import { UserContext } from "../contexts/UserContext"
 
 export const SettingsPage = () => {
+
+    const ctx = useContext(UserContext)
+
+    const [newUsername, setNewUsername] = useState(ctx.user?.username ?? '')
+    const [savingUsername, setSavingUsername] = useState(false)
 
     const [sessions, setSessions] = useState<UserSession[]|null>(null)
     const [loadingSessions, setLoadingSessions] = useState(false)
 
     const [connections, setConnections] = useState<UserConnection[]|null>(null)
     const [loadingConnections, setLoadingConnections] = useState(false)
+
+    const updateUsername = async () => {
+        setSavingUsername(true)
+        try {
+            const user = await updateUser(newUsername)
+            ctx.setUser(user)
+        } catch (err) {
+
+        }
+        setSavingUsername(false)
+    }
 
     const fetchSessions = async () => {
         setLoadingSessions(true)
@@ -43,6 +60,15 @@ export const SettingsPage = () => {
         }
         setLoadingConnections(false)
     }
+
+    const removeConnection = (type: OAuth2Provider) => {
+        if (!connections) return
+        const newCons = [...connections]
+        const index = newCons.findIndex(c=>c.type===type)
+        if (index < 0) return
+        newCons.splice(index, 1)
+        setConnections(newCons)
+    }
     
     useEffect(()=>{
         fetchSessions()
@@ -51,6 +77,19 @@ export const SettingsPage = () => {
 
     return <Container maxWidth='xs' sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
         <Typography variant="h2">Settings</Typography>
+        <Typography variant="h4">Username</Typography>
+        <TextField
+        autoFocus
+        margin="dense"
+        id="name"
+        label="Username"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={newUsername}
+        onChange={(e)=>setNewUsername(e.currentTarget.value)}
+        />
+        <Button disabled={savingUsername} onClick={updateUsername}>Update</Button>
         <Typography variant="h4">Sessions</Typography>
         {
             loadingSessions
@@ -82,9 +121,9 @@ export const SettingsPage = () => {
                 {
                     connections
                     ? <List>
-                        <ConnectionListItem connections={connections} type='discord' onDelete={()=>{}} />
-                        <ConnectionListItem connections={connections} type='google' onDelete={()=>{}} />
-                        <ConnectionListItem connections={connections} type='github' onDelete={()=>{}} />
+                        <ConnectionListItem connections={connections} type='discord' onDelete={()=>removeConnection('discord')} />
+                        <ConnectionListItem connections={connections} type='google' onDelete={()=>removeConnection('google')} />
+                        <ConnectionListItem connections={connections} type='github' onDelete={()=>removeConnection('github')} />
                     </List>
                     : <>
                         <Typography variant="h6">Error fetching connections</Typography>

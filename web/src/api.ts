@@ -18,6 +18,13 @@ export const loginOrRegisterWithOAuth2Provider = async (code: string, type: OAut
     localStorage.setItem('token', data.token)
 }
 
+export const updateUser = async (username: string): Promise<User> => {
+    const res = await customFetch('/users/@me', {method: 'PATCH', body: JSON.stringify({username})})
+
+    const body = await res.json()
+    return body as User
+}
+
 export const addConnection = async (code: string, type: OAuth2Provider): Promise<void> => {
     await customFetch(`/auth/${type}`, {method: 'POST', body: JSON.stringify({code})})
 }
