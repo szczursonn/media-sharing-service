@@ -52,7 +52,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
 
     router.get('/@me/communities', requiresAuth(async (req, res, userId) => {
         try {
-            return await communityService.getUserCommunities(userId)
+            return res.json(await communityService.getUserCommunities(userId))
         } catch (err) {
             return genericErrorResponse(res, err)
         }
