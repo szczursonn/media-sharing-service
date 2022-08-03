@@ -1,9 +1,8 @@
 import { CannotRemoveLastUserConnectionError, InvalidOAuth2CodeError, UnauthenticatedError, UnavailableOAuth2ProviderError } from "./errors"
-import { Community, OAuth2Provider, User, UserConnection, UserSession } from "./types"
+import { Album, Community, OAuth2Provider, User, UserConnection, UserSession } from "./types"
 
 export const getCurrentUser = async (): Promise<User> => {
     const token = localStorage.getItem('token')
-    console.log(`GET USER, token: ${!!token}`)
     if (!token) throw new UnauthenticatedError()
 
     const res = await customFetch('/users/@me', {method: 'GET'})
@@ -65,6 +64,19 @@ export const createNewCommunity = async (name: string) => {
     return body as Community
 }
 
+export const getCommunityAlbums = async (communityId: number) => {
+    const res = await customFetch(`/communities/${communityId}/albums`, {method: 'GET'})
+
+    const body = await res.json()
+    return body as Album[]
+}
+
+export const createNewAlbum = async (communityId: number, name: string) => {
+    const res = await customFetch(`/communities/${communityId}/albums`, {method: 'POST', body: JSON.stringify({name})})
+
+    const body = await res.json()
+    return body as Album
+}
 
 const API_URL = process.env.REACT_APP_API_URL
 

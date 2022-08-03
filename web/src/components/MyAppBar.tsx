@@ -3,21 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { Home } from '@mui/icons-material';
+import { CommunityContext } from '../contexts/CommunityContext';
 
 export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
 
     const navigate = useNavigate()
 
     const {user} = useContext(UserContext)
+
+    const {selected: selectedCommunity, select: setSelectedCommunity} = useContext(CommunityContext)
   
     return <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton size='large' onClick={()=>navigate('/')} sx={{marginRight: 2}}>
+          <IconButton size='large' onClick={()=>{setSelectedCommunity(null);navigate('/')}} sx={{marginRight: 2}}>
             <Home />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            media-sharing-service
+            media-sharing-service{selectedCommunity && ` > ${selectedCommunity.name}`}
           </Typography>
           {
             user

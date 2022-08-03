@@ -23,4 +23,9 @@ export type Community = {
     createdAt: string
 }
 
+export type Album = {
+    id: number,
+    name: string
+}
+
 export type OAuth2Provider = 'discord' | 'google' | 'github'

@@ -1,42 +1,27 @@
 import { GitHub } from "@mui/icons-material"
-import { Avatar, Box, Button, CircularProgress, Divider, IconButton, List, ListItem, ListItemIcon, Tooltip, Typography } from "@mui/material"
-import { useContext, useEffect, useState } from "react"
-import { getUserCommunities } from "../api"
+import { Avatar, Box, CircularProgress, Divider, IconButton, List, ListItem, ListItemIcon, Tooltip, Typography } from "@mui/material"
+import { useContext, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { CommunityContext } from "../contexts/CommunityContext"
 import { UserContext } from "../contexts/UserContext"
 import { Community } from "../types"
 import { CommunityCreateDialog } from "./CommunityCreateDialog"
 
 export const MyDrawer = () => {
 
-    const [communities, setCommunities] = useState<Community[]|null>(null)
-    const [loadingCommunities, setLoadingCommunities] = useState(false)
     const [createDialogOpen, setCreateDialogOpen] = useState(false)
+    const navigate = useNavigate()
 
     const {user} = useContext(UserContext)
-
-    const fetchCommunities = async () => {
-        if (!user) return
-        setCommunities(null)
-        setLoadingCommunities(true)
-        try {
-            const com = await getUserCommunities()
-            setCommunities(com)
-        } catch (err) {
-
-        }
-        setLoadingCommunities(false)
-    }
+    const {communities, setCommunities, loading: loadingCommunities, selected: selectedCommunity, select: setSelectedCommunity} = useContext(CommunityContext)
 
     const onSuccess = (community: Community) => {
         if (!communities) return
         const newCommunities = [...communities, community]
         setCommunities(newCommunities)
         setCreateDialogOpen(false)
+        navigate(`/communities/${community.id}`)
     }
-
-    useEffect(()=>{
-        fetchCommunities()
-    }, [user])
 
     return <Box sx={{borderColor: '#111', borderWidth: 2, borderStyle: 'solid', borderRightColor: '#333', height: '93.5vh'}}>
         {
@@ -49,7 +34,7 @@ export const MyDrawer = () => {
                             ? <List disablePadding>
                                 {communities.map((community)=><ListItem key={community.id} sx={{paddingLeft: '8px'}}>
                                     <ListItemIcon>
-                                        <IconButton>
+                                        <IconButton sx={{boxShadow: (selectedCommunity === community ? '0px 0px 15px 5px #0ff' : '')}} onClick={()=>{setSelectedCommunity(community);navigate(`/communities/${community.id}`)}}>
                                             <Tooltip title={community.name}>
                                                 <Avatar alt={community.name} src={'fdsfds'} />
                                             </Tooltip>
@@ -69,7 +54,6 @@ export const MyDrawer = () => {
                             </List>
                             : <>
                                 <Typography variant="body2">Failed to fetch communities</Typography>
-                                <Button onClick={fetchCommunities}>retry</Button>
                             </>
                         }
                     </>

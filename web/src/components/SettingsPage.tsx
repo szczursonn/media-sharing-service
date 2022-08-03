@@ -1,4 +1,4 @@
-import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, TextField, Typography } from "@mui/material"
+import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useContext, useEffect, useState } from "react"
 import { getUserConnections, getUserSessions, invalidateSession, removeUserConnection, updateUser } from "../api"
