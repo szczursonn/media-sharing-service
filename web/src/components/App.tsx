@@ -4,19 +4,23 @@ import { Route, Routes } from 'react-router-dom';
 import { HomePage } from './HomePage';
 import { UserContext } from '../contexts/UserContext';
 import { User } from '../types';
-import { getCurrentUser } from '../db';
-import { Backdrop, CircularProgress } from '@mui/material';
+import { getCurrentUser } from '../api';
+import { Backdrop, Box, Button, CircularProgress, Typography } from '@mui/material';
 import { CallbackPage } from './CallbackPage';
 import { NotFoundPage } from './NotFoundPage';
 import { LoginDialog } from './LoginDialog';
 import { SettingsPage } from './SettingsPage';
+import { UnauthenticatedError } from '../errors';
+import { ErrorDialog } from './ErrorDialog';
 
 
 const App = () => {
 
   const [loginOpen, setLoginOpen] = useState(false)
-  const [loadingUser, setLoadingUser] = useState(true)
+  const [loadingUser, setLoadingUser] = useState(false)
   const [user, setUser] = useState<User|null>(null)
+  const [error, setError] = useState<string>('')
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
 
   const contextValue = {
     user,
@@ -25,12 +29,22 @@ const App = () => {
     }
   }
 
-  useEffect(()=>{
+  const loadUser = async () => {
     setLoadingUser(true)
-    getCurrentUser()
-      .then(u=>setUser(u))
-      .catch(e=>e)
-      .finally(()=>setLoadingUser(false))
+    try {
+      const user = await getCurrentUser()
+      setUser(user)
+    } catch (err) {
+      if (!(err instanceof UnauthenticatedError)) {
+        setErrorDialogOpen(true)
+        setError(String(err))
+      }
+    }
+    setLoadingUser(false)
+  }
+
+  useEffect(()=>{
+    loadUser()
   }, [])
 
   return (
@@ -39,7 +53,7 @@ const App = () => {
         <MyAppBar onLoginClick={()=>setLoginOpen(true)} />
         {!loadingUser && <Routes>
           <Route path='/' element={<HomePage />} />
-          <Route path='/settings' element={<SettingsPage />} />
+          <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />} />
           <Route path='/callback/:provider' element={<CallbackPage />} />
           <Route path='*' element={<NotFoundPage />} />
         </Routes>}
@@ -47,9 +61,18 @@ const App = () => {
           <CircularProgress color='inherit' />
         </Backdrop>
         <LoginDialog open={loginOpen} onClose={()=>setLoginOpen(false)}/>
+        <ErrorDialog open={errorDialogOpen} title='Unexpected error' description={`There was an unexpected error when logging in: ${error}`} onClose={()=>setErrorDialogOpen(false)}/>
       </UserContext.Provider>
     </div>
   );
+}
+
+const RequireLoginPage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
+  return <Box sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
+    <Typography variant="h1">401</Typography>
+    <Typography variant="h4">You need to be logged in to access <code>{window.location.pathname}</code></Typography>
+    <Button variant="contained" onClick={onLoginClick}>Login</Button>
+  </Box>
 }
 
 export default App;

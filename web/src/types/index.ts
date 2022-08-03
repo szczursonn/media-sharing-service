@@ -10,4 +10,11 @@ export type UserSession = {
     createdAt: string
 }
 
+export type UserConnection = {
+    foreignId: string,
+    foreignUsername: string,
+    createdAt: string,
+    type: OAuth2Provider
+}
+
 export type OAuth2Provider = 'discord' | 'google' | 'github'

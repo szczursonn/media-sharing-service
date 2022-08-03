@@ -2,6 +2,7 @@ import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography }
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
+import { Home } from '@mui/icons-material';
 
 export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
 
@@ -12,7 +13,10 @@ export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
     return <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={()=>navigate('/')}>
+          <IconButton size='large' onClick={()=>navigate('/')} sx={{marginRight: 2}}>
+            <Home />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             media-sharing-service
           </Typography>
           {
@@ -28,7 +32,7 @@ export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
                 </Tooltip>
               </Box>
             : <Box>
-                <Button color="inherit" onClick={onLoginClick}>Login</Button>
+                <Button size='large' color="inherit" onClick={onLoginClick}>Login</Button>
               </Box>
           }
         </Toolbar>
