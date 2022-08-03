@@ -100,6 +100,13 @@ export class AuthService {
     }
 
     public async removeConnection(userId: number, type: UserConnectionType): Promise<void> {
+
+        const c = await this.dataSource.manager.countBy(UserConnection, {
+            userId,
+            type
+        })
+        if (c === 0) throw new ResourceNotFoundError()
+
         const connections = await this.dataSource.manager.findBy(UserConnection, {
             userId
         })
