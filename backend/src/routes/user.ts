@@ -45,6 +45,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
             const type = req.params.connection
             if (type !== 'discord' && type !== 'google' && type !== 'github') throw new BadRequestError()
             await authService.removeConnection(userId, type)
+            return res.sendStatus(204)
         } catch (err) {
             return genericErrorResponse(res, err)
         }
