@@ -1,6 +1,4 @@
 import { Express, Router } from 'express'
-import { BadRequestError, ResourceNotFoundError } from '../errors'
-import Logger from '../Logger'
 import { AppServices } from '../types'
 import { requiresAuth } from '../middlewares'
 import { genericErrorResponse } from '../utils'
@@ -24,10 +22,9 @@ export const setupInviteRoutes = (app: Express, requiresAuth: requiresAuth, {inv
 
     router.post('/:id', requiresAuth(async (req, res, userId) => {
         try {
-            const inviteId = req.body.inviteId
-            if (typeof inviteId !== 'string') throw new BadRequestError()
-            await inviteService.acceptInvite(inviteId, userId)
-            return res.sendStatus(204)
+            const inviteId = req.params.id
+            const com = await inviteService.acceptInvite(inviteId, userId)
+            return res.json(com)
         } catch (err) {
             return genericErrorResponse(res, err)
         }

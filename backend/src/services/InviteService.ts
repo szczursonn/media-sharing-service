@@ -5,7 +5,7 @@ import { CommunityInvite } from "../models/CommunityInvite";
 import { CommunityMember } from "../models/CommunityMember";
 import { User } from "../models/User";
 import nanoid from "nanoid";
-import { CommunityInvitePublic } from "../types";
+import { CommunityInvitePublic, CommunityPublic } from "../types";
 
 export class InviteService {
     private dataSource: DataSource
@@ -80,7 +80,7 @@ export class InviteService {
         })
     }
 
-    public async acceptInvite(inviteId: string, userId: number): Promise<void> {
+    public async acceptInvite(inviteId: string, userId: number): Promise<CommunityPublic> {
         const invite = await this.dataSource.manager.findOneBy(CommunityInvite, {
             id: inviteId
         })
@@ -121,5 +121,11 @@ export class InviteService {
                 await transaction.save(invite)
             }
         })
+
+        const com = await this.dataSource.manager.findOneByOrFail(Community, {
+            id: invite.communityId
+        })
+
+        return com.public()
     }
 }

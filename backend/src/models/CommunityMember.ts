@@ -1,4 +1,4 @@
-import { CreateDateColumn, Column, Entity, OneToOne, PrimaryColumn } from "typeorm";
+import { CreateDateColumn, Column, Entity, PrimaryColumn, ManyToOne } from "typeorm";
 import { CommunityMemberPublic } from "../types";
 import { Community } from "./Community";
 import { User } from "./User";
@@ -8,13 +8,13 @@ export class CommunityMember {
     @PrimaryColumn()
     communityId!: number
 
-    @OneToOne(()=>Community, {onDelete: 'CASCADE'})
+    @ManyToOne(()=>Community, {onDelete: 'CASCADE'})
     community!: Promise<Community>
 
     @PrimaryColumn()
     userId!: number
 
-    @OneToOne(()=>User, {onDelete: 'CASCADE'})
+    @ManyToOne(()=>User, {onDelete: 'CASCADE'})
     user!: Promise<User>
     
     @Column({default: false})
