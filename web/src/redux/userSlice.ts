@@ -54,12 +54,13 @@ export const fetchCurrentUser = createAsyncThunk('user/fetchUser', async (): Pro
             data: user
         }
     } catch (err) {
+        let e: string
         if (err instanceof AppError) {
-            err = err.type
-        } else err = String(err)
+            e = err.type
+        } else e = String(err)
         
         return {
-            err,
+            err: e,
             data: null
         } as any
     }

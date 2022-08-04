@@ -74,11 +74,12 @@ export const fetchCommunities = createAsyncThunk('community/fetchCommunities', a
             data: communities
         }
     } catch (err) {
+        let e: string
         if (err instanceof AppError) {
-            err = err.type
-        } else err = String(err)
+            e = err.type
+        } else e = String(err)
         return {
-            err,
+            err: e,
             data: null
         } as any
     }
@@ -92,11 +93,12 @@ export const createCommunity = createAsyncThunk('community/createCommunity', asy
             data: com
         }
     } catch (err) {
+        let e: string
         if (err instanceof AppError) {
-            err = err.type
-        } else err = String(err)
+            e = err.type
+        } else e = String(err)
         return {
-            err,
+            err: e,
             data: null
         } as any
     }
