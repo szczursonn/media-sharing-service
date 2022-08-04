@@ -72,8 +72,7 @@ export const setupUserRoutes = (app: Express, requiresAuth: requiresAuth, {userS
 
     router.patch('/@me', requiresAuth(async (req, res, userId) => {
         try {
-            const newUsername = typeof req.body.userame === 'string' ? req.body.username as string : undefined
-
+            const newUsername = typeof req.body.username === 'string' ? req.body.username as string : undefined
             const user = await userService.modifyUser(userId, {username: newUsername})
             return res.json(user)
         } catch (err) {
