@@ -33,7 +33,7 @@ const main = async () => {
     }
 
     const dataSource = await createDataSource()
-    Logger.info(`Connected to database (${dataSource.driver.options.type})`)
+    Logger.info(`Connected to database (type: ${dataSource.driver.options.type})`)
     
     const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
         ? new DiscordOAuth2Provider({
@@ -43,17 +43,20 @@ const main = async () => {
         })
         : undefined
     if (!discordOAuth2Provider) Logger.warn('Discord OAuth2 configuration missing, will be unavailable')
+    else Logger.info('Discord OAuth2 OK!')
 
     const googleOAuth2Provider = (config.google.clientId && config.google.clientSecret && config.google.redirectUri)
         ? new GoogleOAuth2Provider(config.google.clientId, config.google.clientSecret, config.google.redirectUri)
         : undefined
     if (!googleOAuth2Provider) Logger.warn('Google OAuth2 configuration missing, will be unavailable')
+    else Logger.info('Google OAuth2 OK!')
 
     const githubOAuth2Provider = (config.github.clientId && config.github.clientSecret && config.github.redirectUri)
         ? new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)
         : undefined
     if (!githubOAuth2Provider) Logger.warn('Github OAuth2 configuration missing, will be unavailable')
-    
+    else Logger.info('Github OAuth2 OK!')
+
     let mediaStorage: MediaStorage
 
     switch (config.mediaStorage.type) {
@@ -63,7 +66,7 @@ const main = async () => {
                 process.exit(-1)
             }
             mediaStorage = new GCPMediaStorage(new Storage(), config.mediaStorage.googleBucketName)
-            Logger.info('Initialized GCP Media Storage')
+            Logger.info(`Initialized GCP Media Storage (bucket: ${config.mediaStorage.googleBucketName})`)
             break
         case 'local':
             if (config.mediaStorage.localDirectory === undefined) {
@@ -71,7 +74,7 @@ const main = async () => {
                 process.exit(-1)
             }
             mediaStorage = new LocalMediaStorage(config.mediaStorage.localDirectory)
-            Logger.info('Initialized Local Media Storage')
+            Logger.info(`Initialized Local Media Storage (directory: ${config.mediaStorage.localDirectory})`)
             break
         case 'mock':
             mediaStorage = new MockMediaStorage()
