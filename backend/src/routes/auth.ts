@@ -1,4 +1,5 @@
 import { Express, Router, Request, Response } from 'express'
+import { UAParser } from 'ua-parser-js'
 import { BadRequestError } from '../errors'
 import { requiresAuth } from '../middlewares'
 import { AppServices } from '../types'
@@ -30,7 +31,10 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authS
         const token = extractToken(req)
         try {
             if (!token) {
-                return res.json(await authService.loginOrRegisterWithOAuth2(code, type))
+                const ua = UAParser(req.headers['user-agent'])
+                ua.engine.name
+                const deviceName = `${ua.os.name ? `${ua.os.name} ${ua.os.version}` : ua.ua} ${ua.device.model || ua.browser.name}`
+                return res.json(await authService.loginOrRegisterWithOAuth2(code, type, deviceName))
             } else {
                 const [userId] = await authService.validate(token)
                 await authService.addConnection(userId, code, type)

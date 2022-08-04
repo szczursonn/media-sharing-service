@@ -32,14 +32,14 @@ export class AuthService {
         this.githubOAuth2Provider = githubOAuth2Provider
     }
 
-    public async loginOrRegisterWithOAuth2(code: string, type: UserConnectionType): Promise<AccessToken> {
+    public async loginOrRegisterWithOAuth2(code: string, type: UserConnectionType, deviceName: string): Promise<AccessToken> {
         const oauthProvider = this.getOAuth2Service(type)
 
         const profile = await oauthProvider.exchange(code)
         
         const user = await (await this.dataSource.manager.findOneBy(UserConnection, {foreignId: profile.id}))?.user ?? await this.createUserFromOAuth2(profile, type)
         
-        const token = await this.createSession(user.id)
+        const token = await this.createSession(user.id, deviceName)
 
         return token
     }
@@ -150,9 +150,10 @@ export class AuthService {
         })
     }
 
-    private async createSession(userId: number): Promise<AccessToken> {
+    private async createSession(userId: number, deviceName: string): Promise<AccessToken> {
         const newSession = new Session()
         newSession.userId = userId
+        newSession.deviceName = deviceName
         const session = await this.dataSource.manager.save(newSession)
         
         const payload: TokenPayload = {
