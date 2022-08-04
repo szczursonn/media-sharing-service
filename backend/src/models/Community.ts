@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, JoinTable, OneToOne, ManyToMany, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { CommunityPublic } from "../types";
 import { Album } from "./Album";
 import { CommunityInvite } from "./CommunityInvite";
 import { User } from "./User";
@@ -36,4 +37,13 @@ export class Community {
 
     @CreateDateColumn()
     createdAt!: Date
+
+    public public(): CommunityPublic {
+        return {
+            id: this.id,
+            name: this.name,
+            ownerId: this.ownerId,
+            createdAt: this.createdAt.toISOString()
+        }
+    }
 }

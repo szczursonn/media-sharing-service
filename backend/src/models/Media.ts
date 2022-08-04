@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
-import { MediaType } from "../types";
+import { MediaPublic, MediaType } from "../types";
 import { Album } from "./Album";
 import { User } from "./User";
 
@@ -25,4 +25,13 @@ export class Media {
 
     @CreateDateColumn()
     createdAt!: Date
+
+    public public(): MediaPublic {
+        return {
+            filename: this.filename,
+            authorId: this.authorId,
+            type: this.type,
+            createdAt: this.createdAt.toISOString()
+        }
+    }
 }

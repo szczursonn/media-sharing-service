@@ -3,6 +3,7 @@ import { InsufficientPermissionsError, ResourceNotFoundError } from "../errors";
 import { Album } from "../models/Album";
 import { Community } from "../models/Community";
 import { CommunityMember } from "../models/CommunityMember";
+import { AlbumPublic } from "../types";
 
 export class AlbumService {
     private dataSource: DataSource
@@ -11,7 +12,7 @@ export class AlbumService {
         this.dataSource = dataSource
     }
 
-    public async getByCommunity(communityId: number, getterId: number): Promise<Album[]> {
+    public async getByCommunity(communityId: number, getterId: number): Promise<AlbumPublic[]> {
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
         })
@@ -23,12 +24,14 @@ export class AlbumService {
         })
         if (!member) throw new InsufficientPermissionsError()
 
-        return await this.dataSource.manager.findBy(Album, {
+        const albums = await this.dataSource.manager.findBy(Album, {
             communityId
         })
+
+        return albums.map(a=>a.public())
     }
 
-    public async create(communityId: number, name: string, creatorId: number): Promise<Album> {
+    public async create(communityId: number, name: string, creatorId: number): Promise<AlbumPublic> {
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
         })
@@ -44,10 +47,12 @@ export class AlbumService {
         album.name = name
         album.communityId = communityId
 
-        return await this.dataSource.manager.save(album)
+        const saved = await this.dataSource.manager.save(album)
+
+        return saved.public()
     }
 
-    public async rename(albumId: number, newName: string, getterId: number): Promise<Album> {
+    public async rename(albumId: number, newName: string, getterId: number): Promise<AlbumPublic> {
         const album = await this.dataSource.manager.findOneBy(Album, {
             id: albumId
         })
@@ -60,7 +65,10 @@ export class AlbumService {
         if (!member || !member.canUpload) throw new InsufficientPermissionsError()
 
         album.name = newName
-        return await this.dataSource.manager.save(album)
+
+        const saved = await this.dataSource.manager.save(album)
+
+        return saved.public()
     }
 
     public async remove(albumId: number, deleterId: number): Promise<void> {

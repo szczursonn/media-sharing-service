@@ -3,6 +3,7 @@ import { Community } from "../models/Community"
 import { DataSource } from "typeorm";
 import { CommunityMember } from "../models/CommunityMember";
 import { User } from "../models/User";
+import { CommunityMemberPublic, CommunityPublic } from "../types";
 
 export class CommunityService {
     private dataSource: DataSource
@@ -11,29 +12,36 @@ export class CommunityService {
         this.dataSource = dataSource
     }
 
-    public async getCommunityById(communityId: number): Promise<Community> {
+    public async getCommunityById(communityId: number): Promise<CommunityPublic> {
         const com = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
         })
         if (!com) throw new ResourceNotFoundError()
-        return com
+        return com.public()
     }
 
-    public async getUserCommunities(userId: number): Promise<Community[]> {
+    public async getUserCommunities(userId: number): Promise<CommunityPublic[]> {
         const user = await this.dataSource.manager.findOneBy(User, {
             id: userId
         })
         if (!user) throw new ResourceNotFoundError()
-        return await user.communities
+
+        const communities = await user.communities
+
+        return communities.map(c=>c.public())
     }
 
-    public async getCommunityMembers(communityId: number, getterId: number): Promise<any> {
+    public async getCommunityMembers(communityId: number, getterId: number): Promise<CommunityMemberPublic[]> {
         const members = await this.dataSource.manager.findBy(CommunityMember, {
             communityId
         })
         if (!members.map(m=>m.userId).includes(getterId)) throw new InsufficientPermissionsError()
-        // TODO: return members with user info inside
-        return members
+        
+        // TODO: better query
+
+        const mem = await Promise.all(members.map(m=>m.public()))
+
+        return mem
     }
 
     public async kickUser(communityId: number, userId: number, kickerId: number): Promise<void> {
@@ -51,7 +59,7 @@ export class CommunityService {
         if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
     }
 
-    public async createCommunity(ownerId: number, name: string): Promise<Community> {
+    public async createCommunity(ownerId: number, name: string): Promise<CommunityPublic> {
         return await this.dataSource.transaction(async transaction => {
             const com = new Community()
             com.ownerId = ownerId
@@ -64,7 +72,7 @@ export class CommunityService {
             comMember.canUpload = true
             await transaction.save(comMember)
             
-            return savedCommunity
+            return savedCommunity.public()
         })
     }
 }

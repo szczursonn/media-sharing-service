@@ -5,6 +5,7 @@ import { CommunityInvite } from "../models/CommunityInvite";
 import { CommunityMember } from "../models/CommunityMember";
 import { User } from "../models/User";
 import nanoid from "nanoid";
+import { CommunityInvitePublic } from "../types";
 
 export class InviteService {
     private dataSource: DataSource
@@ -13,7 +14,7 @@ export class InviteService {
         this.dataSource = dataSource
     }
 
-    public async getInvite(inviteId: string) {
+    public async getInvite(inviteId: string): Promise<CommunityInvitePublic> {
         const invite = await this.dataSource.manager.findOneBy(CommunityInvite, {
             id: inviteId
         })
@@ -23,14 +24,10 @@ export class InviteService {
             id: invite.inviterId
         })
         
-        return {
-            invite,
-            community,
-            user
-        }
+        return await invite.public()
     }
 
-    public async getCommunityInvites(communityId: number, getterId: number) {
+    public async getCommunityInvites(communityId: number, getterId: number): Promise<CommunityInvitePublic[]> {
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
         })
@@ -40,10 +37,13 @@ export class InviteService {
 
         const invites = await community.invites
 
-        return invites
+        // TODO: better query
+        const i = await Promise.all(invites.map(i=>i.public()))
+
+        return i
     }
 
-    public async createInvite(communityId: number, inviterId: number, validTime: number | null, maxUses: number | null): Promise<CommunityInvite> {
+    public async createInvite(communityId: number, inviterId: number, validTime: number | null, maxUses: number | null): Promise<CommunityInvitePublic> {
 
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
@@ -59,7 +59,9 @@ export class InviteService {
         inv.expiresAt = validTime === null ? undefined : new Date(Date.now()+validTime)
         inv.maxUses = maxUses ?? undefined
 
-        return await this.dataSource.manager.save(inv)
+        const saved = await this.dataSource.manager.save(inv)
+
+        return await saved.public()
     }
 
     public async removeInvite(inviteId: string, removerId: number): Promise<void> {

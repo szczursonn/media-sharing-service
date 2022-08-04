@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
-import { UserConnectionType } from "../types";
+import { UserConnectionPublic, UserConnectionType } from "../types";
 import { User } from "./User";
 
 @Entity()
@@ -21,5 +21,14 @@ export class UserConnection {
 
     @CreateDateColumn()
     createdAt!: Date
+
+    public public(): UserConnectionPublic {
+        return {
+            foreignId: this.foreignId,
+            foreignUsername: this.foreignUsername,
+            type: this.type,
+            createdAt: this.createdAt.toISOString()
+        }
+    }
 
 }

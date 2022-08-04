@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { UserPublic } from "../types";
 import { Community } from "./Community";
 import { Session } from "./Session";
 import { UserConnection } from "./UserConnection";
@@ -33,5 +34,14 @@ export class User {
 
     @CreateDateColumn()
     createdAt!: Date
+
+    public public(): UserPublic {
+        return {
+            id: this.id,
+            username: this.username,
+            avatarUrl: this.avatarUrl ?? null,
+            createdAt: this.createdAt.toISOString()
+        }
+    }
 
 }

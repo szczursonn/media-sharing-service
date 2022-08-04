@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { SessionPublic } from "../types";
 import { User } from "./User";
 
 @Entity()
@@ -17,5 +18,13 @@ export class Session {
 
     @CreateDateColumn()
     createdAt!: Date
+
+    public public(): SessionPublic {
+        return {
+            id: this.id,
+            deviceName: this.deviceName ?? null,
+            createdAt: this.createdAt.toISOString()
+        }
+    }
 
 }

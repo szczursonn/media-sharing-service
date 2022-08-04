@@ -145,6 +145,6 @@ describe('OAuth2 tests', () => {
         const res4 = await supertest(app)
             .get('/auth/sessions')
             .set('Authorization', `Bearer: ${token1}`)
-            .expect(403)
+            .expect(401)
     })
 })

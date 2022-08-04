@@ -1,4 +1,5 @@
-import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { CommunityInvitePublic } from "../types";
 import { Community } from "./Community";
 import { User } from './User';
 
@@ -15,10 +16,10 @@ export class CommunityInvite {
     @Column()
     communityId!: number
 
-    @OneToOne(()=>User, {onDelete: 'SET NULL', nullable: true})
+    @ManyToOne(()=>User, {onDelete: 'SET NULL', nullable: true})
     inviter!: Promise<User>
 
-    @Column()
+    @Column({nullable: true})
     inviterId?: number
 
     @Column({nullable: true})
@@ -29,4 +30,14 @@ export class CommunityInvite {
 
     @Column({nullable: true})
     expiresAt?: Date
+
+    public async public(): Promise<CommunityInvitePublic> {
+        return {
+            id: this.id,
+            inviter: (await this.inviter)?.public() ?? null,
+            community: (await this.community).public(),
+            maxUses: this.maxUses ?? null,
+            expiresAt: this.expiresAt?.toISOString() ?? null
+        }
+    }
 }

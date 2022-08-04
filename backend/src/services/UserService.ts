@@ -1,12 +1,10 @@
-import { AlreadyAMemberError, CannotRemoveLastUserConnectionError, OwnerCannotLeaveCommunityError } from "../errors";
+import { OwnerCannotLeaveCommunityError } from "../errors";
 import { User } from "../models/User";
 import { Community } from "../models/Community";
-import { UserConnection } from "../models/UserConnection";
-import { UserConnectionType } from "../types";
+import { UserPublic } from "../types";
 import { ResourceNotFoundError } from "../errors"
 import { CommunityMember } from "../models/CommunityMember";
 import { DataSource } from "typeorm";
-import { CommunityInvite } from "../models/CommunityInvite";
 
 export class UserService {
     private dataSource: DataSource
@@ -15,12 +13,12 @@ export class UserService {
         this.dataSource = dataSource
     }
 
-    public async getUserById(userId: number): Promise<User> {
+    public async getUserById(userId: number): Promise<UserPublic> {
         const user = await this.dataSource.manager.findOneBy(User, {
             id: userId
         })
         if (!user) throw new ResourceNotFoundError()
-        return user
+        return user.public()
     }
 
     public async removeUser(userId: number): Promise<void> {
@@ -30,15 +28,17 @@ export class UserService {
         if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
     }
 
-    public async modifyUser(userId: number, {username}: {username?: string}): Promise<User> {
+    public async modifyUser(userId: number, {username}: {username?: string}): Promise<UserPublic> {
         const user = await this.dataSource.manager.findOneBy(User, {
             id: userId
         })
         if (!user) throw new ResourceNotFoundError()
 
         if (username) user.username = username
-        
-        return await this.dataSource.manager.save(user)
+
+        const saved = await this.dataSource.manager.save(user)
+
+        return saved.public()
     }
 
     public async leaveCommunity(userId: number, communityId: number): Promise<void> {

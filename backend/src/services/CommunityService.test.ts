@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm"
 import { createTestDataSource } from "../createDataSource"
 import { ResourceNotFoundError } from "../errors"
+import { CommunityMember } from "../models/CommunityMember"
 import { CommunityService } from "./CommunityService"
 
 describe('CommunityService tests', () => {
@@ -28,9 +29,12 @@ describe('CommunityService tests', () => {
     it('allows to create community', async () => {
         const community = await communityService.createCommunity(4, 'gigacommunity')
 
-        const users = await community.users
+        const members = await dataSource.manager.findBy(CommunityMember, {
+            communityId: community.id,
+            userId: 4
+        })
 
-        expect(users.length).toBe(1)
+        expect(members.length).toBe(1)
         expect(community.ownerId).toBe(4)
     })
 

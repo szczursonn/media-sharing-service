@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 import { Media } from "../models/Media";
-import { MediaType } from "../types";
+import { MediaPublic, MediaType } from "../types";
 import { fromBuffer } from "file-type";
 import { Album } from "../models/Album";
 import { InsufficientPermissionsError, ResourceNotFoundError } from "../errors";
@@ -21,7 +21,7 @@ export class MediaService {
         this.storage = storage
     }
 
-    public async upload(albumId: number, filename: string, content: Buffer, uploaderId: number): Promise<Media> {
+    public async upload(albumId: number, filename: string, content: Buffer, uploaderId: number): Promise<MediaPublic> {
         let type: MediaType
 
         const album = await this.dataSource.manager.findOneBy(Album, {
@@ -42,7 +42,7 @@ export class MediaService {
         else if (filetype.mime.startsWith('video')) type = 'video'
         else throw new Error()
 
-        return await this.dataSource.transaction(async (transaction) => {
+        const media = await this.dataSource.transaction(async (transaction) => {
 
             let newFilename = filename
             if (await transaction.countBy(Media, {filename: newFilename, albumId})) {
@@ -65,6 +65,8 @@ export class MediaService {
 
             return saved
         })
+
+        return media.public()
     }
 
     public async remove(albumId: number, filename: string, removerId: number): Promise<void> {

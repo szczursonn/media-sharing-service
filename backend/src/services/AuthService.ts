@@ -2,7 +2,7 @@ import { InvalidSessionError, ResourceNotFoundError, OAuth2ProviderUnavailableEr
 import { Session } from "../models/Session";
 import { User } from "../models/User";
 import { UserConnection } from "../models/UserConnection";
-import { AccessToken, OAuth2Profile, TokenPayload, UserConnectionType } from "../types";
+import { AccessToken, OAuth2Profile, SessionPublic, TokenPayload, UserConnectionPublic, UserConnectionType } from "../types";
 import jwt from 'jsonwebtoken'
 import { validateTokenPayload } from "../types/validators";
 import { DataSource } from "typeorm";
@@ -44,7 +44,7 @@ export class AuthService {
         return token
     }
 
-    public async addConnection(userId: number, code: string, type: UserConnectionType): Promise<UserConnection> {
+    public async addConnection(userId: number, code: string, type: UserConnectionType): Promise<UserConnectionPublic> {
         const oauthProvider = this.getOAuth2Service(type)
 
         const profile = await oauthProvider.exchange(code)
@@ -55,7 +55,9 @@ export class AuthService {
         connection.type = type
         connection.userId = userId
         
-        return await this.dataSource.manager.save(connection)
+        const saved = await this.dataSource.manager.save(connection)
+
+        return saved.public()
     }
 
     public async validate(token: string): Promise<[number, number]> {
@@ -70,13 +72,16 @@ export class AuthService {
         return [payload.userId, payload.sessionId]
     }
 
-    public async getUserSessions(userId: number): Promise<Session[]> {
-        return await this.dataSource.manager.findBy(Session, {
+    public async getUserSessions(userId: number): Promise<SessionPublic[]> {
+
+        const sessions = await this.dataSource.manager.findBy(Session, {
             userId
         })
+
+        return sessions.map(s=>s.public())
     }
 
-    public async invalidateSession(sessionId: number, userId: number) {
+    public async invalidateSession(sessionId: number, userId: number): Promise<void> {
         const session = await this.dataSource.manager.findOneBy(Session, {
             userId,
             id: sessionId
@@ -91,12 +96,12 @@ export class AuthService {
         })
     }
 
-    public async getUserConnections(userId: number): Promise<UserConnection[]> {
+    public async getUserConnections(userId: number): Promise<UserConnectionPublic[]> {
         const connections = await this.dataSource.manager.findBy(UserConnection, {
             userId
         })
         if (connections.length === 0) throw new ResourceNotFoundError()
-        return connections
+        return connections.map(c=>c.public())
     }
 
     public async removeConnection(userId: number, type: UserConnectionType): Promise<void> {

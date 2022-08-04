@@ -20,7 +20,7 @@ describe('InviteService tests', () => {
 
     it('allows to get info about invite', async () => {
         const x = await inviteService.getInvite('abc')
-        expect(x.user === null).toBe(false)
+        expect(x.inviter === null).toBe(false)
     })
 
     it('disallows to get info about non-existent invite', async () => {
@@ -44,8 +44,9 @@ describe('InviteService tests', () => {
     it('allows to create invite', async () => {
         const invite = await inviteService.createInvite(2, 1, 60000, 3)
         expect(invite.maxUses).toBe(3)
-        expect(invite.inviterId).toBe(1)
-        expect(invite.communityId).toBe(2)
+        expect(invite.inviter).toBeDefined()
+        expect(invite.inviter?.id).toBe(1)
+        expect(invite.community.id).toBe(2)
     })
 
     it('disallows to create invite for non-existent community', async () => {

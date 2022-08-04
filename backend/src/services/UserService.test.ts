@@ -61,14 +61,22 @@ describe('UserService tests', () => {
     it('allows user to leave a guild as a member', async () => {
         await userService.leaveCommunity(2, 1)
 
-        const x = (await (await userService.getUserById(2)).communities).map(c=>c.id)
-        expect(x.includes(1)).toBe(false)
+        const c = await dataSource.manager.countBy(CommunityMember, {
+            userId: 2,
+            communityId: 1
+        })
+        
+        expect(c).toBe(0)
     })
 
     it('disallows user to leave a guild as owner', async () => {
         await expect(userService.leaveCommunity(3, 1)).rejects.toThrowError(OwnerCannotLeaveCommunityError)
 
-        const x = (await (await userService.getUserById(3)).communities).map(c=>c.id)
-        expect(x.includes(1)).toBe(true)
+        const c = await dataSource.manager.countBy(CommunityMember, {
+            userId: 3,
+            communityId: 1
+        })
+        
+        expect(c).toBe(1)
     })
 })

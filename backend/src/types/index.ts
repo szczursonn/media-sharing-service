@@ -1,3 +1,4 @@
+import { Media } from '../models/Media'
 import { AlbumService } from '../services/AlbumService'
 import { AuthService } from '../services/AuthService'
 import { CommunityService } from '../services/CommunityService'
@@ -36,53 +37,56 @@ export type MediaType = 'image' | 'video'
 
 // WIP - TYPES TO BE RETURNED FROM SERVICES INSTEAD OF TYPEORM CLASSES
 
-type User = {
+export type UserPublic = {
     id: number
     username: string
     avatarUrl: string | null
-    connections: UserConnection[] | null
-    sessions: Session[] | null
-    createdAt: Date
+    createdAt: string
 }
 
-type Community = {
+export type CommunityPublic = {
     id: number
     name: string
     ownerId: number
-    createdAt: Date
+    createdAt: string
 }
 
-type UserConnection = {
+export type UserConnectionPublic = {
     type: UserConnectionType
     foreignId: string
     foreignUsername: string
-    createdAt: Date
+    createdAt: string
 }
 
-type Session = {
+export type SessionPublic = {
     id: number
-    deviceName: string
-    createdAt: Date
+    deviceName: string|null
+    createdAt: string
 }
 
-type CommunityMember = {
-    user: User
+export type CommunityMemberPublic = {
+    user: UserPublic
     canUpload: boolean
-    joinedAt: Date
+    joinedAt: string
 }
 
-// GET /invites/:id
-type CommunityInvitePublicInfo = {
+export type CommunityInvitePublic = {
     id: string
-    inviter: User | null
-    community: Community
-}
-
-// GET /communities/:communityId/invites
-type CommunityInvite = {
-    id: string
-    inviter: User | null
-    uses: number
+    inviter: UserPublic | null
+    community: CommunityPublic
     maxUses: number | null
-    expiresAt: Date | null
+    expiresAt: string | null
+}
+
+export type AlbumPublic = {
+    id: number,
+    name: string,
+    cover: null
+}
+
+export type MediaPublic = {
+    filename: string,
+    authorId: number,
+    type: MediaType,
+    createdAt: string
 }
