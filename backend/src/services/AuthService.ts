@@ -39,7 +39,7 @@ export class AuthService {
         
         const user = await (await this.dataSource.manager.findOneBy(UserConnection, {foreignId: profile.id}))?.user ?? await this.createUserFromOAuth2(profile, type)
         
-        const [_, token] = await this.createSession(user.id)
+        const token = await this.createSession(user.id)
 
         return token
     }
@@ -150,7 +150,7 @@ export class AuthService {
         })
     }
 
-    private async createSession(userId: number): Promise<[Session, AccessToken]> {
+    private async createSession(userId: number): Promise<AccessToken> {
         const newSession = new Session()
         newSession.userId = userId
         const session = await this.dataSource.manager.save(newSession)
@@ -161,7 +161,10 @@ export class AuthService {
         }
         const token = jwt.sign(payload, this.jwtSecret)
 
-        return [session, {token}]
+        return {
+            token,
+            sessionId: session.id
+        }
     }
 
     private getOAuth2Service(type: UserConnectionType): OAuth2Provider {

@@ -1,4 +1,3 @@
-import { Media } from '../models/Media'
 import { AlbumService } from '../services/AlbumService'
 import { AuthService } from '../services/AuthService'
 import { CommunityService } from '../services/CommunityService'
@@ -7,7 +6,8 @@ import { MediaService } from '../services/MediaService'
 import { UserService } from '../services/UserService'
 
 export type AccessToken = {
-    token: string
+    token: string,
+    sessionId: number
 }
 
 export type OAuth2Profile = {
