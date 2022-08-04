@@ -1,129 +1,76 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { MyAppBar } from './MyAppBar';
 import { Route, Routes } from 'react-router-dom';
 import { HomePage } from './HomePage';
-import { UserContext } from '../contexts/UserContext';
-import { Community, User } from '../types';
-import { getCurrentUser, getUserCommunities } from '../api';
 import { Backdrop, Box, Button, CircularProgress, Grid, Typography } from '@mui/material';
 import { CallbackPage } from './CallbackPage';
 import { NotFoundPage } from './NotFoundPage';
 import { LoginDialog } from './LoginDialog';
 import { SettingsPage } from './SettingsPage';
-import { UnauthenticatedError } from '../errors';
 import { ErrorDialog } from './ErrorDialog';
 import { MyDrawer } from './MyDrawer';
-import { CommunityContext } from '../contexts/CommunityContext';
 import { CommunityPage } from './CommunityPage';
 import { InvitePage } from './InvitePage';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { openLoginDialog } from '../redux/loginSlice';
+import { clearError, fetchCurrentUser } from '../redux/userSlice';
+import { fetchCommunities } from '../redux/communitySlice';
 
 
 const App = () => {
 
-  const [loginOpen, setLoginOpen] = useState(false)
-  const [loadingUser, setLoadingUser] = useState(false)
-  const [user, setUser] = useState<User|null>(null)
-  const [loadingCommunities, setLoadingCommunities] = useState(false)
-  const [communities, setCommunities] = useState<Community[]|null>(null)
-  const [error, setError] = useState<string>('')
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
-  const [selectedCommunity, setSelectedCommunity] = useState<Community|null>(null)
+  const dispatch = useAppDispatch()
+  const user = useAppSelector(state=>state.userReducer.user)
+  const loadingUser = useAppSelector(state=>state.userReducer.loading)
+  const errorUser = useAppSelector(state=>state.userReducer.error)
 
-  const userContextValue = {
-    user,
-    setUser: (u: User|null)=>{
-      setUser(u)
-    },
-    loading: loadingUser
-  }
-
-  const communityContextValue = {
-    communities,
-    setCommunities: (c: Community[]|null)=>{
-      setCommunities(c)
-      if (selectedCommunity && c && !c.includes(selectedCommunity)) {
-        setSelectedCommunity(null)
-      }
-      if (!c) {
-        setSelectedCommunity(null)
-      }
-    },
-    loading: loadingCommunities,
-    selected: selectedCommunity,
-    select: (c: Community|null)=>{
-      if (c===null || communities?.includes(c)) setSelectedCommunity(c)
-    }
-  }
-
-  const loadUser = async () => {
-    setLoadingUser(true)
-    try {
-      const user = await getCurrentUser()
-      setUser(user)
-    } catch (err) {
-      if (!(err instanceof UnauthenticatedError)) {
-        setErrorDialogOpen(true)
-        setError(String(err))
-      }
-    }
-    setLoadingUser(false)
-  }
-
-  const loadCommunities = async () => {
-    setCommunities(null)
-    setSelectedCommunity(null)
-    setLoadingCommunities(true)
-    try {
-        const com = await getUserCommunities()
-        setCommunities(com)
-    } catch (err) {
-
-    }
-    setLoadingCommunities(false)
-}
+  const communities = useAppSelector(state=>state.communityReducer.communities)
+  const loadingCommunities = useAppSelector(state=>state.communityReducer.loading)
 
   useEffect(()=>{
-    loadUser().then(loadCommunities)
+    dispatch(fetchCurrentUser())
   }, [])
 
   useEffect(()=>{
-    if (user && !communities && !loadingCommunities) loadCommunities()
+    if (user && !communities && !loadingCommunities) dispatch(fetchCommunities())
   }, [user])
 
   return (
     <div className="App">
-      <UserContext.Provider value={userContextValue}>
-        <CommunityContext.Provider value={communityContextValue}>
-          <MyAppBar onLoginClick={()=>setLoginOpen(true)} />
-          <Grid container>
-            <Grid item xs={0.5}>
-              <MyDrawer />
-            </Grid>
-            <Grid item xs={11.5}>
-              <Routes>
-                <Route path='/' element={<HomePage />} />
-                <Route path='/communities/:communityId' element={user ? <CommunityPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />}/>
-                <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />} />
-                <Route path='/i/:inviteId' element={<InvitePage onLoginClick={()=>setLoginOpen(true)} />} />
-                <Route path='/callback/:provider' element={!loadingUser ? <CallbackPage /> : <></>} />
-                <Route path='*' element={<NotFoundPage />} />
-              </Routes>
-            </Grid>
-          </Grid>
-          <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer+1}} open={loadingUser}>
-            <CircularProgress color='inherit' />
-          </Backdrop>
-          <LoginDialog open={loginOpen} onClose={()=>setLoginOpen(false)}/>
-          <ErrorDialog open={errorDialogOpen} title='Unexpected error' description={`There was an unexpected error when logging in: ${error}`} onClose={()=>setErrorDialogOpen(false)}/>
-        </CommunityContext.Provider>
-      </UserContext.Provider>
+      <MyAppBar />
+      <Grid container>
+        <Grid item xs={0.5}>
+          <MyDrawer />
+        </Grid>
+        <Grid item xs={11.5}>
+          <Routes>
+            <Route path='/' element={<HomePage />} />
+            <Route path='/communities/:communityId' element={user ? <CommunityPage /> : <RequireLoginPage />}/>
+            <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage />} />
+            <Route path='/i/:inviteId' element={<InvitePage />} />
+            <Route path='/callback/:provider' element={!loadingUser ? <CallbackPage /> : <></>} />
+            <Route path='*' element={<NotFoundPage />} />
+          </Routes>
+        </Grid>
+      </Grid>
+      <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer+1}} open={loadingUser}>
+        <CircularProgress color='inherit' />
+      </Backdrop>
+      <LoginDialog />
+      <ErrorDialog open={errorUser !== null} title='Unexpected error' description={`There was an unexpected error when logging in: ${errorUser}`} onClose={()=>dispatch(clearError())}/>
     </div>
   );
 }
 
-const RequireLoginPage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
+const RequireLoginPage = () => {
 
-  const {loading} = useContext(UserContext)
+  const dispatch = useAppDispatch()
+
+  const onLoginClick = () => {
+    dispatch(openLoginDialog())
+  }
+
+  const loading = useAppSelector(state=>state.userReducer.loading)
 
   return <Box sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
     {!loading && <>

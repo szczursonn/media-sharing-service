@@ -1,3 +1,5 @@
+import { AppErrorType } from "../errors"
+
 export type User = {
     id: number,
     username: string,
@@ -50,6 +52,11 @@ export type Member = {
     user: User,
     canUpload: boolean,
     joinedAt: string
+}
+
+export type ThunkResult<T> = {
+    err: AppErrorType|null,
+    data: T|null
 }
 
 export type OAuth2Provider = 'discord' | 'google' | 'github'

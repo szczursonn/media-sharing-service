@@ -1,31 +1,44 @@
 import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
-import { UserContext } from '../contexts/UserContext';
 import { Home } from '@mui/icons-material';
-import { CommunityContext } from '../contexts/CommunityContext';
 import { invalidateCurrentSession } from '../api';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { openLoginDialog } from '../redux/loginSlice';
+import { setCurrentUser } from '../redux/userSlice';
+import { selectCommunity } from '../redux/communitySlice';
 
-export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
+export const MyAppBar = () => {
+
+    const dispatch = useAppDispatch()
 
     const navigate = useNavigate()
 
-    const {user, setUser} = useContext(UserContext)
+    const user = useAppSelector(state=>state.userReducer.user)
 
-    const {selected: selectedCommunity, select: setSelectedCommunity} = useContext(CommunityContext)
+    const selectedCommunity = useAppSelector(state=>state.communityReducer.selected)
     const [logoutInProgress, setLogoutInProgress] = useState(false)
+
+    const onLoginClick = () => {
+      dispatch(openLoginDialog())
+    }
 
     const onLogoutClick = async () => {
       setLogoutInProgress(true)
       await invalidateCurrentSession()
-      setUser(null)
+      dispatch(setCurrentUser(null))
       setLogoutInProgress(false)
+    }
+    
+    const onHomeClick = () => {
+      dispatch(selectCommunity(null))
+      navigate('/')
     }
   
     return <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton size='large' onClick={()=>{setSelectedCommunity(null);navigate('/')}} sx={{marginRight: 2}}>
+          <IconButton size='large' onClick={onHomeClick} sx={{marginRight: 2}}>
             <Home />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>

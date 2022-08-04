@@ -1,9 +1,9 @@
-import { CannotRemoveLastUserConnectionError, InvalidOAuth2CodeError, ResourceNotFoundError, UnauthenticatedError, UnavailableOAuth2ProviderError } from "./errors"
+import { AppError } from "./errors"
 import { Album, Community, Invite, Member, OAuth2Provider, User, UserConnection, UserSession } from "./types"
 
 export const getCurrentUser = async (): Promise<User> => {
     const token = localStorage.getItem('token')
-    if (!token) throw new UnauthenticatedError()
+    if (!token) throw new AppError('unauthenticated')
 
     const res = await customFetch('/users/@me', {method: 'GET'})
 
@@ -43,7 +43,7 @@ export const invalidateSession = async (sessionId: number) => {
 export const invalidateCurrentSession = async () => {
     try {
         const sessionId = localStorage.getItem('sessionId')
-        if (!sessionId) throw new Error()
+        if (!sessionId) throw new AppError('unauthenticated')
         await invalidateSession(parseInt(sessionId))
     } catch (err) {
 
@@ -118,7 +118,7 @@ const customFetch = async (uri: string, {method, auth=true, body=undefined}: {me
 
     const token = localStorage.getItem('token')
 
-    if (auth && !token) throw new UnauthenticatedError()
+    if (auth && !token) throw new AppError('unauthenticated')
 
     const headers: any = auth ? {
         'Content-Type': 'application/json',
@@ -138,12 +138,12 @@ const customFetch = async (uri: string, {method, auth=true, body=undefined}: {me
         
         if (error === 'unauthenticated') {
             localStorage.removeItem('token')
-            throw new UnauthenticatedError()
+            throw new AppError('unauthenticated')
         }
-        if (error === 'invalid_oauth2_code') throw new InvalidOAuth2CodeError()
-        if (error === 'oauth2_provider_unavailable') throw new UnavailableOAuth2ProviderError()
-        if (error === 'cannot_remove_last_connection') throw new CannotRemoveLastUserConnectionError()
-        if (error === 'resource_not_found') throw new ResourceNotFoundError()
+        if (error === 'invalid_oauth2_code') throw new AppError('invalid_oauth2_code')
+        if (error === 'oauth2_provider_unavailable') throw new AppError('unavailable_oauth2_provider')
+        if (error === 'cannot_remove_last_connection') throw new AppError('cannot_remove_last_user_connection')
+        if (error === 'resource_not_found') throw new AppError('resource_not_found')
         
         throw new Error(error)
     }

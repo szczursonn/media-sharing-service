@@ -3,17 +3,27 @@ import githubIcon from '../svg/githubIcon.svg'
 import discordIcon from '../svg/discordIcon.svg'
 import googleIcon from '../svg/googleIcon.svg'
 import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL } from "../constants"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { closeLoginDialog } from "../redux/loginSlice"
 
-export const LoginDialog = ({open, onClose}: {open: boolean, onClose: ()=>void}) => {
+export const LoginDialog = () => {
 
-    return <Dialog onClose={onClose} open={open}>
-      <DialogTitle>Login/Register with OAuth2 Provider</DialogTitle>
-      <Stack marginBottom={4}>
-        <LoginOption textColor="#fff" bgColor="#7289da" iconSrc={discordIcon} name='discord' onSelect={()=>window.location.href = DISCORD_OAUTH_URL} />
-        <LoginOption textColor="#111" bgColor="#fff" iconSrc={googleIcon} name='google' onSelect={()=>{}} />
-        <LoginOption textColor="#fff" bgColor="#111" iconSrc={githubIcon} name='github' onSelect={()=>window.location.href = GITHUB_OAUTH_URL} />
-      </Stack>
-    </Dialog>
+  const dispatch = useAppDispatch()
+
+  const open = useAppSelector(state=>state.loginReducer.open)
+  
+  const onClose = () => {
+    dispatch(closeLoginDialog())
+  }
+
+  return <Dialog onClose={onClose} open={open}>
+    <DialogTitle>Login/Register with OAuth2 Provider</DialogTitle>
+    <Stack marginBottom={4}>
+      <LoginOption textColor="#fff" bgColor="#7289da" iconSrc={discordIcon} name='discord' onSelect={()=>window.location.href = DISCORD_OAUTH_URL} />
+      <LoginOption textColor="#111" bgColor="#fff" iconSrc={googleIcon} name='google' onSelect={()=>{}} />
+      <LoginOption textColor="#fff" bgColor="#111" iconSrc={githubIcon} name='github' onSelect={()=>window.location.href = GITHUB_OAUTH_URL} />
+    </Stack>
+  </Dialog>
 }
 
 const LoginOption = ({textColor, bgColor, iconSrc, name, onSelect}: {textColor: string, bgColor: string, iconSrc: string, name: string, onSelect: ()=>void}) => { 

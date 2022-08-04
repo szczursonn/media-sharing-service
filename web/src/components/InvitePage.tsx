@@ -1,15 +1,21 @@
 import { Avatar, Box, Button, CircularProgress, Paper, Stack, Typography, Container } from "@mui/material"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { acceptInvite, getInvite } from "../api"
-import { CommunityContext } from "../contexts/CommunityContext"
-import { UserContext } from "../contexts/UserContext"
-import { ResourceNotFoundError } from "../errors"
+import { AppError } from "../errors"
+import { setCommunities } from "../redux/communitySlice"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { openLoginDialog } from "../redux/loginSlice"
 import { Invite } from "../types"
 
-export const InvitePage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
+export const InvitePage = () => {
 
     const {inviteId} = useParams()
+
+    const dispatch = useAppDispatch()
+
+    const communities = useAppSelector(state=>state.communityReducer.communities)
+    const loadingCommunities = useAppSelector(state=>state.communityReducer.loading)
 
     const navigate = useNavigate()
 
@@ -17,6 +23,10 @@ export const InvitePage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [acceptingInvite, setAcceptingInvite] = useState(false)
+
+    const onLoginClick = () => {
+        dispatch(openLoginDialog())
+    }
 
     const loadInvite = async () => {
         setLoading(true)
@@ -26,7 +36,10 @@ export const InvitePage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
             setInvite(inv)
             setError('')
         } catch (err) {
-            if (err instanceof ResourceNotFoundError) setError('Invalid invite')
+            if (err instanceof AppError) {
+                if (err.type === 'resource_not_found') setError('Invalid invite')
+                setError(`Unexpected error when fetching invite: ${err.type}`)
+            }
             else setError(`Unknown error fetching invite: ${err}`)
         }
         setLoading(false)
@@ -37,9 +50,9 @@ export const InvitePage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
         setAcceptingInvite(true)
         try {
             const com = await acceptInvite(inviteId)
-            if (comCtx.communities) {
-                const newComs = [...comCtx.communities, com]
-                comCtx.setCommunities(newComs)
+            if (communities) {
+                const newComs = [...communities, com]
+                dispatch(setCommunities(newComs))
             }
             navigate(`/communities/${com.id}`)
         } catch (err) {
@@ -48,10 +61,10 @@ export const InvitePage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
         setAcceptingInvite(false)
     }
 
-    const userCtx = useContext(UserContext)
-    const comCtx = useContext(CommunityContext)
+    const user = useAppSelector(state=>state.userReducer.user)
+    const loadingUser = useAppSelector(state=>state.userReducer.loading)
 
-    const alreadyJoined = (invite && comCtx.communities) ? !!comCtx.communities.find(c=>c.id===invite.community.id) : false
+    const alreadyJoined = (invite && communities) ? !!communities.find(c=>c.id===invite.community.id) : false
 
     useEffect(()=>{
         loadInvite()
@@ -78,10 +91,10 @@ export const InvitePage = ({onLoginClick}: {onLoginClick: ()=>void}) => {
                                     </Container>
                                 </>}
                                 <Box sx={{marginTop: 1}}></Box>
-                                {(!userCtx.loading && !userCtx.user)
+                                {(!loadingUser && !user)
                                 ? <Button variant="outlined" onClick={onLoginClick}>Sign up</Button>
                                 : <>
-                                    <Button disabled={alreadyJoined || comCtx.loading || acceptingInvite} variant="contained" onClick={onJoin}>Join</Button>
+                                    <Button disabled={alreadyJoined || loadingCommunities || acceptingInvite} variant="contained" onClick={onJoin}>Join</Button>
                                     {alreadyJoined && <Typography>You are already a member of this community!</Typography>}
                                 </>
                                 }

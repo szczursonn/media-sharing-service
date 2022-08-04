@@ -1,6 +1,6 @@
 import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { getUserConnections, getUserSessions, invalidateSession, removeUserConnection, updateUser } from "../api"
 import { OAuth2Provider, UserConnection, UserSession } from "../types"
 import { Clear, LaptopChromebook } from '@mui/icons-material';
@@ -9,15 +9,17 @@ import { ErrorDialog } from "./ErrorDialog"
 import githubIcon from '../svg/githubIcon.svg'
 import discordIcon from '../svg/discordIcon.svg'
 import googleIcon from '../svg/googleIcon.svg'
-import { CannotRemoveLastUserConnectionError } from "../errors"
 import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../constants"
-import { UserContext } from "../contexts/UserContext"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { setCurrentUser } from "../redux/userSlice"
+import { AppError } from "../errors"
 
 export const SettingsPage = () => {
 
-    const ctx = useContext(UserContext)
+    const dispatch = useAppDispatch()
+    const user = useAppSelector(state=>state.userReducer.user)
 
-    const [newUsername, setNewUsername] = useState(ctx.user?.username ?? '')
+    const [newUsername, setNewUsername] = useState(user?.username ?? '')
     const [savingUsername, setSavingUsername] = useState(false)
 
     const [sessions, setSessions] = useState<UserSession[]|null>(null)
@@ -30,7 +32,7 @@ export const SettingsPage = () => {
         setSavingUsername(true)
         try {
             const user = await updateUser(newUsername)
-            ctx.setUser(user)
+            dispatch(setCurrentUser(user))
         } catch (err) {
 
         }
@@ -141,14 +143,14 @@ const SessionListItem = ({session, onDelete}: {session: UserSession, onDelete: (
     const [openErrorDialog, setOpenErrorDialog] = useState(false)
     const [error, setError] = useState<string>('')
 
-    const {setUser} = useContext(UserContext)
+    const dispatch = useAppDispatch()
 
     const removeSession = async () => {
         setOpenDialog(false)
         setRemoving(true)
         try {
             await invalidateSession(session.id)
-            if (localStorage.getItem('sessionId')===session.id.toString()) setUser(null)
+            if (localStorage.getItem('sessionId')===session.id.toString()) dispatch(setCurrentUser(null))
             onDelete()
         } catch (err) {
             setOpenErrorDialog(true)
@@ -194,10 +196,12 @@ const ConnectionListItem = ({connections, type, onDelete}: {connections: UserCon
             await removeUserConnection(type)
             onDelete()
         } catch (err) {
-            
             setOpenErrorDialog(true)
-            if (err instanceof CannotRemoveLastUserConnectionError) setError('Cannot remove the last user connection')
-            else setError(String(err))
+            if (err instanceof AppError) {
+                if (err.type === 'cannot_remove_last_user_connection') setError('Cannot remove the last user connection')
+                else setError(`Unexpected error removing user connection: ${err}`)
+            }
+            else setError(`Unknown error removing user connection: ${err}`)
         }
         setRemoving(false)
     }

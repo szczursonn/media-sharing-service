@@ -2,7 +2,8 @@ import { Avatar, Button, Card, CardActionArea, CardContent, CardMedia, CircularP
 import { useContext, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { getCommunityAlbums, getCommunityMembers } from "../api"
-import { CommunityContext } from "../contexts/CommunityContext"
+import { selectCommunity } from "../redux/communitySlice"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { Album, Member } from "../types"
 import { AlbumCreateDialog } from "./AlbumCreateDialog"
 
@@ -39,15 +40,17 @@ export const CommunityPage = () => {
         setLoadingMembers(false)
     }
 
-    const ctx = useContext(CommunityContext)
+    const dispatch = useAppDispatch()
+    const communities = useAppSelector(state=>state.communityReducer.communities)
+    const loadingCommunities = useAppSelector(state=>state.communityReducer.loading)
 
-    const community = ctx.communities?.find(c=>c.id===communityId) ?? null
-
+    const community = communities?.find(c=>c.id===communityId) ?? null
+    
     useEffect(()=>{
-        if (!ctx.loading && communityId) ctx.select(ctx.communities?.find(c=>c.id===communityId) ?? null)
-        return ()=>ctx.select(null)
+        if (!loadingCommunities && communityId) dispatch(selectCommunity(communities?.find(c=>c.id===communityId) ?? null))
+        return ()=>{dispatch(selectCommunity(null))}
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ctx, communityId])
+    }, [loadingCommunities, communityId])
 
     useEffect(()=>{
         if (community) loadAlbums().then(loadMembers)
@@ -68,7 +71,7 @@ export const CommunityPage = () => {
                             albums
                             ? <>
                                 <Grid container>
-                                    {albums.map((album)=><Grid item xs={4}><Card sx={{ maxWidth: 345 }}>
+                                    {albums.map((album)=><Grid item key={album.id} xs={4}><Card sx={{ maxWidth: 345 }}>
                                             <CardActionArea>
                                                 <CardMedia
                                                 component="img"
@@ -102,7 +105,7 @@ export const CommunityPage = () => {
                                             {
                                                 members
                                                 ? <>
-                                                    {members.map(m=><Grid item>
+                                                    {members.map(m=><Grid item key={m.user.id}>
                                                         <Paper sx={{padding: 1.5, alignItems: 'center', display: 'flex'}}>
                                                             <Avatar src={m.user.avatarUrl ?? undefined}/>
                                                             <Typography sx={{marginLeft: 1}}>{m.user.username}</Typography>

@@ -1,9 +1,10 @@
 import { Backdrop, Button, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { addConnection, getCurrentUser, loginOrRegisterWithOAuth2Provider } from "../api"
-import { UserContext } from "../contexts/UserContext"
-import { InvalidOAuth2CodeError, UnavailableOAuth2ProviderError } from "../errors"
+import { AppError } from "../errors"
+import { useAppDispatch } from "../redux/hooks"
+import { setCurrentUser } from "../redux/userSlice"
 import { OAuth2Provider } from "../types"
 
 export const CallbackPage = () => {
@@ -14,7 +15,7 @@ export const CallbackPage = () => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<null|string>(null)
 
-    const context = useContext(UserContext)
+    const dispatch = useAppDispatch()
 
     const code = searchParams.get('code')
     const isProviderValid = (provider !== undefined && (provider === 'google' || provider === 'discord' || provider === 'github'))
@@ -27,15 +28,21 @@ export const CallbackPage = () => {
             } else {
                 await loginOrRegisterWithOAuth2Provider(code, provider)
                 const user = await getCurrentUser()
-                context.setUser(user)
+                dispatch(setCurrentUser(user))
             }
             navigate('/')
         } catch (err) {
-            if (err instanceof InvalidOAuth2CodeError) {
-                setError(`Invalid OAuth2 code`)
-            }
-            else if (err instanceof UnavailableOAuth2ProviderError) {
-                setError(`Logging in with ${provider} is currently unavailable`)
+            if (err instanceof AppError) {
+                switch (err.type) {
+                    case 'invalid_oauth2_code':
+                        setError(`Invalid OAuth2 code`)
+                        break
+                    case 'unavailable_oauth2_provider':
+                        setError(`Logging in with ${provider} is currently unavailable`)
+                        break
+                    default:
+                        setError(`Unknown error: ${err.type}`)
+                }
             }
             else setError(`Unknown error: ${err}`)
         }

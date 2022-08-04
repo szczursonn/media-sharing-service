@@ -5,6 +5,8 @@ import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { Provider } from 'react-redux'
+import store from './redux/store';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -17,10 +19,12 @@ const darkTheme = createTheme({
 
 root.render(
     <BrowserRouter>
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
+      <Provider store={store}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </Provider>
     </BrowserRouter>
 );
 

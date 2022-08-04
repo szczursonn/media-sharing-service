@@ -1,9 +1,9 @@
 import { GitHub } from "@mui/icons-material"
 import { Avatar, Box, CircularProgress, Divider, IconButton, List, ListItem, ListItemIcon, Tooltip, Typography } from "@mui/material"
-import { useContext, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { CommunityContext } from "../contexts/CommunityContext"
-import { UserContext } from "../contexts/UserContext"
+import { selectCommunity } from "../redux/communitySlice"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { Community } from "../types"
 import { CommunityCreateDialog } from "./CommunityCreateDialog"
 
@@ -12,14 +12,14 @@ export const MyDrawer = () => {
     const [createDialogOpen, setCreateDialogOpen] = useState(false)
     const navigate = useNavigate()
 
-    const {user} = useContext(UserContext)
-    const {communities, setCommunities, loading: loadingCommunities, selected: selectedCommunity, select: setSelectedCommunity} = useContext(CommunityContext)
+    const dispatch = useAppDispatch()
+    const user = useAppSelector(state=>state.userReducer.user)
+    const communities = useAppSelector(state=>state.communityReducer.communities)
+    const loadingCommunities = useAppSelector(state=>state.communityReducer.loading)
+    const selectedCommunity = useAppSelector(state=>state.communityReducer.selected)
 
-    const onSuccess = (community: Community) => {
-        if (!communities) return
-        const newCommunities = [...communities, community]
-        setCommunities(newCommunities)
-        setCreateDialogOpen(false)
+    const onCommunityClick = (community: Community) => {
+        dispatch(selectCommunity(community))
         navigate(`/communities/${community.id}`)
     }
 
@@ -34,7 +34,7 @@ export const MyDrawer = () => {
                             ? <List disablePadding>
                                 {communities.map((community)=><ListItem key={community.id} sx={{paddingLeft: '8px'}}>
                                     <ListItemIcon>
-                                        <IconButton sx={{boxShadow: (selectedCommunity === community ? '0px 0px 15px 5px #0ff' : '')}} onClick={()=>{setSelectedCommunity(community);navigate(`/communities/${community.id}`)}}>
+                                        <IconButton sx={{boxShadow: (selectedCommunity === community ? '0px 0px 15px 5px #0ff' : '')}} onClick={()=>onCommunityClick(community)}>
                                             <Tooltip title={community.name}>
                                                 <Avatar alt={community.name} src={'fdsfds'} />
                                             </Tooltip>
@@ -71,6 +71,6 @@ export const MyDrawer = () => {
                 </ListItemIcon>
             </ListItem>
         </List>
-        <CommunityCreateDialog open={createDialogOpen} onCancel={()=>setCreateDialogOpen(false)} onSuccess={onSuccess} />
+        <CommunityCreateDialog open={createDialogOpen} onClose={()=>setCreateDialogOpen(false)} />
     </Box>
 }
