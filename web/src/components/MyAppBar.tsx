@@ -4,14 +4,20 @@ import { useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { Home } from '@mui/icons-material';
 import { CommunityContext } from '../contexts/CommunityContext';
+import { invalidateCurrentSession } from '../api';
 
 export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
 
     const navigate = useNavigate()
 
-    const {user} = useContext(UserContext)
+    const {user, setUser} = useContext(UserContext)
 
     const {selected: selectedCommunity, select: setSelectedCommunity} = useContext(CommunityContext)
+
+    const onLogoutClick = async () => {
+      await invalidateCurrentSession()
+      setUser(null)
+    }
   
     return <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -33,6 +39,7 @@ export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
                     <Avatar alt='marcinek' src={user.avatarUrl ?? undefined}/>
                   </IconButton>
                 </Tooltip>
+                <Button size='large' color="inherit" onClick={onLogoutClick}>Logout</Button>
               </Box>
             : <Box>
                 <Button size='large' color="inherit" onClick={onLoginClick}>Login</Button>

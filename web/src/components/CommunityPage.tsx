@@ -1,4 +1,4 @@
-import { Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Container, Grid, List, ListItem, Typography } from "@mui/material"
+import { Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Container, Grid, Typography } from "@mui/material"
 import { useContext, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { getCommunityAlbums } from "../api"

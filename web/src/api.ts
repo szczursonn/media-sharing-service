@@ -15,6 +15,7 @@ export const loginOrRegisterWithOAuth2Provider = async (code: string, type: OAut
     const res = await customFetch(`/auth/${type}`, {method: 'POST', auth: false, body: JSON.stringify({code})})
     const data = await res.json()
     localStorage.setItem('token', data.token)
+    localStorage.setItem('sessionId', data.sessionId)
 }
 
 export const updateUser = async (username: string): Promise<User> => {
@@ -37,6 +38,18 @@ export const getUserSessions = async () => {
 
 export const invalidateSession = async (sessionId: number) => {
     await customFetch(`/auth/sessions/${sessionId}`, {method: 'DELETE'})
+}
+
+export const invalidateCurrentSession = async () => {
+    try {
+        const sessionId = localStorage.getItem('sessionId')
+        if (!sessionId) throw new Error()
+        await invalidateSession(parseInt(sessionId))
+    } catch (err) {
+
+    }
+    localStorage.removeItem('sessionId')
+    localStorage.removeItem('token')
 }
 
 export const getUserConnections = async () => {
