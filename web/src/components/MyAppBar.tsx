@@ -1,6 +1,6 @@
 import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { Home } from '@mui/icons-material';
 import { CommunityContext } from '../contexts/CommunityContext';
@@ -13,10 +13,13 @@ export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
     const {user, setUser} = useContext(UserContext)
 
     const {selected: selectedCommunity, select: setSelectedCommunity} = useContext(CommunityContext)
+    const [logoutInProgress, setLogoutInProgress] = useState(false)
 
     const onLogoutClick = async () => {
+      setLogoutInProgress(true)
       await invalidateCurrentSession()
       setUser(null)
+      setLogoutInProgress(false)
     }
   
     return <Box sx={{ flexGrow: 1 }}>
@@ -31,15 +34,15 @@ export const MyAppBar = ({onLoginClick}: {onLoginClick: ()=>void}) => {
           {
             user
             ? <Box sx={{display: 'flex', flexGrow: 0, alignItems: 'center'}}>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                  {user.username}
-                </Typography>
                 <Tooltip title='Open settings'>
                   <IconButton onClick={()=>navigate('/settings')}>
                     <Avatar alt='marcinek' src={user.avatarUrl ?? undefined}/>
                   </IconButton>
                 </Tooltip>
-                <Button size='large' color="inherit" onClick={onLogoutClick}>Logout</Button>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                  {user.username}
+                </Typography>
+                <Button size='large' disabled={logoutInProgress} color="inherit" onClick={onLogoutClick}>Logout</Button>
               </Box>
             : <Box>
                 <Button size='large' color="inherit" onClick={onLoginClick}>Login</Button>

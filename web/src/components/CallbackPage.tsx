@@ -45,7 +45,6 @@ export const CallbackPage = () => {
     useEffect(()=>{
         if (!isProviderValid) setError(`Invalid OAuth2 Provider: ${provider}`)
         else if (code === null) setError(`Missing code in query params`)
-        else if (!loading) setError(`There was an error`)
 
         if (code !== null && isProviderValid && !loading) {
             exchange(code, provider)

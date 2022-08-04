@@ -15,6 +15,7 @@ import { ErrorDialog } from './ErrorDialog';
 import { MyDrawer } from './MyDrawer';
 import { CommunityContext } from '../contexts/CommunityContext';
 import { CommunityPage } from './CommunityPage';
+import { InvitePage } from './InvitePage';
 
 
 const App = () => {
@@ -103,6 +104,7 @@ const App = () => {
                 <Route path='/' element={<HomePage />} />
                 <Route path='/communities/:communityId' element={user ? <CommunityPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />}/>
                 <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage onLoginClick={()=>setLoginOpen(true)} />} />
+                <Route path='/i/:inviteId' element={<InvitePage onLoginClick={()=>setLoginOpen(true)} />} />
                 <Route path='/callback/:provider' element={!loadingUser ? <CallbackPage /> : <></>} />
                 <Route path='*' element={<NotFoundPage />} />
               </Routes>

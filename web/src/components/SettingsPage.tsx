@@ -141,11 +141,14 @@ const SessionListItem = ({session, onDelete}: {session: UserSession, onDelete: (
     const [openErrorDialog, setOpenErrorDialog] = useState(false)
     const [error, setError] = useState<string>('')
 
+    const {setUser} = useContext(UserContext)
+
     const removeSession = async () => {
         setOpenDialog(false)
         setRemoving(true)
         try {
             await invalidateSession(session.id)
+            if (localStorage.getItem('sessionId')===session.id.toString()) setUser(null)
             onDelete()
         } catch (err) {
             setOpenErrorDialog(true)
@@ -160,7 +163,7 @@ const SessionListItem = ({session, onDelete}: {session: UserSession, onDelete: (
                 <LaptopChromebook />
             </Avatar>
         </ListItemAvatar>
-        <ListItemText primary={session.deviceName ?? 'unknown device'} secondary={`id: ${session.id}`}/>
+        <ListItemText primary={session.deviceName ?? 'unknown device'} secondary={localStorage.getItem('sessionId')===session.id.toString() ? `id: ${session.id} CURRENT` : `id: ${session.id}`}/>
         <Backdrop sx={{position: 'absolute'}} open={removing}><CircularProgress color='inherit'/></Backdrop>
         <AreYouSureDialog
             open={openDialog}

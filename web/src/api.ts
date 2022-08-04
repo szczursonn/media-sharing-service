@@ -1,5 +1,5 @@
-import { CannotRemoveLastUserConnectionError, InvalidOAuth2CodeError, UnauthenticatedError, UnavailableOAuth2ProviderError } from "./errors"
-import { Album, Community, OAuth2Provider, User, UserConnection, UserSession } from "./types"
+import { CannotRemoveLastUserConnectionError, InvalidOAuth2CodeError, ResourceNotFoundError, UnauthenticatedError, UnavailableOAuth2ProviderError } from "./errors"
+import { Album, Community, Invite, Member, OAuth2Provider, User, UserConnection, UserSession } from "./types"
 
 export const getCurrentUser = async (): Promise<User> => {
     const token = localStorage.getItem('token')
@@ -91,6 +91,27 @@ export const createNewAlbum = async (communityId: number, name: string) => {
     return body as Album
 }
 
+export const getInvite = async (inviteId: string) => {
+    const res = await customFetch(`/invite/${inviteId}`, {method: 'GET', auth: false})
+
+    const body = await res.json()
+    return body as Invite
+}
+
+export const acceptInvite = async (inviteId: string) => {
+    const res = await customFetch(`/invite/${inviteId}`, {method: 'POST'})
+
+    const body = await res.json()
+    return body as Community
+}
+
+export const getCommunityMembers = async (communityId: number) => {
+    const res = await customFetch(`/communities/${communityId}/members`, {method: 'GET'})
+
+    const body = await res.json()
+    return body as Member[]
+}
+
 const API_URL = process.env.REACT_APP_API_URL
 
 const customFetch = async (uri: string, {method, auth=true, body=undefined}: {method: string, auth?: boolean, body?: BodyInit|null}) => {
@@ -114,6 +135,7 @@ const customFetch = async (uri: string, {method, auth=true, body=undefined}: {me
 
     if (!res.ok) {
         const {error} = await res.json()
+        
         if (error === 'unauthenticated') {
             localStorage.removeItem('token')
             throw new UnauthenticatedError()
@@ -121,7 +143,8 @@ const customFetch = async (uri: string, {method, auth=true, body=undefined}: {me
         if (error === 'invalid_oauth2_code') throw new InvalidOAuth2CodeError()
         if (error === 'oauth2_provider_unavailable') throw new UnavailableOAuth2ProviderError()
         if (error === 'cannot_remove_last_connection') throw new CannotRemoveLastUserConnectionError()
-
+        if (error === 'resource_not_found') throw new ResourceNotFoundError()
+        
         throw new Error(error)
     }
 

@@ -46,4 +46,10 @@ export type Invite = {
     expiresAt: string | null
 }
 
+export type Member = {
+    user: User,
+    canUpload: boolean,
+    joinedAt: string
+}
+
 export type OAuth2Provider = 'discord' | 'google' | 'github'
