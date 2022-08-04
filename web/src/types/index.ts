@@ -1,7 +1,8 @@
 export type User = {
     id: number,
     username: string,
-    avatarUrl: string | null
+    avatarUrl: string | null,
+    createdAt: string
 }
 
 export type UserSession = {
@@ -20,12 +21,29 @@ export type UserConnection = {
 export type Community = {
     id: number,
     name: string,
+    ownerId: number,
     createdAt: string
 }
 
 export type Album = {
     id: number,
-    name: string
+    name: string,
+    cover: null
+}
+
+export type Media = {
+    filename: string,
+    authorId: number,
+    type: 'image' | 'video',
+    createdAt: string
+}
+
+export type Invite = {
+    id: string
+    inviter: User | null
+    community: Community
+    maxUses: number | null
+    expiresAt: string | null
 }
 
 export type OAuth2Provider = 'discord' | 'google' | 'github'
