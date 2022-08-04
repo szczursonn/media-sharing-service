@@ -1,6 +1,6 @@
 import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Home } from '@mui/icons-material';
 import { invalidateCurrentSession } from '../api';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';

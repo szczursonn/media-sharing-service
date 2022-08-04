@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material"
-import { useContext } from "react"
 import { useAppSelector } from "../redux/hooks"
 
 export const HomePage = () => {

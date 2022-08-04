@@ -1,5 +1,5 @@
 import { Avatar, Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Container, Grid, Paper, Typography } from "@mui/material"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { getCommunityAlbums, getCommunityMembers } from "../api"
 import { selectCommunity } from "../redux/communitySlice"
