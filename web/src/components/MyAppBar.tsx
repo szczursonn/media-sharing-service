@@ -2,11 +2,11 @@ import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography }
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Home } from '@mui/icons-material';
-import { invalidateCurrentSession } from '../api';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { openLoginDialog } from '../redux/loginSlice';
+import { openLoginDialog } from '../redux/dialogSlice';
 import { setCurrentUser } from '../redux/userSlice';
 import { selectCommunity } from '../redux/communitySlice';
+import userApi from '../api/userApi';
 
 export const MyAppBar = () => {
 
@@ -25,7 +25,7 @@ export const MyAppBar = () => {
 
     const onLogoutClick = async () => {
       setLogoutInProgress(true)
-      await invalidateCurrentSession()
+      await userApi.invalidateCurrentSession()
       dispatch(setCurrentUser(null))
       setLogoutInProgress(false)
     }

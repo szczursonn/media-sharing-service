@@ -55,7 +55,7 @@ export type Member = {
 }
 
 export type ThunkResult<T> = {
-    err: AppErrorType|null,
+    err: AppErrorType|string|null,
     data: T|null
 }
 

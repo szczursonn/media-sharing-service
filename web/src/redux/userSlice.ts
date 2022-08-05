@@ -1,18 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getCurrentUser } from '../api'
+import userApi from '../api/userApi'
 import { AppError } from '../errors'
 import { ThunkResult, User } from '../types'
 
 type UserState = {
     user: User|null,
     loading: boolean,
-    error: string|null
+    error: string|null,
+    errorDialogOpen: boolean
 }
 
 const initialState: UserState = {
     user: null,
     loading: false,
-    error: null
+    error: null,
+    errorDialogOpen: false
 }
 
 export const userSlice = createSlice({
@@ -22,14 +24,15 @@ export const userSlice = createSlice({
         setCurrentUser: (state, action: {payload: User|null}) => {
             state.user = action.payload
         },
-        clearError: (state) => {
-            state.error = null
+        closeUserErrorDialog: (state) => {
+            state.errorDialogOpen = false
         }
     },
     extraReducers: (builder) => {
         builder.addCase(fetchCurrentUser.pending, (state) => {
             state.loading = true
             state.error = null
+            state.errorDialogOpen = false
             state.user = null
         })
         builder.addCase(fetchCurrentUser.fulfilled, (state, action) => {
@@ -38,6 +41,7 @@ export const userSlice = createSlice({
             if (err) {
                 if (err !== 'unauthenticated') {
                     state.error = err
+                    state.errorDialogOpen = true
                 }
             } else {
                 state.user = action.payload.data
@@ -48,7 +52,7 @@ export const userSlice = createSlice({
 
 export const fetchCurrentUser = createAsyncThunk('user/fetchUser', async (): Promise<ThunkResult<User>> => {
     try {
-        const user = await getCurrentUser()
+        const user = await  userApi.getCurrentUser()
         return {
             err: null,
             data: user
@@ -62,10 +66,10 @@ export const fetchCurrentUser = createAsyncThunk('user/fetchUser', async (): Pro
         return {
             err: e,
             data: null
-        } as any
+        }
     }
 })
 
-export const {setCurrentUser, clearError} = userSlice.actions
+export const {setCurrentUser, closeUserErrorDialog} = userSlice.actions
 
 export default userSlice.reducer

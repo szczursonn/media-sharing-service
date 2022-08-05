@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { createNewCommunity, getUserCommunities } from '../api'
+import communityApi from '../api/communityApi'
+import userApi from '../api/userApi'
 import { AppError } from '../errors'
 import { Community, ThunkResult } from '../types'
 
@@ -9,7 +10,9 @@ type CommunityState = {
     error: string|null,
     selected: Community|null,
     saving: boolean,
-    savingError: string|null
+    savingError: string|null,
+    leaving: boolean,
+    leavingError: string|null
 }
 
 const initialState: CommunityState = {
@@ -18,7 +21,9 @@ const initialState: CommunityState = {
     error: null,
     selected: null,
     saving: false,
-    savingError: null
+    savingError: null,
+    leaving: false,
+    leavingError: null
 }
 
 export const communitySlice = createSlice({
@@ -63,12 +68,27 @@ export const communitySlice = createSlice({
             }
             state.saving = false
         })
+
+        builder.addCase(leaveCommunity.pending, (state) => {
+            state.leaving = true
+            state.leavingError = null
+        })
+        builder.addCase(leaveCommunity.fulfilled, (state, action) => {
+            const err = action.payload.err
+            if (err) {
+                state.leavingError = err
+            } else if (state.communities) {
+                const i = state.communities.findIndex(c=>c.id === action.payload.data!)
+                state.communities.splice(i, 1)
+            }
+            state.leaving = false
+        })
     },
 })
 
 export const fetchCommunities = createAsyncThunk('community/fetchCommunities', async (): Promise<ThunkResult<Community[]|null>> => {
     try {
-        const communities = await getUserCommunities()
+        const communities = await userApi.getUserCommunities()
         return {
             err: null,
             data: communities
@@ -81,13 +101,13 @@ export const fetchCommunities = createAsyncThunk('community/fetchCommunities', a
         return {
             err: e,
             data: null
-        } as any
+        }
     }
 })
 
 export const createCommunity = createAsyncThunk('community/createCommunity', async (name: string): Promise<ThunkResult<Community|null>> => {
     try {
-        const com = await createNewCommunity(name)
+        const com = await communityApi.createNewCommunity(name)
         return {
             err: null,
             data: com
@@ -100,7 +120,26 @@ export const createCommunity = createAsyncThunk('community/createCommunity', asy
         return {
             err: e,
             data: null
-        } as any
+        }
+    }
+})
+
+export const leaveCommunity = createAsyncThunk('community/leaveCommunity', async (communityId: number): Promise<ThunkResult<number|null>> => {
+    try {
+        await communityApi.leaveCommunity(communityId)
+        return {
+            err: null,
+            data: communityId
+        }
+    } catch (err) {
+        let e: string
+        if (err instanceof AppError) {
+            e = err.type
+        } else e = String(err)
+        return {
+            err: e,
+            data: null
+        }
     }
 })
 

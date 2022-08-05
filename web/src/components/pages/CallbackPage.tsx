@@ -1,34 +1,36 @@
 import { Backdrop, Button, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { addConnection, getCurrentUser, loginOrRegisterWithOAuth2Provider } from "../api"
-import { AppError } from "../errors"
-import { useAppDispatch } from "../redux/hooks"
-import { setCurrentUser } from "../redux/userSlice"
-import { OAuth2Provider } from "../types"
+import userApi from "../../api/userApi"
+import { AppError } from "../../errors"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
+import { fetchCurrentUser } from "../../redux/userSlice"
+import { OAuth2Provider } from "../../types"
 
 export const CallbackPage = () => {
 
     const navigate = useNavigate()
-    const { provider } = useParams()
-    const [searchParams] = useSearchParams()
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<null|string>(null)
-
     const dispatch = useAppDispatch()
 
-    const code = searchParams.get('code')
+    const loadingUser = useAppSelector(state=>state.userReducer.loading)
+
+    const { provider } = useParams()
     const isProviderValid = (provider !== undefined && (provider === 'google' || provider === 'discord' || provider === 'github'))
+
+    const [searchParams] = useSearchParams()
+    const code = searchParams.get('code')
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string|null>(null)
 
     const exchange = async (code: string, provider: OAuth2Provider) => {
         setLoading(true)
         try {
             if (localStorage.getItem('token')) {
-                await addConnection(code, provider)
+                await userApi.addConnection(code, provider)
             } else {
-                await loginOrRegisterWithOAuth2Provider(code, provider)
-                const user = await getCurrentUser()
-                dispatch(setCurrentUser(user))
+                await userApi.loginOrRegisterWithOAuth2Provider(code, provider)
+                dispatch(fetchCurrentUser())
             }
             navigate('/')
         } catch (err) {
@@ -58,6 +60,10 @@ export const CallbackPage = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    if (loadingUser) {
+        return <></>
+    }
 
     if (error !== null) {
         return <Grid container alignItems='center' justifyItems='center' direction='column' marginTop='10vh'>

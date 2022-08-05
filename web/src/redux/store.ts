@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import loginReducer from './loginSlice'
+import dialogReducer from './dialogSlice'
 import userReducer from './userSlice'
 import communityReducer from './communitySlice'
 
 const store = configureStore({
     reducer: {
-        loginReducer,
+        dialogReducer,
         userReducer,
         communityReducer
     }

@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material"
 import { useState } from "react"
-import { createNewAlbum } from "../api"
-import { Album } from "../types"
+import communityApi from "../../api/communityApi"
+import { Album } from "../../types"
 
 export const AlbumCreateDialog = ({open, communityId, onCancel, onSuccess}: {open: boolean, communityId: number, onCancel: ()=>void, onSuccess: (album: Album)=>void}) => {
 
@@ -17,7 +17,7 @@ export const AlbumCreateDialog = ({open, communityId, onCancel, onSuccess}: {ope
         setLoading(true)
         setError(null)
         try {
-            const com = await createNewAlbum(communityId, name)
+            const com = await communityApi.createNewAlbum(communityId, name)
             setName('')
             onSuccess(com)
         } catch (err) {

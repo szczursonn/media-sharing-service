@@ -1,10 +1,11 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { createCommunity } from "../redux/communitySlice"
-import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { createCommunity } from "../../redux/communitySlice"
+import { closeCommunityCreateDialog, openInviteDialog } from "../../redux/dialogSlice"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 
-export const CommunityCreateDialog = ({open, onClose}: {open: boolean, onClose: ()=>void}) => {
+export const CommunityCreateDialog = () => {
 
     const [name, setName] = useState('')
 
@@ -15,8 +16,13 @@ export const CommunityCreateDialog = ({open, onClose}: {open: boolean, onClose: 
     const error = useAppSelector(state=>state.communityReducer.error)
     const newCommunity = useAppSelector(state=>state.communityReducer.communities?.find(c=>c.name===name))
 
-    const _onClose = () => {
-        if (!saving) onClose()
+    const open = useAppSelector(state=>state.dialogReducer.communityCreateOpen)
+
+    const onClose = () => {
+        if (!saving) {
+            setName('')
+            dispatch(closeCommunityCreateDialog())
+        }
     }
     const onCreate = () => {
         dispatch(createCommunity(name))
@@ -24,12 +30,12 @@ export const CommunityCreateDialog = ({open, onClose}: {open: boolean, onClose: 
 
     useEffect(()=>{
         if (newCommunity && !saving && !error) {
-            _onClose()
+            onClose()
             navigate(`/communities/${newCommunity.id}`)
         }
     }, [newCommunity])
 
-    return <Dialog open={open} onClose={_onClose}>
+    return <Dialog open={open} onClose={onClose}>
         <DialogTitle>Create Community</DialogTitle>
         <DialogContent>
         {error !== null && <Typography variant="body2" color={'red'}>ERROR: {error}</Typography>}
@@ -46,8 +52,12 @@ export const CommunityCreateDialog = ({open, onClose}: {open: boolean, onClose: 
         />
         </DialogContent>
         <DialogActions>
-        <Button disabled={saving} onClick={_onClose}>Cancel</Button>
-        <Button disabled={saving} onClick={onCreate}>Create</Button>
+            <Button disabled={saving} onClick={()=>{
+                dispatch(closeCommunityCreateDialog())
+                dispatch(openInviteDialog())
+            }} variant='outlined'>Use invite</Button>
+            <Button disabled={saving} onClick={onClose} variant='outlined'>Cancel</Button>
+            <Button disabled={saving} onClick={onCreate} variant='contained'>Create</Button>
         </DialogActions>
     </Dialog>
 }

@@ -1,16 +1,16 @@
 import { Button, Dialog, DialogTitle, Stack, Typography } from "@mui/material"
-import githubIcon from '../svg/githubIcon.svg'
-import discordIcon from '../svg/discordIcon.svg'
-import googleIcon from '../svg/googleIcon.svg'
-import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL } from "../constants"
-import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { closeLoginDialog } from "../redux/loginSlice"
+import githubIcon from '../../svg/githubIcon.svg'
+import discordIcon from '../../svg/discordIcon.svg'
+import googleIcon from '../../svg/googleIcon.svg'
+import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL } from "../../constants"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
+import { closeLoginDialog } from "../../redux/dialogSlice"
 
 export const LoginDialog = () => {
 
   const dispatch = useAppDispatch()
 
-  const open = useAppSelector(state=>state.loginReducer.open)
+  const open = useAppSelector(state=>state.dialogReducer.loginOpen)
   
   const onClose = () => {
     dispatch(closeLoginDialog())

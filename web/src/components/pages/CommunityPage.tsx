@@ -1,11 +1,11 @@
 import { Avatar, Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Container, Grid, Paper, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { getCommunityAlbums, getCommunityMembers } from "../api"
-import { selectCommunity } from "../redux/communitySlice"
-import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { Album, Member } from "../types"
-import { AlbumCreateDialog } from "./AlbumCreateDialog"
+import communityApi from "../../api/communityApi"
+import { selectCommunity } from "../../redux/communitySlice"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
+import { Album, Member } from "../../types"
+import { AlbumCreateDialog } from "../dialogs/AlbumCreateDialog"
 
 export const CommunityPage = () => {
 
@@ -20,7 +20,7 @@ export const CommunityPage = () => {
     const loadAlbums = async () => {
         setLoading(true)
         try {
-            const a = await getCommunityAlbums(communityId)
+            const a = await communityApi.getCommunityAlbums(communityId)
             setAlbums(a)
         } catch (err) {
 
@@ -32,7 +32,7 @@ export const CommunityPage = () => {
         setMembers(null)
         setLoadingMembers(true)
         try {
-            const mem = await getCommunityMembers(communityId)
+            const mem = await communityApi.getCommunityMembers(communityId)
             setMembers(mem)
         } catch (err) {
 

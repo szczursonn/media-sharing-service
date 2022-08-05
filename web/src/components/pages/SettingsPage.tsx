@@ -1,18 +1,18 @@
 import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useState } from "react"
-import { getUserConnections, getUserSessions, invalidateSession, removeUserConnection, updateUser } from "../api"
-import { OAuth2Provider, UserConnection, UserSession } from "../types"
+import { OAuth2Provider, UserConnection, UserSession } from "../../types"
 import { Clear, LaptopChromebook } from '@mui/icons-material';
-import { AreYouSureDialog } from "./AreYouSureDialog"
-import { ErrorDialog } from "./ErrorDialog"
-import githubIcon from '../svg/githubIcon.svg'
-import discordIcon from '../svg/discordIcon.svg'
-import googleIcon from '../svg/googleIcon.svg'
-import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../constants"
-import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { setCurrentUser } from "../redux/userSlice"
-import { AppError } from "../errors"
+import { AreYouSureDialog } from "../dialogs/AreYouSureDialog"
+import { ErrorDialog } from "../dialogs/ErrorDialog"
+import githubIcon from '../../svg/githubIcon.svg'
+import discordIcon from '../../svg/discordIcon.svg'
+import googleIcon from '../../svg/googleIcon.svg'
+import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../../constants"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
+import { setCurrentUser } from "../../redux/userSlice"
+import { AppError } from "../../errors"
+import userApi from "../../api/userApi";
 
 export const SettingsPage = () => {
 
@@ -31,7 +31,7 @@ export const SettingsPage = () => {
     const updateUsername = async () => {
         setSavingUsername(true)
         try {
-            const user = await updateUser(newUsername)
+            const user = await userApi.updateUser(newUsername)
             dispatch(setCurrentUser(user))
         } catch (err) {
 
@@ -43,7 +43,7 @@ export const SettingsPage = () => {
         setLoadingSessions(true)
         setSessions(null)
         try {
-            const sessions = await getUserSessions()
+            const sessions = await userApi.getUserSessions()
             setSessions(sessions)
         } catch (err) {
 
@@ -55,7 +55,7 @@ export const SettingsPage = () => {
         setLoadingConnections(true)
         setConnections(null)
         try {
-            const cons = await getUserConnections()
+            const cons = await userApi.getUserConnections()
             setConnections(cons)
         } catch (err) {
 
@@ -149,7 +149,7 @@ const SessionListItem = ({session, onDelete}: {session: UserSession, onDelete: (
         setOpenDialog(false)
         setRemoving(true)
         try {
-            await invalidateSession(session.id)
+            await userApi.invalidateSession(session.id)
             if (localStorage.getItem('sessionId')===session.id.toString()) dispatch(setCurrentUser(null))
             onDelete()
         } catch (err) {
@@ -193,7 +193,7 @@ const ConnectionListItem = ({connections, type, onDelete}: {connections: UserCon
         setOpenDialog(false)
         setRemoving(true)
         try {
-            await removeUserConnection(type)
+            await userApi.removeUserConnection(type)
             onDelete()
         } catch (err) {
             setOpenErrorDialog(true)

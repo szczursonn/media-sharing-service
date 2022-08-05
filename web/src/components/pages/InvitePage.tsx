@@ -1,12 +1,12 @@
 import { Avatar, Box, Button, CircularProgress, Paper, Stack, Typography, Container } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { acceptInvite, getInvite } from "../api"
-import { AppError } from "../errors"
-import { setCommunities } from "../redux/communitySlice"
-import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { openLoginDialog } from "../redux/loginSlice"
-import { Invite } from "../types"
+import { AppError } from "../../errors"
+import { setCommunities } from "../../redux/communitySlice"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
+import { openLoginDialog } from "../../redux/dialogSlice"
+import { Invite } from "../../types"
+import inviteApi from "../../api/inviteApi"
 
 export const InvitePage = () => {
 
@@ -32,13 +32,13 @@ export const InvitePage = () => {
         setLoading(true)
         setInvite(null)
         try {
-            const inv = await getInvite(inviteId!)
+            const inv = await inviteApi.getInvite(inviteId!)
             setInvite(inv)
             setError('')
         } catch (err) {
             if (err instanceof AppError) {
                 if (err.type === 'resource_not_found') setError('Invalid invite')
-                setError(`Unexpected error when fetching invite: ${err.type}`)
+                else setError(`Unexpected error when fetching invite: ${err.type}`)
             }
             else setError(`Unknown error fetching invite: ${err}`)
         }
@@ -49,7 +49,7 @@ export const InvitePage = () => {
         if (!inviteId) return
         setAcceptingInvite(true)
         try {
-            const com = await acceptInvite(inviteId)
+            const com = await inviteApi.acceptInvite(inviteId)
             if (communities) {
                 const newComs = [...communities, com]
                 dispatch(setCommunities(newComs))
