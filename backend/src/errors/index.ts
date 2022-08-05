@@ -13,6 +13,8 @@ export class OAuth2ProviderUnavailableError extends Error {
 
 export class OAuth2InvalidCodeError extends Error {}
 
+export class OAuth2AlreadyConnectedError extends Error {}
+
 export class CannotRemoveLastUserConnectionError extends Error {}
 
 export class InvalidSessionError extends Error {}

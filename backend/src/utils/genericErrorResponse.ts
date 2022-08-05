@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AlreadyAMemberError, BadRequestError, CannotRemoveLastUserConnectionError, InsufficientPermissionsError, InvalidSessionError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError, OwnerCannotLeaveCommunityError, ResourceNotFoundError, UnauthenticatedError } from "../errors";
+import { AlreadyAMemberError, BadRequestError, CannotRemoveLastUserConnectionError, InsufficientPermissionsError, InvalidSessionError, OAuth2AlreadyConnectedError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError, OwnerCannotLeaveCommunityError, ResourceNotFoundError, UnauthenticatedError } from "../errors";
 import Logger from "../Logger";
 
 export const genericErrorResponse = (res: Response, err: any) => {
@@ -11,6 +11,10 @@ export const genericErrorResponse = (res: Response, err: any) => {
         case OAuth2ProviderUnavailableError:
             return res.status(503).json({
                 error: 'oauth2_provider_unavailable'
+            })
+        case OAuth2AlreadyConnectedError:
+            return res.status(409).json({
+                error: 'oauth2_already_connected'
             })
         case CannotRemoveLastUserConnectionError:
             return res.status(409).json({

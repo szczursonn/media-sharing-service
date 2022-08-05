@@ -1,4 +1,4 @@
-import { InvalidSessionError, ResourceNotFoundError, OAuth2ProviderUnavailableError, CannotRemoveLastUserConnectionError } from "../errors";
+import { InvalidSessionError, ResourceNotFoundError, OAuth2ProviderUnavailableError, CannotRemoveLastUserConnectionError, OAuth2AlreadyConnectedError } from "../errors";
 import { Session } from "../models/Session";
 import { User } from "../models/User";
 import { UserConnection } from "../models/UserConnection";
@@ -49,6 +49,12 @@ export class AuthService {
 
         const profile = await oauthProvider.exchange(code)
         
+        const c = await this.dataSource.manager.countBy(UserConnection, {
+            type,
+            foreignId: profile.id
+        })
+        if (c > 0) throw new OAuth2AlreadyConnectedError()
+
         const connection = new UserConnection()
         connection.foreignId = profile.id
         connection.foreignUsername = profile.username
