@@ -1,4 +1,4 @@
-import { InsufficientPermissionsError, ResourceNotFoundError } from "../errors";
+import { InsufficientPermissionsError, OwnerCannotLeaveCommunityError, ResourceNotFoundError } from "../errors";
 import { Community } from "../models/Community"
 import { DataSource } from "typeorm";
 import { CommunityMember } from "../models/CommunityMember";
@@ -51,6 +51,7 @@ export class CommunityService {
         if (!community) throw new ResourceNotFoundError()
         // only the owner can kick users
         if (community.ownerId !== kickerId) throw new InsufficientPermissionsError()
+        if (userId === community.ownerId) throw new OwnerCannotLeaveCommunityError()
 
         const delResult = await this.dataSource.manager.delete(CommunityMember, {
             userId,
