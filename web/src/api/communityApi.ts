@@ -44,6 +44,13 @@ const removeMember = async (communityId: number, userId: number) => {
     await customFetch(`/communities/${communityId}/members/${userId}`, {method: 'DELETE'})
 }
 
+const getCommunityInvites = async (communityId: number) => {
+    const res = await customFetch(`/communities/${communityId}/invites`, {method: 'GET'})
+
+    const body = await res.json()
+    return body as Invite[]
+}
+
 const communityApi = {
     createNewCommunity,
     getCommunityAlbums,
@@ -51,7 +58,8 @@ const communityApi = {
     getCommunityMembers,
     leaveCommunity,
     createInvite,
-    removeMember
+    removeMember,
+    getCommunityInvites
 }
 
 export default communityApi

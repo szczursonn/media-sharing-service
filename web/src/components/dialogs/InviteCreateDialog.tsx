@@ -30,7 +30,10 @@ export const InviteCreateDialog = () => {
     }
 
     const onClose = () => {
-        if (!creating) dispatch(closeInviteCreateDialog())
+        if (!creating) {
+          setCreatedInvite(null)
+          dispatch(closeInviteCreateDialog())
+        }
     }
 
     const community = useAppSelector(state=>state.communityReducer.communities?.find(c=>c.id===state.dialogReducer.inviteCreateTargetId) ?? null)
@@ -74,6 +77,7 @@ export const InviteCreateDialog = () => {
           {createdInvite && <Typography>URL: <code>{`${window.location.host}/i/${createdInvite.id}`}</code></Typography>}
         </DialogContent>
         <DialogActions>
+          {createdInvite && <Button variant='contained' onClick={onClose}>Close</Button>}
           <Button variant="contained" disabled={creating || !!createdInvite} onClick={createInvite}>Create invite</Button>
         </DialogActions>
       </Dialog>

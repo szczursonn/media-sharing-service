@@ -4,6 +4,7 @@ import { Route, Routes, useParams } from "react-router-dom"
 import { selectCommunity } from "../../redux/communitySlice"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { fetchMembers } from "../../redux/memberSlice"
+import { AlbumPage } from "./AlbumPage"
 import { CommunityHomePage } from "./CommunityHomePage"
 import { CommunitySettingsPage } from "./CommunitySettingsPage"
 import { NotFoundPage } from "./NotFoundPage"
@@ -39,7 +40,7 @@ export const CommunityPage = () => {
                         <Routes>
                             <Route index element={<CommunityHomePage community={community}/>} />
                             <Route path='settings' element={<CommunitySettingsPage community={community} />} />
-                            <Route path='invite' element={<p>sijsdfs</p>} />
+                            <Route path='albums/:albumId' element={<AlbumPage community={community}/>} />
                             <Route path='*' element={<NotFoundPage />} />
                         </Routes>
                     </>

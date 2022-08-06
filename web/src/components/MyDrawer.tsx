@@ -7,6 +7,7 @@ import { openCommunityCreateDialog, openInviteCreateDialog, openInviteDialog } f
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { Community } from "../types"
 import { ErrorDialog } from "./dialogs/ErrorDialog"
+import { MemberGridDialog } from "./dialogs/MemberGridDialog"
 
 export const MyDrawer = () => {
 
@@ -78,6 +79,7 @@ const CommunityListItem = ({community}: {community: Community}) => {
 
     const user = useAppSelector(state=>state.userReducer.user)
 
+    const [openMemberList, setOpenMemberList] = useState(false)
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
     const onCommunityClick = () => {
@@ -95,6 +97,11 @@ const CommunityListItem = ({community}: {community: Community}) => {
     const onInviteClick = () => {
         setAnchorEl(null)
         dispatch(openInviteCreateDialog(community.id))
+    }
+    const onMembersClick = () => {
+        setAnchorEl(null)
+        navigate(`/communities/${community.id}`)
+        setOpenMemberList(true)
     }
 
     const menuBlocked = useAppSelector(state=>state.communityReducer.leaving)
@@ -130,7 +137,7 @@ const CommunityListItem = ({community}: {community: Community}) => {
                 </ListItemIcon>
                 <Typography>Create album</Typography>
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={onMembersClick}>
                 <ListItemIcon>
                     <Person />
                 </ListItemIcon>
@@ -152,5 +159,6 @@ const CommunityListItem = ({community}: {community: Community}) => {
                 </MenuItem>]
             }
         </Menu>
+        <MemberGridDialog open={openMemberList} onClose={()=>setOpenMemberList(false)} community={community} />
     </ListItem>
 }

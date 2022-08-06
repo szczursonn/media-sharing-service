@@ -1,11 +1,13 @@
 import { Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Grid, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import communityApi from "../../api/communityApi"
 import { Album, Community } from "../../types"
 import { AlbumCreateDialog } from "../dialogs/AlbumCreateDialog"
 
 export const CommunityHomePage = ({community}: {community: Community}) => {
 
+    const navigate = useNavigate()
     const [albums, setAlbums] = useState<Album[]|null>(null)
     const [loading, setLoading] = useState(false)
     const [albumCreateDialogOpen, setAlbumCreateDialogOpen] = useState(false)
@@ -37,7 +39,7 @@ export const CommunityHomePage = ({community}: {community: Community}) => {
                     ? <>
                         <Grid container>
                             {albums.map((album)=><Grid item key={album.id} xs={4}>
-                                <Card sx={{ maxWidth: 345 }}>
+                                <Card sx={{ maxWidth: 345 }} onClick={()=>navigate(`albums/${album.id}`)}>
                                     <CardActionArea>
                                         <CardMedia
                                         component="img"

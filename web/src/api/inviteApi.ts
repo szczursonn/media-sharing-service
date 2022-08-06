@@ -15,9 +15,14 @@ const acceptInvite = async (inviteId: string) => {
     return body as Community
 }
 
+const invalidateInvite = async (inviteId: string) => {
+    await customFetch(`/invite/${inviteId}`, {method: 'DELETE'})
+}
+
 const inviteApi = {
     getInvite,
-    acceptInvite
+    acceptInvite,
+    invalidateInvite
 }
 
 export default inviteApi
