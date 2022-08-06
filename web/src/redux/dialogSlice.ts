@@ -1,11 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { createAlbum } from './albumSlice'
 
 type DialogState = {
     loginOpen: boolean,
     communityCreateOpen: boolean,
     inviteOpen: boolean,
     inviteCreateOpen: boolean,
-    inviteCreateTargetId: number|null
+    inviteCreateTargetId: number|null,
+    albumCreateOpen: boolean,
+    albumCreateTargetId: number|null
 }
 
 const initialState: DialogState = {
@@ -13,7 +16,9 @@ const initialState: DialogState = {
     communityCreateOpen: false,
     inviteOpen: false,
     inviteCreateOpen: false,
-    inviteCreateTargetId: null
+    inviteCreateTargetId: null,
+    albumCreateOpen: false,
+    albumCreateTargetId: null
 }
 
 export const dialogSlice = createSlice({
@@ -47,10 +52,34 @@ export const dialogSlice = createSlice({
         },
         closeInviteCreateDialog: (state) => {
             state.inviteCreateOpen = false
+        },
+
+        openAlbumCreateDialog: (state, action: {payload: number}) => {
+            state.albumCreateOpen = true
+            state.albumCreateTargetId = action.payload
+        },
+        closeAlbumCreateDialog: (state) => {
+            state.albumCreateOpen = false
         }
-    }
+    },
+    extraReducers: (builder) => {
+        builder.addCase(createAlbum.fulfilled, (state, action) => {
+            if (action.payload.err === null) state.albumCreateOpen = false
+        })
+    },
 })
 
-export const {openLoginDialog, closeLoginDialog, openCommunityCreateDialog, closeCommunityCreateDialog, openInviteDialog, closeInviteDialog, openInviteCreateDialog, closeInviteCreateDialog} = dialogSlice.actions
+export const {
+    openLoginDialog, 
+    closeLoginDialog, 
+    openCommunityCreateDialog, 
+    closeCommunityCreateDialog, 
+    openInviteDialog, 
+    closeInviteDialog, 
+    openInviteCreateDialog, 
+    closeInviteCreateDialog,
+    openAlbumCreateDialog,
+    closeAlbumCreateDialog
+} = dialogSlice.actions
 
 export default dialogSlice.reducer

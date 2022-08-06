@@ -1,29 +1,25 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material"
 import { useState } from "react"
-import communityApi from "../../api/communityApi"
-import { Album } from "../../types"
+import { createAlbum } from "../../redux/albumSlice"
+import { closeAlbumCreateDialog } from "../../redux/dialogSlice"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 
-export const AlbumCreateDialog = ({open, communityId, onCancel, onSuccess}: {open: boolean, communityId: number, onCancel: ()=>void, onSuccess: (album: Album)=>void}) => {
+export const AlbumCreateDialog = () => {
 
     const [name, setName] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string|null>(null)
+
+    const dispatch = useAppDispatch()
+    const loading = useAppSelector(state=>state.albumReducer.creating)
+    const error = useAppSelector(state=>state.albumReducer.creatingError)
+
+    const open = useAppSelector(state=>state.dialogReducer.albumCreateOpen)
+    const communityId = useAppSelector(state=>state.dialogReducer.albumCreateTargetId)
 
     const onClose = () => {
-        if (!loading) onCancel()
+        if (!loading) dispatch(closeAlbumCreateDialog())
     }
-
-    const createAlbum = async () => {
-        setLoading(true)
-        setError(null)
-        try {
-            const com = await communityApi.createNewAlbum(communityId, name)
-            setName('')
-            onSuccess(com)
-        } catch (err) {
-            setError(String(err))
-        }
-        setLoading(false)
+    const onCreateClick = () => {
+      if (communityId) dispatch(createAlbum({communityId, albumName: name}))
     }
 
     return <Dialog open={open} onClose={onClose}>
@@ -44,7 +40,7 @@ export const AlbumCreateDialog = ({open, communityId, onCancel, onSuccess}: {ope
     </DialogContent>
     <DialogActions>
       <Button disabled={loading} onClick={onClose}>Cancel</Button>
-      <Button disabled={loading} onClick={createAlbum}>Create</Button>
+      <Button disabled={loading} onClick={onCreateClick}>Create</Button>
     </DialogActions>
   </Dialog>
 }

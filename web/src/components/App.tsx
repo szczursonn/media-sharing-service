@@ -18,6 +18,7 @@ import { CommunityCreateDialog } from './dialogs/CommunityCreateDialog';
 import { InviteInputDialog } from './dialogs/InviteInputDialog';
 import { RequireLoginPage } from './pages/RequireLoginPage';
 import { InviteCreateDialog } from './dialogs/InviteCreateDialog';
+import { AlbumCreateDialog } from './dialogs/AlbumCreateDialog';
 
 
 const App = () => {
@@ -62,6 +63,7 @@ const App = () => {
       </Backdrop>
       <LoginDialog />
       <CommunityCreateDialog />
+      <AlbumCreateDialog />
       <InviteInputDialog />
       <InviteCreateDialog />
       <ErrorDialog open={errorDialogOpen} title='Unexpected error' description={`There was an unexpected error when logging in: ${errorUser}`} onClose={()=>dispatch(closeUserErrorDialog())}/>

@@ -1,32 +1,16 @@
 import { Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Grid, Typography } from "@mui/material"
-import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import communityApi from "../../api/communityApi"
-import { Album, Community } from "../../types"
-import { AlbumCreateDialog } from "../dialogs/AlbumCreateDialog"
+import { openAlbumCreateDialog } from "../../redux/dialogSlice"
+import { useAppDispatch, useAppSelector } from "../../redux/hooks"
+import { Community } from "../../types"
 
 export const CommunityHomePage = ({community}: {community: Community}) => {
 
     const navigate = useNavigate()
-    const [albums, setAlbums] = useState<Album[]|null>(null)
-    const [loading, setLoading] = useState(false)
-    const [albumCreateDialogOpen, setAlbumCreateDialogOpen] = useState(false)
 
-    const loadAlbums = async () => {
-        setLoading(true)
-        try {
-            const a = await communityApi.getCommunityAlbums(community.id)
-            setAlbums(a)
-        } catch (err) {
-
-        }
-        setLoading(false)
-    }
-
-    useEffect(()=>{
-        if (community) loadAlbums()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [community])
+    const dispatch = useAppDispatch()
+    const albums = useAppSelector(state=>state.albumReducer.albums)
+    const loading = useAppSelector(state=>state.albumReducer.loading)
 
     return <>
         <Typography variant="h4">Albums</Typography>
@@ -60,11 +44,7 @@ export const CommunityHomePage = ({community}: {community: Community}) => {
                                 </Card>
                             </Grid>)}
                         </Grid>
-                        <Button sx={{marginTop: 1}} variant="outlined" onClick={()=>setAlbumCreateDialogOpen(true)}>add album</Button>
-                        <AlbumCreateDialog open={albumCreateDialogOpen} communityId={community.id} onCancel={()=>setAlbumCreateDialogOpen(false)} onSuccess={(album)=>{
-                            setAlbums([...albums, album])
-                            setAlbumCreateDialogOpen(false)
-                        }}/>
+                        <Button sx={{marginTop: 1}} variant="outlined" onClick={()=>dispatch(openAlbumCreateDialog(community.id))}>add album</Button>
                     </>
                     : <Typography variant="h6">eror :(</Typography>
                 }

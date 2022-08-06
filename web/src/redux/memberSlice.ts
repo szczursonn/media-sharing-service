@@ -58,7 +58,7 @@ export const memberSlice = createSlice({
     },
 })
 
-export const fetchMembers = createAsyncThunk('member/fetchMembers', async (communityId: number): Promise<ThunkResult<Member[]|null>> => {
+export const fetchMembers = createAsyncThunk('member/fetchMembers', async (communityId: number): Promise<ThunkResult<Member[]>> => {
     try {
         const members = await communityApi.getCommunityMembers(communityId)
         return {
@@ -96,6 +96,6 @@ export const kickMember = createAsyncThunk('member/kickMember', async ({communit
     }
 })
 
-export const {} = memberSlice.actions
+//export const {} = memberSlice.actions
 
 export default memberSlice.reducer

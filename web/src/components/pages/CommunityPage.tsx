@@ -1,6 +1,7 @@
 import { CircularProgress, Container, Typography } from "@mui/material"
 import { useEffect } from "react"
 import { Route, Routes, useParams } from "react-router-dom"
+import { fetchAlbums } from "../../redux/albumSlice"
 import { selectCommunity } from "../../redux/communitySlice"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { fetchMembers } from "../../redux/memberSlice"
@@ -26,7 +27,10 @@ export const CommunityPage = () => {
     }, [loadingCommunities, communityId])
 
     useEffect(()=>{
-        if (community) dispatch(fetchMembers(community.id))
+        if (community) {
+            dispatch(fetchMembers(community.id))
+            dispatch(fetchAlbums(community.id))
+        }
     }, [community])
 
     return <Container maxWidth='lg' sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>

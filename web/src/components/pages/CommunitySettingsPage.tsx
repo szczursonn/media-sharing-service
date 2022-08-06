@@ -1,4 +1,4 @@
-import { Container, Typography, CircularProgress, Paper, Stack, Button, Grid } from "@mui/material"
+import { Container, Typography, CircularProgress, Button, Grid } from "@mui/material"
 import { useEffect, useState } from "react"
 import communityApi from "../../api/communityApi"
 import inviteApi from "../../api/inviteApi"
