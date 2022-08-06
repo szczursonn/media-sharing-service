@@ -1,9 +1,9 @@
-import { GitHub, Logout, Mail, Settings } from "@mui/icons-material"
+import { Create, GitHub, Logout, Mail, Person, Settings } from "@mui/icons-material"
 import { Avatar, Box, Button, CircularProgress, Divider, IconButton, List, ListItem, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { fetchCommunities, leaveCommunity, selectCommunity } from "../redux/communitySlice"
-import { openCommunityCreateDialog, openInviteDialog } from "../redux/dialogSlice"
+import { fetchCommunities, leaveCommunity, selectCommunity, selectSelectedCommunity } from "../redux/communitySlice"
+import { openCommunityCreateDialog, openInviteCreateDialog, openInviteDialog } from "../redux/dialogSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { Community } from "../types"
 import { ErrorDialog } from "./dialogs/ErrorDialog"
@@ -74,19 +74,27 @@ export const MyDrawer = () => {
 const CommunityListItem = ({community}: {community: Community}) => {
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
-    const selectedCommunity = useAppSelector(state=>state.communityReducer.selected)
+    const selectedCommunity = useAppSelector(selectSelectedCommunity())
 
     const user = useAppSelector(state=>state.userReducer.user)
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
     const onCommunityClick = () => {
-        dispatch(selectCommunity(community))
+        dispatch(selectCommunity(community.id))
         navigate(`/communities/${community.id}`)
     }
     const onRightClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setAnchorEl(e.currentTarget)
+    }
+    const onSettingsClick = () => {
+        setAnchorEl(null)
+        navigate(`/communities/${community.id}/settings`)
+    }
+    const onInviteClick = () => {
+        setAnchorEl(null)
+        dispatch(openInviteCreateDialog(community.id))
     }
 
     const menuBlocked = useAppSelector(state=>state.communityReducer.leaving)
@@ -94,6 +102,8 @@ const CommunityListItem = ({community}: {community: Community}) => {
     const closeMenu = () => {
         if (!menuBlocked) setAnchorEl(null)
     }
+
+    const isOwner = (user && community.ownerId === user.id)
 
     return <ListItem sx={{paddingLeft: '8px'}}>
         <ListItemIcon>
@@ -107,8 +117,8 @@ const CommunityListItem = ({community}: {community: Community}) => {
                 </Tooltip>
             </IconButton>
         </ListItemIcon>
-        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeMenu}>
-            <MenuItem>
+        <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={closeMenu}>
+            <MenuItem disabled={menuBlocked} onClick={onInviteClick}>
                 <ListItemIcon>
                     <Mail />
                 </ListItemIcon>
@@ -116,13 +126,25 @@ const CommunityListItem = ({community}: {community: Community}) => {
             </MenuItem>
             <MenuItem>
                 <ListItemIcon>
+                    <Create />
+                </ListItemIcon>
+                <Typography>Create album</Typography>
+            </MenuItem>
+            <MenuItem>
+                <ListItemIcon>
+                    <Person />
+                </ListItemIcon>
+                <Typography>Members</Typography>
+            </MenuItem>
+            {isOwner && <MenuItem onClick={onSettingsClick}>
+                <ListItemIcon>
                     <Settings />
                 </ListItemIcon>
                 <Typography>Settings</Typography>
-            </MenuItem>
-            {(user && community.ownerId !== user.id) && [
-                <Divider />,
-                <MenuItem onClick={()=>dispatch(leaveCommunity(community.id))} disabled={menuBlocked}>
+            </MenuItem>}
+            {!isOwner && [
+                <Divider key={1}/>,
+                <MenuItem key={2} onClick={()=>dispatch(leaveCommunity(community.id))} disabled={menuBlocked}>
                     <ListItemIcon>
                         <Logout />
                     </ListItemIcon>

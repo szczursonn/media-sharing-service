@@ -42,6 +42,9 @@ export const CallbackPage = () => {
                     case 'unavailable_oauth2_provider':
                         setError(`Logging in with ${provider} is currently unavailable`)
                         break
+                    case 'already_connected':
+                        setError(`That ${provider} account is already connected to different account!`)
+                        break
                     default:
                         setError(`Unknown error: ${err.type}`)
                 }
@@ -68,7 +71,7 @@ export const CallbackPage = () => {
     if (error !== null) {
         return <Grid container alignItems='center' justifyItems='center' direction='column' marginTop='10vh'>
             <Paper elevation={5} sx={{padding: '15px', display: 'flex', justifyItems: 'center', flexDirection: 'column'}}>
-                <Typography variant="h5" color='error'>{error}</Typography>
+                <Typography variant="h5" color='error'>ERROR: {error}</Typography>
                 <Button variant="contained" onClick={()=>navigate('/')}>HOME</Button>
             </Paper>
         </Grid>

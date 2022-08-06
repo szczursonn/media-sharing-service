@@ -3,13 +3,17 @@ import { createSlice } from '@reduxjs/toolkit'
 type DialogState = {
     loginOpen: boolean,
     communityCreateOpen: boolean,
-    inviteOpen: boolean
+    inviteOpen: boolean,
+    inviteCreateOpen: boolean,
+    inviteCreateTargetId: number|null
 }
 
 const initialState: DialogState = {
     loginOpen: false,
     communityCreateOpen: false,
-    inviteOpen: false
+    inviteOpen: false,
+    inviteCreateOpen: false,
+    inviteCreateTargetId: null
 }
 
 export const dialogSlice = createSlice({
@@ -35,10 +39,18 @@ export const dialogSlice = createSlice({
         },
         closeInviteDialog: (state) => {
             state.inviteOpen = false
+        },
+
+        openInviteCreateDialog: (state, action: {payload: number}) => {
+            state.inviteCreateOpen = true
+            state.inviteCreateTargetId = action.payload
+        },
+        closeInviteCreateDialog: (state) => {
+            state.inviteCreateOpen = false
         }
     }
 })
 
-export const {openLoginDialog, closeLoginDialog, openCommunityCreateDialog, closeCommunityCreateDialog, openInviteDialog, closeInviteDialog} = dialogSlice.actions
+export const {openLoginDialog, closeLoginDialog, openCommunityCreateDialog, closeCommunityCreateDialog, openInviteDialog, closeInviteDialog, openInviteCreateDialog, closeInviteCreateDialog} = dialogSlice.actions
 
 export default dialogSlice.reducer

@@ -32,6 +32,7 @@ export const customFetch = async (uri: string, {method, auth=true, body=undefine
         if (error === 'oauth2_provider_unavailable') throw new AppError('unavailable_oauth2_provider')
         if (error === 'cannot_remove_last_connection') throw new AppError('cannot_remove_last_user_connection')
         if (error === 'resource_not_found') throw new AppError('resource_not_found')
+        if (error === 'oauth2_already_connected') throw new AppError('already_connected')
         
         throw new Error(error)
     }

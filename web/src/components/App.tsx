@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MyAppBar } from './MyAppBar';
 import { Route, Routes } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
-import { Backdrop, Box, Button, CircularProgress, Grid, Typography } from '@mui/material';
+import { Backdrop, CircularProgress, Grid } from '@mui/material';
 import { CallbackPage } from './pages/CallbackPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { LoginDialog } from './dialogs/LoginDialog';
@@ -17,6 +17,7 @@ import { fetchCommunities } from '../redux/communitySlice';
 import { CommunityCreateDialog } from './dialogs/CommunityCreateDialog';
 import { InviteInputDialog } from './dialogs/InviteInputDialog';
 import { RequireLoginPage } from './pages/RequireLoginPage';
+import { InviteCreateDialog } from './dialogs/InviteCreateDialog';
 
 
 const App = () => {
@@ -48,7 +49,7 @@ const App = () => {
         <Grid item xs={11.5}>
           <Routes>
             <Route path='/' element={<HomePage />} />
-            <Route path='/communities/:communityId' element={user ? <CommunityPage /> : <RequireLoginPage />}/>
+            <Route path='/communities/:communityId/*' element={user ? <CommunityPage /> : <RequireLoginPage />}/>
             <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage />} />
             <Route path='/i/:inviteId' element={<InvitePage />} />
             <Route path='/callback/:provider' element={<CallbackPage />} />
@@ -62,6 +63,7 @@ const App = () => {
       <LoginDialog />
       <CommunityCreateDialog />
       <InviteInputDialog />
+      <InviteCreateDialog />
       <ErrorDialog open={errorDialogOpen} title='Unexpected error' description={`There was an unexpected error when logging in: ${errorUser}`} onClose={()=>dispatch(closeUserErrorDialog())}/>
     </div>
   );

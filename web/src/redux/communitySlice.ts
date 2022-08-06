@@ -3,12 +3,13 @@ import communityApi from '../api/communityApi'
 import userApi from '../api/userApi'
 import { AppError } from '../errors'
 import { Community, ThunkResult } from '../types'
+import { RootState } from './store'
 
 type CommunityState = {
     communities: Community[]|null,
     loading: boolean,
     error: string|null,
-    selected: Community|null,
+    selectedId: number|null,
     saving: boolean,
     savingError: string|null,
     leaving: boolean,
@@ -19,7 +20,7 @@ const initialState: CommunityState = {
     communities: null,
     loading: false,
     error: null,
-    selected: null,
+    selectedId: null,
     saving: false,
     savingError: null,
     leaving: false,
@@ -30,19 +31,19 @@ export const communitySlice = createSlice({
     name: 'community',
     initialState,
     reducers: {
-        selectCommunity: (state, action: {payload: Community|null})=>{
-            state.selected = action.payload
+        selectCommunity: (state, action: {payload: number|null})=>{
+            state.selectedId = action.payload
         },
         setCommunities: (state, action: {payload: Community[]|null}) => {
             state.communities = action.payload
-            if (!state.communities) state.selected = null
-            if (state.communities && state.selected && !state.communities.includes(state.selected)) state.selected = null
+            if (!state.communities) state.selectedId = null
+            if (state.communities && state.selectedId && !state.communities.map(c=>c.id).includes(state.selectedId)) state.selectedId = null
         }
     },
     extraReducers: (builder) => {
         builder.addCase(fetchCommunities.pending, (state) => {
             state.communities = null
-            state.selected = null
+            state.selectedId = null
             state.loading = true
             state.error = null
         })
@@ -142,6 +143,10 @@ export const leaveCommunity = createAsyncThunk('community/leaveCommunity', async
         }
     }
 })
+
+export const selectSelectedCommunity = () => (state: RootState): Community|null => {
+    return state.communityReducer.communities?.find(c=>c.id===state.communityReducer.selectedId) ?? null
+}
 
 export const {selectCommunity, setCommunities} = communitySlice.actions
 

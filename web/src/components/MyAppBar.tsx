@@ -1,22 +1,22 @@
 import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Home } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { openLoginDialog } from '../redux/dialogSlice';
 import { setCurrentUser } from '../redux/userSlice';
-import { selectCommunity } from '../redux/communitySlice';
+import { selectCommunity, selectSelectedCommunity } from '../redux/communitySlice';
 import userApi from '../api/userApi';
 
 export const MyAppBar = () => {
 
     const dispatch = useAppDispatch()
-
+    const location = useLocation()
     const navigate = useNavigate()
 
     const user = useAppSelector(state=>state.userReducer.user)
 
-    const selectedCommunity = useAppSelector(state=>state.communityReducer.selected)
+    const selectedCommunity = useAppSelector(selectSelectedCommunity())
     const [logoutInProgress, setLogoutInProgress] = useState(false)
 
     const onLoginClick = () => {
@@ -34,7 +34,9 @@ export const MyAppBar = () => {
       dispatch(selectCommunity(null))
       navigate('/')
     }
-  
+    
+    const isCommunitySettings = !!location.pathname.match(/communities\/\d\/settings/g)
+
     return <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
@@ -42,7 +44,7 @@ export const MyAppBar = () => {
             <Home />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            media-sharing-service{selectedCommunity && ` > ${selectedCommunity.name}`}
+            media-sharing-service{selectedCommunity && ` > ${selectedCommunity.name}`}{isCommunitySettings && ' > Community Settings'}
           </Typography>
           {
             user
