@@ -13,7 +13,9 @@ type CommunityState = {
     saving: boolean,
     savingError: string|null,
     leaving: boolean,
-    leavingError: string|null
+    leavingError: string|null,
+    deleting: boolean,
+    deletingError: string|null
 }
 
 const initialState: CommunityState = {
@@ -24,7 +26,9 @@ const initialState: CommunityState = {
     saving: false,
     savingError: null,
     leaving: false,
-    leavingError: null
+    leavingError: null,
+    deleting: false,
+    deletingError: null
 }
 
 export const communitySlice = createSlice({
@@ -84,6 +88,21 @@ export const communitySlice = createSlice({
             }
             state.leaving = false
         })
+
+        builder.addCase(deleteCommunity.pending, (state) => {
+            state.deleting = true
+            state.deletingError = null
+        })
+        builder.addCase(deleteCommunity.fulfilled, (state, action) => {
+            const err = action.payload.err
+            if (err) {
+                state.deletingError = err
+            } else if (state.communities) {
+                const i = state.communities.findIndex(c=>c.id===action.payload.data!)
+                if (i !== -1) state.communities.splice(i, 1)
+            }
+            state.deleting = false
+        })
     },
 })
 
@@ -128,6 +147,25 @@ export const createCommunity = createAsyncThunk('community/createCommunity', asy
 export const leaveCommunity = createAsyncThunk('community/leaveCommunity', async (communityId: number): Promise<ThunkResult<number|null>> => {
     try {
         await communityApi.leaveCommunity(communityId)
+        return {
+            err: null,
+            data: communityId
+        }
+    } catch (err) {
+        let e: string
+        if (err instanceof AppError) {
+            e = err.type
+        } else e = String(err)
+        return {
+            err: e,
+            data: null
+        }
+    }
+})
+
+export const deleteCommunity = createAsyncThunk('community/deleteCommunity', async (communityId: number): Promise<ThunkResult<number>> => {
+    try {
+        await communityApi.removeCommunity(communityId)
         return {
             err: null,
             data: communityId
