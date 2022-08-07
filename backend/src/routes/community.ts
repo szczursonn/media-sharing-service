@@ -14,6 +14,7 @@ import { genericErrorResponse } from '../utils'
  * - DELETE /<communityId>/members/<memberId> - kicks user from community
  * - GET /<communityId>/albums - returns community albums
  * - POST /<communityId>/albums - creates an album
+ * - DELETE /<communityId - deletes a community
  */
 
 export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {communityService, inviteService, albumService}: AppServices) => {
