@@ -71,6 +71,10 @@ const getUserCommunities = async () => {
     return body as Community[]
 }
 
+const deleteCurrentUser = async () => {
+    await customFetch('/users/@me', {method: 'DELETE'})
+}
+
 const userApi = {
     getCurrentUser,
     loginOrRegisterWithOAuth2Provider,
@@ -81,7 +85,8 @@ const userApi = {
     invalidateCurrentSession,
     getUserConnections,
     removeUserConnection,
-    getUserCommunities
+    getUserCommunities,
+    deleteCurrentUser
 }
 
 export default userApi

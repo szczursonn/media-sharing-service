@@ -1,4 +1,4 @@
-import { Avatar, Backdrop, Button, CircularProgress, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField, Typography } from "@mui/material"
+import { Avatar, Backdrop, Button, CircularProgress, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useState } from "react"
 import { OAuth2Provider, UserConnection, UserSession } from "../../types"
@@ -10,7 +10,7 @@ import discordIcon from '../../svg/discordIcon.svg'
 import googleIcon from '../../svg/googleIcon.svg'
 import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../../constants"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
-import { setCurrentUser, updateCurrentUser } from "../../redux/userSlice"
+import { deleteCurrentUser, setCurrentUser, updateCurrentUser } from "../../redux/userSlice"
 import { AppError } from "../../errors"
 import userApi from "../../api/userApi";
 
@@ -30,6 +30,14 @@ export const SettingsPage = () => {
     const updatingUser = useAppSelector(state=>state.userReducer.updating)
     const updatingUserError = useAppSelector(state=>state.userReducer.updatingError)
 
+    const deleting = useAppSelector(state=>state.userReducer.deleting)
+    const deletingError = useAppSelector(state=>state.userReducer.deletingError)
+
+    const [openAreYouSureDialog, setOpenAreYouSureDialog] = useState(false)
+
+    const removeUser = async () => {
+        dispatch(deleteCurrentUser())
+    }
     const updateUsername = async () => {
         dispatch(updateCurrentUser({username: newUsername}))
     }
@@ -111,6 +119,7 @@ export const SettingsPage = () => {
                 }
             </>
         }
+        <Divider light sx={{width: '100%', marginTop: 2, marginBottom: 2}}/>
         <Typography variant="h4">Connections</Typography>
         {
             loadingConnections
@@ -130,6 +139,11 @@ export const SettingsPage = () => {
                 }
             </>
         }
+        <Divider light sx={{width: '100%', marginTop: 2, marginBottom: 2}}/>
+        <Button variant="contained" color="error" onClick={()=>setOpenAreYouSureDialog(true)}>DELETE COMMUNITY</Button>
+        {deletingError && <Typography color='error'>Error: {deletingError}</Typography>}
+        <Backdrop open={deleting}><CircularProgress /></Backdrop>
+        <AreYouSureDialog open={openAreYouSureDialog} onNo={() => setOpenAreYouSureDialog(false)} onYes={removeUser} description={'Are you sure you want do delete your account?'} />
     </Container>
 }
 

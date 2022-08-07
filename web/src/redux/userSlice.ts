@@ -9,7 +9,9 @@ type UserState = {
     error: string|null,
     errorDialogOpen: boolean,
     updating: boolean,
-    updatingError: string|null
+    updatingError: string|null,
+    deleting: boolean,
+    deletingError: string|null
 }
 
 const initialState: UserState = {
@@ -18,7 +20,9 @@ const initialState: UserState = {
     error: null,
     errorDialogOpen: false,
     updating: false,
-    updatingError: null
+    updatingError: null,
+    deleting: false,
+    deletingError: null
 }
 
 export const userSlice = createSlice({
@@ -65,6 +69,22 @@ export const userSlice = createSlice({
             }
             state.updating = false
         })
+
+        builder.addCase(deleteCurrentUser.pending, (state) => {
+            state.deleting = true
+            state.deletingError = null
+        })
+        builder.addCase(deleteCurrentUser.fulfilled, (state, action) => {
+            const err = action.payload.err
+            if (err) {
+                state.deletingError = err
+            } else {
+                state.user = null
+                localStorage.removeItem('token')
+                localStorage.removeItem('sessionId')
+            }
+            state.deleting = false
+        })
     }
 })
 
@@ -94,6 +114,26 @@ export const updateCurrentUser = createAsyncThunk('user/updateUser', async ({use
         return {
             err: null,
             data: updated
+        }
+    } catch (err) {
+        let e: string
+        if (err instanceof AppError) {
+            e = err.type
+        } else e = String(err)
+        
+        return {
+            err: e,
+            data: null
+        }
+    }
+})
+
+export const deleteCurrentUser = createAsyncThunk('user/deleteUser', async (): Promise<ThunkResult<null>> => {
+    try {
+        await userApi.deleteCurrentUser()
+        return {
+            err: null,
+            data: null
         }
     } catch (err) {
         let e: string
