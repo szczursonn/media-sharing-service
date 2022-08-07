@@ -5,6 +5,7 @@ import googleIcon from '../../svg/googleIcon.svg'
 import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL } from "../../constants"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { closeLoginDialog } from "../../redux/dialogSlice"
+import { useEffect } from "react"
 
 export const LoginDialog = () => {
 
@@ -15,6 +16,10 @@ export const LoginDialog = () => {
   const onClose = () => {
     dispatch(closeLoginDialog())
   }
+
+  useEffect(()=>{
+    if (open) localStorage.setItem('beforeLoginPage', window.location.pathname)
+  }, [open])
 
   return <Dialog onClose={onClose} open={open}>
     <DialogTitle>Login/Register with OAuth2 Provider</DialogTitle>

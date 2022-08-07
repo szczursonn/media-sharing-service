@@ -32,7 +32,7 @@ export const CallbackPage = () => {
                 await userApi.loginOrRegisterWithOAuth2Provider(code, provider)
                 dispatch(fetchCurrentUser())
             }
-            navigate('/')
+            navigate(localStorage.getItem('beforeLoginPage') ?? '/')
         } catch (err) {
             if (err instanceof AppError) {
                 switch (err.type) {
