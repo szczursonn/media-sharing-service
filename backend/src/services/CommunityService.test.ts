@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm"
 import { createTestDataSource } from "../createDataSource"
-import { ResourceNotFoundError } from "../errors"
+import { MissingAccessError, ResourceNotFoundError } from "../errors"
 import { CommunityMember } from "../models/CommunityMember"
 import { CommunityService } from "./CommunityService"
 
@@ -18,12 +18,16 @@ describe('CommunityService tests', () => {
     })
 
     it('allows to get community by id', async () => {
-        const community = await communityService.getCommunityById(1)
+        const community = await communityService.getCommunityById(1, 1)
         expect(community.id).toBe(1)
     })
 
     it('disallows to get a community that doesnt exist', async () => {
-        await expect(communityService.getCommunityById(999)).rejects.toThrowError(ResourceNotFoundError)
+        await expect(communityService.getCommunityById(999, 1)).rejects.toThrowError(ResourceNotFoundError)
+    })
+
+    it('disallows to get a community you are not a part of', async () => {
+        await expect(communityService.getCommunityById(1, 4)).rejects.toThrowError(MissingAccessError)
     })
 
     it('allows to create community', async () => {

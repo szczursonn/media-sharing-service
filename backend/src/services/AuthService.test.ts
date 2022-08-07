@@ -24,7 +24,7 @@ describe('AuthService tests', () => {
     })
 
     it('allows to register with OAuth2 provider', async () => {
-        await authService.loginOrRegisterWithOAuth2('abc', 'discord')
+        await authService.loginOrRegisterWithOAuth2('abc', 'discord', 'windows 10')
 
         const connection = await dataSource.manager.findOneBy(UserConnection, {
             foreignId: 'abc',
@@ -40,7 +40,7 @@ describe('AuthService tests', () => {
     })
 
     it('allows to login with OAuth2 provider', async () => {
-        await authService.loginOrRegisterWithOAuth2('afro#1234', 'discord')
+        await authService.loginOrRegisterWithOAuth2('afro#1234', 'discord', 'windows 10')
 
         const sessions = await dataSource.manager.findBy(Session, {
             userId: 4
@@ -50,11 +50,11 @@ describe('AuthService tests', () => {
     })
 
     it('disallows to login/register with unavailable oauth2 provider', async () => {
-        await expect(authService.loginOrRegisterWithOAuth2('goblinek666', 'google')).rejects.toThrowError(OAuth2ProviderUnavailableError)
+        await expect(authService.loginOrRegisterWithOAuth2('goblinek666', 'google', 'windows 10')).rejects.toThrowError(OAuth2ProviderUnavailableError)
     })
 
     it('disallows to login/register with invalid code', async () => {
-        await expect(authService.loginOrRegisterWithOAuth2('invalidcode', 'discord')).rejects.toThrowError(OAuth2InvalidCodeError)
+        await expect(authService.loginOrRegisterWithOAuth2('invalidcode', 'discord', 'linux')).rejects.toThrowError(OAuth2InvalidCodeError)
     })
 
     it('allows to add new connections to user', async () => {

@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm"
 import { createTestDataSource } from "../createDataSource"
-import { InsufficientPermissionsError } from "../errors"
+import { InsufficientPermissionsError, MissingAccessError } from "../errors"
 import { Album } from "../models/Album"
 import { AlbumService } from "./AlbumService"
 
@@ -23,7 +23,7 @@ describe('AlbumService tests', () => {
     })
 
     it('disallows to get community\'s albums if you are not a member', async () => {
-        await expect(albumService.getByCommunity(2, 3)).rejects.toThrowError(InsufficientPermissionsError)
+        await expect(albumService.getByCommunity(2, 3)).rejects.toThrowError(MissingAccessError)
     })
 
     it('allows to create album', async () => {
