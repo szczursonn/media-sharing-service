@@ -33,6 +33,8 @@ export const customFetch = async (uri: string, {method, auth=true, body=undefine
         if (error === 'cannot_remove_last_connection') throw new AppError('cannot_remove_last_user_connection')
         if (error === 'resource_not_found') throw new AppError('resource_not_found')
         if (error === 'oauth2_already_connected') throw new AppError('already_connected')
+        if (error === 'bad_file') throw new AppError('bad_file')
+        if (error === 'bad_request') throw new AppError('bad_request')
         
         throw new Error(error)
     }

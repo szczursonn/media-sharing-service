@@ -1,4 +1,12 @@
-export type AppErrorType = 'unauthenticated' | 'invalid_oauth2_code' | 'unavailable_oauth2_provider' | 'cannot_remove_last_user_connection' | 'resource_not_found' | 'already_connected'
+export type AppErrorType = 
+'unauthenticated' | 
+'invalid_oauth2_code' | 
+'unavailable_oauth2_provider' | 
+'cannot_remove_last_user_connection' | 
+'resource_not_found' | 
+'already_connected' | 
+'bad_file' |
+'bad_request'
 
 export class AppError extends Error {
     public readonly type: AppErrorType

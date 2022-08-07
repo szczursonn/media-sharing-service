@@ -11,6 +11,7 @@ export const CommunityHomePage = ({community}: {community: Community}) => {
     const dispatch = useAppDispatch()
     const albums = useAppSelector(state=>state.albumReducer.albums)
     const loading = useAppSelector(state=>state.albumReducer.loading)
+    const error = useAppSelector(state=>state.albumReducer.error)
 
     return <>
         <Typography variant="h4">Albums</Typography>
@@ -46,7 +47,7 @@ export const CommunityHomePage = ({community}: {community: Community}) => {
                         </Grid>
                         <Button sx={{marginTop: 1}} variant="outlined" onClick={()=>dispatch(openAlbumCreateDialog(community.id))}>add album</Button>
                     </>
-                    : <Typography variant="h6">eror :(</Typography>
+                    : <Typography variant="h6" color='error'>error: {error}</Typography>
                 }
             </>
         }
