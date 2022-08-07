@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinTable, OneToOne, ManyToMany, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, OneToMany, ManyToOne } from "typeorm";
 import { CommunityPublic } from "../types";
 import { Album } from "./Album";
 import { CommunityInvite } from "./CommunityInvite";
@@ -18,7 +18,7 @@ export class Community {
     })
     users!: Promise<User[]>
 
-    @OneToOne(()=>User)
+    @ManyToOne(()=>User)
     owner!: Promise<User>
 
     @Column()

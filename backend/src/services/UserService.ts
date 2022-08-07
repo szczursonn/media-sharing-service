@@ -22,10 +22,28 @@ export class UserService {
     }
 
     public async removeUser(userId: number): Promise<void> {
-        const delResult = await this.dataSource.manager.delete(User, {
-            id: userId
+        await this.dataSource.transaction(async (transaction) => {
+            const ownedCommunities = await transaction.findBy(Community, {
+                ownerId: userId
+            })
+
+            for (const community of ownedCommunities) {
+                const members = await transaction.findBy(CommunityMember, {
+                    communityId: community.id
+                })
+                if (members.length < 2) await transaction.delete(Community, {id: community.id})
+                else {
+                    const newOwnerId = members.find(m=>m.userId !== userId)!.userId
+                    community.ownerId = newOwnerId
+                    await transaction.save(community)
+                }
+            }
+
+            const delResult = await transaction.delete(User, {
+                id: userId
+            })
+            if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
         })
-        if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
     }
 
     public async modifyUser(userId: number, {username}: {username?: string}): Promise<UserPublic> {
