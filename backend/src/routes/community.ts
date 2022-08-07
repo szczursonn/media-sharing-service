@@ -123,6 +123,18 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
         }
     }))
 
+    router.delete('/:communityId', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.communityId)
+
+            if (isNaN(communityId)) throw new BadRequestError()
+            await communityService.deleteCommunity(communityId, userId)
+            return res.sendStatus(204)
+        } catch (err) {
+            return genericErrorResponse(res, err)
+        }
+    }))
+
     app.use('/communities', router)
     return app
 }

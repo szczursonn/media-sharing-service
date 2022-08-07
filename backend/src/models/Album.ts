@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { AlbumPublic } from "../types";
 import { Community } from "./Community";
 import { Media } from "./Media";
@@ -11,7 +11,7 @@ export class Album {
     @Column()
     name!: string
 
-    @ManyToOne(()=>Community, com=>com.albums)
+    @ManyToOne(()=>Community, com=>com.albums, {onDelete: 'CASCADE'})
     community!: Promise<Community>
 
     @Column()

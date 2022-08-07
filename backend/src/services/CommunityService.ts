@@ -86,4 +86,19 @@ export class CommunityService {
             return savedCommunity.public()
         })
     }
+
+    public async deleteCommunity(communityId: number, deleterId: number): Promise<void> {
+
+        const community = await this.dataSource.manager.findOneBy(Community, {
+            id: communityId
+        })
+        if (!community) throw new ResourceNotFoundError()
+
+        if (community.ownerId !== deleterId) throw new InsufficientPermissionsError()
+
+        const delResult = await this.dataSource.manager.delete(Community, {
+            id: communityId
+        })
+        if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
+    }
 }
