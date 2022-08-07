@@ -7,14 +7,18 @@ type UserState = {
     user: User|null,
     loading: boolean,
     error: string|null,
-    errorDialogOpen: boolean
+    errorDialogOpen: boolean,
+    updating: boolean,
+    updatingError: string|null
 }
 
 const initialState: UserState = {
     user: null,
     loading: false,
     error: null,
-    errorDialogOpen: false
+    errorDialogOpen: false,
+    updating: false,
+    updatingError: null
 }
 
 export const userSlice = createSlice({
@@ -47,6 +51,20 @@ export const userSlice = createSlice({
                 state.user = action.payload.data
             }
         })
+
+        builder.addCase(updateCurrentUser.pending, (state) => {
+            state.updating = true
+            state.updatingError = null
+        })
+        builder.addCase(updateCurrentUser.fulfilled, (state, action) => {
+            const err = action.payload.err
+            if (err) {
+                state.updatingError = err
+            } else {
+                state.user = action.payload.data
+            }
+            state.updating = false
+        })
     }
 })
 
@@ -56,6 +74,26 @@ export const fetchCurrentUser = createAsyncThunk('user/fetchUser', async (): Pro
         return {
             err: null,
             data: user
+        }
+    } catch (err) {
+        let e: string
+        if (err instanceof AppError) {
+            e = err.type
+        } else e = String(err)
+        
+        return {
+            err: e,
+            data: null
+        }
+    }
+})
+
+export const updateCurrentUser = createAsyncThunk('user/updateUser', async ({username}: {username: string}): Promise<ThunkResult<User>> => {
+    try {
+        const updated = await userApi.updateUser(username)
+        return {
+            err: null,
+            data: updated
         }
     } catch (err) {
         let e: string

@@ -10,7 +10,7 @@ import discordIcon from '../../svg/discordIcon.svg'
 import googleIcon from '../../svg/googleIcon.svg'
 import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../../constants"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
-import { setCurrentUser } from "../../redux/userSlice"
+import { setCurrentUser, updateCurrentUser } from "../../redux/userSlice"
 import { AppError } from "../../errors"
 import userApi from "../../api/userApi";
 
@@ -20,7 +20,6 @@ export const SettingsPage = () => {
     const user = useAppSelector(state=>state.userReducer.user)
 
     const [newUsername, setNewUsername] = useState(user?.username ?? '')
-    const [savingUsername, setSavingUsername] = useState(false)
 
     const [sessions, setSessions] = useState<UserSession[]|null>(null)
     const [loadingSessions, setLoadingSessions] = useState(false)
@@ -28,15 +27,11 @@ export const SettingsPage = () => {
     const [connections, setConnections] = useState<UserConnection[]|null>(null)
     const [loadingConnections, setLoadingConnections] = useState(false)
 
-    const updateUsername = async () => {
-        setSavingUsername(true)
-        try {
-            const user = await userApi.updateUser(newUsername)
-            dispatch(setCurrentUser(user))
-        } catch (err) {
+    const updatingUser = useAppSelector(state=>state.userReducer.updating)
+    const updatingUserError = useAppSelector(state=>state.userReducer.updatingError)
 
-        }
-        setSavingUsername(false)
+    const updateUsername = async () => {
+        dispatch(updateCurrentUser({username: newUsername}))
     }
 
     const fetchSessions = async () => {
@@ -91,7 +86,8 @@ export const SettingsPage = () => {
         value={newUsername}
         onChange={(e)=>setNewUsername(e.currentTarget.value)}
         />
-        <Button disabled={savingUsername} onClick={updateUsername}>Update</Button>
+        <Button disabled={updatingUser} onClick={updateUsername}>Update</Button>
+        {updatingUserError && <Typography color='error'>Error: {updatingUserError}</Typography>}
         <Typography variant="h4">Sessions</Typography>
         {
             loadingSessions
