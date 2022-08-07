@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import { InsufficientPermissionsError, ResourceNotFoundError } from "../errors";
+import { InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError } from "../errors";
 import { Album } from "../models/Album";
 import { Community } from "../models/Community";
 import { CommunityMember } from "../models/CommunityMember";
@@ -22,7 +22,7 @@ export class AlbumService {
             userId: getterId,
             communityId
         })
-        if (!member) throw new InsufficientPermissionsError()
+        if (!member) throw new MissingAccessError()
 
         const albums = await this.dataSource.manager.findBy(Album, {
             communityId
@@ -41,7 +41,8 @@ export class AlbumService {
             userId: creatorId,
             communityId
         })
-        if (!member || !member.canUpload) throw new InsufficientPermissionsError()
+        if (!member) throw new MissingAccessError()
+        if (!member.canUpload) throw new InsufficientPermissionsError()
 
         const album = new Album()
         album.name = name
@@ -62,7 +63,8 @@ export class AlbumService {
             communityId: album.communityId,
             userId: getterId
         })
-        if (!member || !member.canUpload) throw new InsufficientPermissionsError()
+        if (!member) throw new MissingAccessError()
+        if (!member.canUpload) throw new InsufficientPermissionsError()
 
         album.name = newName
 
@@ -76,6 +78,12 @@ export class AlbumService {
             id: albumId
         })
         if (!album) throw new ResourceNotFoundError()
+
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: deleterId,
+            communityId: album.communityId
+        })
+        if (!member) throw new MissingAccessError()
 
         const community = await album.community
         if (community.ownerId !== deleterId) throw new InsufficientPermissionsError()

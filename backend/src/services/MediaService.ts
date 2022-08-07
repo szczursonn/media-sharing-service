@@ -3,7 +3,7 @@ import { Media } from "../models/Media";
 import { MediaPublic, MediaType } from "../types";
 import { fromBuffer } from "file-type";
 import { Album } from "../models/Album";
-import { InsufficientPermissionsError, ResourceNotFoundError } from "../errors";
+import { BadFileError, InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError } from "../errors";
 import { CommunityMember } from "../models/CommunityMember";
 import { Community } from "../models/Community";
 
@@ -34,13 +34,14 @@ export class MediaService {
             communityId: album.communityId
         })
 
-        if (!uploaderAsMember || !uploaderAsMember.canUpload) throw new InsufficientPermissionsError()
+        if (!uploaderAsMember) throw new MissingAccessError()
+        if (!uploaderAsMember.canUpload) throw new InsufficientPermissionsError()
 
         const filetype = await fromBuffer(content)
-        if (!filetype) throw new Error()
+        if (!filetype) throw new BadFileError()
         if (filetype.mime.startsWith('image')) type = 'image'
         else if (filetype.mime.startsWith('video')) type = 'video'
-        else throw new Error()
+        else throw new BadFileError()
 
         const media = await this.dataSource.transaction(async (transaction) => {
 
@@ -76,6 +77,7 @@ export class MediaService {
         })
         if (!media) throw new ResourceNotFoundError()
 
+        // only media creator or community owner can delete media
         if (media.authorId !== removerId) {
             const album = await this.dataSource.manager.findOneByOrFail(Album, {
                 id: albumId
@@ -83,6 +85,11 @@ export class MediaService {
             const community = await this.dataSource.manager.findOneByOrFail(Community, {
                 id: album.communityId
             })
+            const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+                userId: removerId,
+                communityId: album.communityId
+            })
+            if (!member) throw new MissingAccessError()
             if (community.ownerId !== removerId) throw new InsufficientPermissionsError()
         }
 

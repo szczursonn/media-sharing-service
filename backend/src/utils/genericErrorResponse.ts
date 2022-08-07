@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AlreadyAMemberError, BadRequestError, CannotRemoveLastUserConnectionError, InsufficientPermissionsError, InvalidSessionError, OAuth2AlreadyConnectedError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError, OwnerCannotLeaveCommunityError, ResourceNotFoundError, UnauthenticatedError } from "../errors";
+import { AlreadyAMemberError, BadFileError, BadRequestError, CannotRemoveLastUserConnectionError, InsufficientPermissionsError, InvalidSessionError, MissingAccessError, OAuth2AlreadyConnectedError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError, OwnerCannotLeaveCommunityError, ResourceNotFoundError, UnauthenticatedError } from "../errors";
 import Logger from "../Logger";
 
 export const genericErrorResponse = (res: Response, err: any) => {
@@ -28,6 +28,7 @@ export const genericErrorResponse = (res: Response, err: any) => {
             return res.status(409).json({
                 error: 'owner_cannot_leave_community'
             })
+        case MissingAccessError:
         case ResourceNotFoundError:
             return res.status(404).json({
                 error: 'resource_not_found'
@@ -44,6 +45,10 @@ export const genericErrorResponse = (res: Response, err: any) => {
         case UnauthenticatedError:
             return res.status(401).json({
                 error: 'unauthenticated'
+            })
+        case BadFileError:
+            return res.status(400).json({
+                error: 'bad_file'
             })
         default:
             Logger.err(String(err))

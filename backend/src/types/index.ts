@@ -76,6 +76,7 @@ export type CommunityInvitePublic = {
     community: CommunityPublic
     maxUses: number | null
     expiresAt: string | null
+    uses: number
 }
 
 export type AlbumPublic = {

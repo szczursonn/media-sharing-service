@@ -18,7 +18,7 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
         try {
             const albumId = parseInt(req.params.albumId)
             const name = req.body.name
-
+            
             if (isNaN(albumId) || typeof name !== 'string') throw new BadRequestError()
 
             const album = await albumService.rename(albumId, name, userId)
@@ -42,7 +42,6 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
     }))
 
     const upload = multer()
-
     router.post('/:albumId/media', upload.single('media'), requiresAuth(async (req, res, userId) => {
         try {
             const albumId = parseInt(req.params.albumId)

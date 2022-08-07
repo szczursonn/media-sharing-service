@@ -1,4 +1,4 @@
-import { InsufficientPermissionsError, OwnerCannotLeaveCommunityError, ResourceNotFoundError } from "../errors";
+import { InsufficientPermissionsError, MissingAccessError, OwnerCannotLeaveCommunityError, ResourceNotFoundError } from "../errors";
 import { Community } from "../models/Community"
 import { DataSource } from "typeorm";
 import { CommunityMember } from "../models/CommunityMember";
@@ -12,11 +12,16 @@ export class CommunityService {
         this.dataSource = dataSource
     }
 
-    public async getCommunityById(communityId: number): Promise<CommunityPublic> {
+    public async getCommunityById(communityId: number, requesterId: number): Promise<CommunityPublic> {
         const com = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
         })
         if (!com) throw new ResourceNotFoundError()
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: requesterId,
+            communityId
+        })
+        if (!member) throw new MissingAccessError()
         return com.public()
     }
 
@@ -35,7 +40,7 @@ export class CommunityService {
         const members = await this.dataSource.manager.findBy(CommunityMember, {
             communityId
         })
-        if (!members.map(m=>m.userId).includes(getterId)) throw new InsufficientPermissionsError()
+        if (!members.map(m=>m.userId).includes(getterId)) throw new MissingAccessError()
         
         // TODO: better query
 
@@ -49,6 +54,11 @@ export class CommunityService {
             id: communityId
         })
         if (!community) throw new ResourceNotFoundError()
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            communityId,
+            userId: kickerId
+        })
+        if (!member) throw new MissingAccessError()
         // only the owner can kick users
         if (community.ownerId !== kickerId) throw new InsufficientPermissionsError()
         if (userId === community.ownerId) throw new OwnerCannotLeaveCommunityError()

@@ -1,9 +1,8 @@
 import { DataSource } from "typeorm";
-import { ResourceNotFoundError, InsufficientPermissionsError, AlreadyAMemberError } from "../errors";
+import { ResourceNotFoundError, InsufficientPermissionsError, AlreadyAMemberError, MissingAccessError } from "../errors";
 import { Community } from "../models/Community"
 import { CommunityInvite } from "../models/CommunityInvite";
 import { CommunityMember } from "../models/CommunityMember";
-import { User } from "../models/User";
 import nanoid from "nanoid";
 import { CommunityInvitePublic, CommunityPublic } from "../types";
 
@@ -19,10 +18,6 @@ export class InviteService {
             id: inviteId
         })
         if (!invite) throw new ResourceNotFoundError()
-        const community = await invite.community
-        const user = await this.dataSource.manager.findOneBy(User, {
-            id: invite.inviterId
-        })
         
         return await invite.public()
     }
@@ -32,7 +27,12 @@ export class InviteService {
             id: communityId
         })
         if (!community) throw new ResourceNotFoundError()
-        // only the owner can get invites
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: getterId,
+            communityId
+        })
+        if (!member) throw new MissingAccessError()
+        // only the owner can get all community invites
         if(community.ownerId !== getterId) throw new InsufficientPermissionsError()
 
         const invites = await community.invites
@@ -49,6 +49,11 @@ export class InviteService {
             id: communityId
         })
         if (!community) throw new ResourceNotFoundError()
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: inviterId,
+            communityId
+        })
+        if (!member) throw new MissingAccessError()
         // only the owner can create invites
         if (community.ownerId !== inviterId) throw new InsufficientPermissionsError()
 
@@ -70,6 +75,7 @@ export class InviteService {
             id: inviteId
         })
         if (!invite) throw new ResourceNotFoundError()
+        // only the owner or inviter can remove an invite
         if (invite.inviterId !== removerId) {
             const community = await invite.community
             if (community.ownerId !== removerId) throw new InsufficientPermissionsError()

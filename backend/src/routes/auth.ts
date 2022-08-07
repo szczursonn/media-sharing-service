@@ -32,8 +32,8 @@ export const setupAuthRoutes = (app: Express, requiresAuth: requiresAuth, {authS
         try {
             if (!token) {
                 const ua = UAParser(req.headers['user-agent'])
-                ua.engine.name
                 const deviceName = `${ua.os.name ? `${ua.os.name} ${ua.os.version}` : ua.ua} ${ua.device.model || ua.browser.name}`
+                
                 return res.json(await authService.loginOrRegisterWithOAuth2(code, type, deviceName))
             } else {
                 const [userId] = await authService.validate(token)

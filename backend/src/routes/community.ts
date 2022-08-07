@@ -1,6 +1,5 @@
 import { Express, Router } from 'express'
-import { ResourceNotFoundError, InsufficientPermissionsError, BadRequestError } from '../errors'
-import Logger from '../Logger'
+import { BadRequestError } from '../errors'
 import { requiresAuth } from '../middlewares'
 import { AppServices } from '../types'
 import { genericErrorResponse } from '../utils'
@@ -24,7 +23,7 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
         try {
             const communityId = parseInt(req.params.id)
             if (isNaN(communityId)) throw new BadRequestError()
-            return res.json(await communityService.getCommunityById(communityId))
+            return res.json(await communityService.getCommunityById(communityId, userId))
         } catch (err) {
             return genericErrorResponse(res, err)
         }
@@ -64,8 +63,8 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
             const validTime = req.body.validTime
 
             if (
-                (typeof maxUses !== 'number' && typeof maxUses !== 'undefined') ||
-                (typeof validTime !== 'number' && typeof validTime !== 'undefined')
+                (typeof maxUses !== 'number' && typeof maxUses !== 'undefined' && maxUses !== null) ||
+                (typeof validTime !== 'number' && typeof validTime !== 'undefined' && maxUses !== null)
             ) throw new BadRequestError()
 
             const invite = await inviteService.createInvite(communityId, userId, validTime ?? null, maxUses ?? null)

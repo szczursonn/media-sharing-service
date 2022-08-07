@@ -37,7 +37,8 @@ export class CommunityInvite {
             inviter: (await this.inviter)?.public() ?? null,
             community: (await this.community).public(),
             maxUses: this.maxUses ?? null,
-            expiresAt: this.expiresAt?.toISOString() ?? null
+            expiresAt: this.expiresAt?.toISOString() ?? null,
+            uses: this.uses
         }
     }
 }
