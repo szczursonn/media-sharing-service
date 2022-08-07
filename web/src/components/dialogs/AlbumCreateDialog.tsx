@@ -1,5 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createAlbum } from "../../redux/albumSlice"
 import { closeAlbumCreateDialog } from "../../redux/dialogSlice"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
@@ -21,6 +21,10 @@ export const AlbumCreateDialog = () => {
     const onCreateClick = () => {
       if (communityId) dispatch(createAlbum({communityId, albumName: name}))
     }
+
+    useEffect(()=>{
+      if (open) setName('')
+    }, [open])
 
     return <Dialog open={open} onClose={onClose}>
     <DialogTitle>Create Album</DialogTitle>
