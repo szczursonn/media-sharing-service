@@ -36,6 +36,7 @@ export const SettingsPage = () => {
     const [openAreYouSureDialog, setOpenAreYouSureDialog] = useState(false)
 
     const removeUser = async () => {
+        setOpenAreYouSureDialog(false)
         dispatch(deleteCurrentUser())
     }
     const updateUsername = async () => {
@@ -140,10 +141,10 @@ export const SettingsPage = () => {
             </>
         }
         <Divider light sx={{width: '100%', marginTop: 2, marginBottom: 2}}/>
-        <Button variant="contained" color="error" onClick={()=>setOpenAreYouSureDialog(true)}>DELETE COMMUNITY</Button>
+        <Button variant="contained" color="error" onClick={()=>setOpenAreYouSureDialog(true)}>DELETE ACCOUNT</Button>
         {deletingError && <Typography color='error'>Error: {deletingError}</Typography>}
         <Backdrop open={deleting}><CircularProgress /></Backdrop>
-        <AreYouSureDialog open={openAreYouSureDialog} onNo={() => setOpenAreYouSureDialog(false)} onYes={removeUser} description={'Are you sure you want do delete your account?'} />
+        <AreYouSureDialog open={openAreYouSureDialog} onNo={()=>setOpenAreYouSureDialog(false)} onYes={removeUser} description={'Are you sure you want do delete your account?'} />
     </Container>
 }
 
