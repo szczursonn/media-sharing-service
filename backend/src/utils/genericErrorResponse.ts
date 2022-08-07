@@ -51,7 +51,7 @@ export const genericErrorResponse = (res: Response, err: any) => {
                 error: 'bad_file'
             })
         default:
-            Logger.err(String(err))
+            Logger.err(err)
             return res.sendStatus(500)
     }
 }

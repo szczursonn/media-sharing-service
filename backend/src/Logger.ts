@@ -30,29 +30,31 @@ class Logger {
         return chalk.bgWhite.black(timestamp)
     }
 
-    private static _log(msg: string, label: LogLevel) {
+    private static _log(msg: any, label: LogLevel) {
         const timestamp = `[${new Date().toISOString()}]`
 
-        console.log(`${this.formatDate(timestamp)}${this.colorLabel(label)} ${msg}`)
+        const _msg = (msg instanceof Error) ? `${msg.name}: ${msg.stack}` : `${msg}`
+
+        console.log(`${this.formatDate(timestamp)}${this.colorLabel(label)} ${_msg}`)
     }
 
-    public static info(msg: string) {
+    public static info(msg: any) {
         this._log(msg, LogLevel.INFO)
     }
 
-    public static warn(msg: string) {
+    public static warn(msg: any) {
         this._log(msg, LogLevel.WARN)
     }
 
-    public static err(msg: string) {
+    public static err(msg: any) {
         this._log(msg, LogLevel.ERROR)
     }
 
-    public static fatal(msg: string) {
+    public static fatal(msg: any) {
         this._log(msg, LogLevel.FATAL)
     }
 
-    public static debug(msg: string) {
+    public static debug(msg: any) {
         this._log(msg, LogLevel.DEBUG)
     }
 
