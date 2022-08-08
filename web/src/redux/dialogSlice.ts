@@ -8,7 +8,8 @@ type DialogState = {
     inviteCreateOpen: boolean,
     inviteCreateTargetId: number|null,
     albumCreateOpen: boolean,
-    albumCreateTargetId: number|null
+    albumCreateTargetId: number|null,
+    mockLoginOpen: boolean
 }
 
 const initialState: DialogState = {
@@ -18,7 +19,8 @@ const initialState: DialogState = {
     inviteCreateOpen: false,
     inviteCreateTargetId: null,
     albumCreateOpen: false,
-    albumCreateTargetId: null
+    albumCreateTargetId: null,
+    mockLoginOpen: false
 }
 
 export const dialogSlice = createSlice({
@@ -60,6 +62,13 @@ export const dialogSlice = createSlice({
         },
         closeAlbumCreateDialog: (state) => {
             state.albumCreateOpen = false
+        },
+
+        openMockLoginDialog: (state) => {
+            state.mockLoginOpen = true
+        },
+        closeMockLoginDialog: (state) => {
+            state.mockLoginOpen = false
         }
     },
     extraReducers: (builder) => {
@@ -79,7 +88,9 @@ export const {
     openInviteCreateDialog, 
     closeInviteCreateDialog,
     openAlbumCreateDialog,
-    closeAlbumCreateDialog
+    closeAlbumCreateDialog,
+    openMockLoginDialog,
+    closeMockLoginDialog
 } = dialogSlice.actions
 
 export default dialogSlice.reducer

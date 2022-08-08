@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { deleteCurrentUser, setCurrentUser, updateCurrentUser } from "../../redux/userSlice"
 import { AppError } from "../../errors"
 import userApi from "../../api/userApi";
+import { openMockLoginDialog } from "../../redux/dialogSlice";
 
 export const SettingsPage = () => {
 
@@ -132,6 +133,13 @@ export const SettingsPage = () => {
                         <ConnectionListItem connections={connections} type='discord' onDelete={()=>removeConnection('discord')} />
                         <ConnectionListItem connections={connections} type='google' onDelete={()=>removeConnection('google')} />
                         <ConnectionListItem connections={connections} type='github' onDelete={()=>removeConnection('github')} />
+                        {process.env.REACT_APP_ENABLE_MOCK_LOGIN === 'true' && <ListItem>
+                                <Button sx={{padding: 1, display: 'flex', alignItems: 'center', backgroundColor: 'orange'}} onClick={()=>dispatch(openMockLoginDialog())}>
+                                <Typography variant="subtitle2" color={'#111'}>
+                                    [DEV] mock OAuth2 login
+                                </Typography>
+                                </Button>
+                            </ListItem>}
                     </List>
                     : <>
                         <Typography variant="h6">Error fetching connections</Typography>

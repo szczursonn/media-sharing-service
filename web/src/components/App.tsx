@@ -19,6 +19,7 @@ import { InviteInputDialog } from './dialogs/InviteInputDialog';
 import { RequireLoginPage } from './pages/RequireLoginPage';
 import { InviteCreateDialog } from './dialogs/InviteCreateDialog';
 import { AlbumCreateDialog } from './dialogs/AlbumCreateDialog';
+import { MockLoginDialog } from './dialogs/MockLoginDialog';
 
 
 const App = () => {
@@ -62,6 +63,7 @@ const App = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <LoginDialog />
+      <MockLoginDialog />
       <CommunityCreateDialog />
       <AlbumCreateDialog />
       <InviteInputDialog />
