@@ -43,7 +43,7 @@ export class InviteService {
         return i
     }
 
-    public async createInvite(communityId: number, inviterId: number, validTime: number | null, maxUses: number | null): Promise<CommunityInvitePublic> {
+    public async createInvite(communityId: number, inviterId: number, validTimeSeconds: number | null, maxUses: number | null): Promise<CommunityInvitePublic> {
 
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
@@ -61,7 +61,7 @@ export class InviteService {
         inv.id = nanoid.nanoid(8)
         inv.communityId = communityId
         inv.inviterId = inviterId
-        inv.expiresAt = validTime === null ? undefined : new Date(Date.now()+validTime)
+        inv.expiresAt = validTimeSeconds === null ? undefined : new Date(Date.now()+validTimeSeconds*1000)
         inv.maxUses = maxUses ?? undefined
 
         const saved = await this.dataSource.manager.save(inv)
