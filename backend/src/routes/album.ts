@@ -48,7 +48,7 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
 
             if (isNaN(albumId)) throw new BadRequestError()
 
-            const media = await albumService.getMedia(albumId, userId)
+            const media = await mediaService.getMedia(albumId, userId)
             return res.json(media)
         } catch (err) {
             return genericErrorResponse(res, err)

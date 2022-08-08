@@ -10,6 +10,7 @@ import { Community } from "../models/Community";
 export interface MediaStorage {
     save(media: Media, file: Buffer): Promise<void>
     remove(media: Media): Promise<void>
+    getUrl(media: Media): string
 }
 
 export class MediaService {
@@ -67,7 +68,7 @@ export class MediaService {
             return saved
         })
 
-        return media.public()
+        return media.public(this.storage)
     }
 
     public async remove(albumId: number, filename: string, removerId: number): Promise<void> {
@@ -100,6 +101,24 @@ export class MediaService {
             })
             await this.storage.remove(media)
         })
+    }
 
+    public async getMedia(albumId: number, getterId: number): Promise<MediaPublic[]> {
+        const album = await this.dataSource.manager.findOneBy(Album, {
+            id: albumId
+        })
+        if (!album) throw new ResourceNotFoundError()
+
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: getterId,
+            communityId: album.communityId
+        })
+        if (!member) throw new MissingAccessError()
+
+        const media = await this.dataSource.manager.findBy(Media, {
+            albumId
+        })
+
+        return media.map(m=>m.public(this.storage))
     }
 }

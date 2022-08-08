@@ -94,23 +94,4 @@ export class AlbumService {
         })
         if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
     }
-
-    public async getMedia(albumId: number, getterId: number): Promise<MediaPublic[]> {
-        const album = await this.dataSource.manager.findOneBy(Album, {
-            id: albumId
-        })
-        if (!album) throw new ResourceNotFoundError()
-
-        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
-            userId: getterId,
-            communityId: album.communityId
-        })
-        if (!member) throw new MissingAccessError()
-
-        const media = await this.dataSource.manager.findBy(Media, {
-            albumId
-        })
-
-        return media.map(m=>m.public())
-    }
 }

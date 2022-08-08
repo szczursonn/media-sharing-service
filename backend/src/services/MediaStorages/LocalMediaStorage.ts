@@ -13,6 +13,10 @@ export class LocalMediaStorage implements MediaStorage {
             mkdirSync(this.dir)
         }
     }
+    public getUrl(media: Media): string {
+        // todo: make files available
+        return ''
+    }
 
     public async save(media: Media, file: Buffer): Promise<void> {
         if (!existsSync(this.albumUri(media))) {

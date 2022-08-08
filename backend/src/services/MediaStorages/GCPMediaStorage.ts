@@ -10,6 +10,9 @@ export class GCPMediaStorage implements MediaStorage {
         this.storage = storage
         this.bucketName = bucketName
     }
+    getUrl(media: Media): string {
+        return `https://storage.googleapis.com/${this.bucketName}/${this.uri(media)}`
+    }
 
     public async save(media: Media, file: Buffer): Promise<void> {
         await this.storage.bucket(this.bucketName).file(this.uri(media)).save(file)

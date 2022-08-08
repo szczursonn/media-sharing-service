@@ -89,5 +89,6 @@ export type MediaPublic = {
     filename: string,
     authorId: number,
     type: MediaType,
+    url: string,
     createdAt: string
 }

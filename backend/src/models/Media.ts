@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { MediaStorage } from "../services/MediaService";
 import { MediaPublic, MediaType } from "../types";
 import { Album } from "./Album";
 import { User } from "./User";
@@ -14,7 +15,7 @@ export class Media {
     @PrimaryColumn()
     albumId!: number
 
-    @OneToOne(()=>User, {onDelete: 'SET NULL'})
+    @ManyToOne(()=>User, {onDelete: 'SET NULL'})
     author!: Promise<User>
 
     @Column()
@@ -26,11 +27,12 @@ export class Media {
     @CreateDateColumn()
     createdAt!: Date
 
-    public public(): MediaPublic {
+    public public(mediaStorage: MediaStorage): MediaPublic {
         return {
             filename: this.filename,
             authorId: this.authorId,
             type: this.type,
+            url: mediaStorage.getUrl(this),
             createdAt: this.createdAt.toISOString()
         }
     }
