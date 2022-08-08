@@ -46,6 +46,7 @@ export type Invite = {
     community: Community
     maxUses: number | null
     expiresAt: string | null
+    uses: number
 }
 
 export type Member = {

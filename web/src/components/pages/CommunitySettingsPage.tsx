@@ -82,8 +82,8 @@ export const CommunitySettingsPage = ({community}: {community: Community}) => {
                         {invites.map(i=><Grid item key={i.id} sx={{bgcolor: '#1e1e1e', padding: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', margin: 1}}>
                             <Typography>{i.id}</Typography>
                             <Typography>Created by: {i.inviter ? i.inviter.username : 'deleted user'}</Typography>
-                            <Typography>Max uses: {i.maxUses ?? '∞'}</Typography>
-                            <Typography>expires at: {i.expiresAt ? new Date(i.expiresAt).toLocaleString() : 'never'}</Typography>
+                            <Typography>Uses: {i.uses}/{i.maxUses ?? '∞'}</Typography>
+                            <Typography>expires at: {i.expiresAt ? new Date((i.expiresAt)).toLocaleString() : 'never'}</Typography>
                             <Button variant='outlined' disabled={removingInvite} onClick={()=>invalidateInvite(i.id)}>Invalidate</Button>
                         </Grid>)}
                         {invites.length === 0 && <Typography>There are currently no invites for this community</Typography>}
