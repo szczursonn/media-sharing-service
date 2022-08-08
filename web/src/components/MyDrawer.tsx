@@ -3,7 +3,7 @@ import { Avatar, Box, Button, CircularProgress, Divider, IconButton, List, ListI
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { fetchCommunities, leaveCommunity, selectCommunity, selectSelectedCommunity } from "../redux/communitySlice"
-import { openCommunityCreateDialog, openInviteCreateDialog, openInviteDialog } from "../redux/dialogSlice"
+import { openAlbumCreateDialog, openCommunityCreateDialog, openInviteCreateDialog, openInviteDialog } from "../redux/dialogSlice"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { Community } from "../types"
 import { ErrorDialog } from "./dialogs/ErrorDialog"
@@ -103,6 +103,11 @@ const CommunityListItem = ({community}: {community: Community}) => {
         navigate(`/communities/${community.id}`)
         setOpenMemberList(true)
     }
+    const onAlbumClick = () => {
+        setAnchorEl(null)
+        navigate(`/communities/${community.id}`)
+        dispatch(openAlbumCreateDialog(community.id))
+    }
 
     const menuBlocked = useAppSelector(state=>state.communityReducer.leaving)
 
@@ -131,7 +136,7 @@ const CommunityListItem = ({community}: {community: Community}) => {
                 </ListItemIcon>
                 <Typography>Invite</Typography>
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={onAlbumClick}>
                 <ListItemIcon>
                     <Create />
                 </ListItemIcon>
