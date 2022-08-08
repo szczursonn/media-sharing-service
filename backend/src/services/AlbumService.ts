@@ -3,7 +3,8 @@ import { InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError
 import { Album } from "../models/Album";
 import { Community } from "../models/Community";
 import { CommunityMember } from "../models/CommunityMember";
-import { AlbumPublic } from "../types";
+import { Media } from "../models/Media";
+import { AlbumPublic, MediaPublic } from "../types";
 
 export class AlbumService {
     private dataSource: DataSource
@@ -92,5 +93,24 @@ export class AlbumService {
             id: albumId
         })
         if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
+    }
+
+    public async getMedia(albumId: number, getterId: number): Promise<MediaPublic[]> {
+        const album = await this.dataSource.manager.findOneBy(Album, {
+            id: albumId
+        })
+        if (!album) throw new ResourceNotFoundError()
+
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: getterId,
+            communityId: album.communityId
+        })
+        if (!member) throw new MissingAccessError()
+
+        const media = await this.dataSource.manager.findBy(Media, {
+            albumId
+        })
+
+        return media.map(m=>m.public())
     }
 }

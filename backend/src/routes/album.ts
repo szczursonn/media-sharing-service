@@ -9,6 +9,7 @@ import { genericErrorResponse } from '../utils'
  * Prefix: /albums
  * - PATCH /<albumId> - edits an album (renames)
  * - DELETE /<albumId> - removes an album
+ * - GET /<albumId>/media - get album media
  * - POST /<albumId>/media - upload new media
  */
 export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albumService, mediaService}: AppServices) => {
@@ -41,6 +42,19 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
         }
     }))
 
+    router.get('/:albumId/media', requiresAuth(async (req, res, userId) => {
+        try {
+            const albumId = parseInt(req.params.albumId)
+
+            if (isNaN(albumId)) throw new BadRequestError()
+
+            const media = await albumService.getMedia(albumId, userId)
+            return res.json(media)
+        } catch (err) {
+            return genericErrorResponse(res, err)
+        }
+    }))
+
     const upload = multer()
     router.post('/:albumId/media', upload.single('media'), requiresAuth(async (req, res, userId) => {
         try {
@@ -56,7 +70,7 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
         }
     }))
 
-    router.delete('/:albumId/media/:filename', requiresAuth( async (req, res, userId) => {
+    router.delete('/:albumId/media/:filename', requiresAuth(async (req, res, userId) => {
         try {
             const albumId = parseInt(req.params.albumId)
             if (isNaN(albumId)) throw new BadRequestError()
