@@ -82,7 +82,7 @@ export type CommunityInvitePublic = {
 export type AlbumPublic = {
     id: number,
     name: string,
-    cover: null
+    cover: MediaPublic|null
 }
 
 export type MediaPublic = {

@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AlreadyAMemberError, BadFileError, BadRequestError, CannotRemoveLastUserConnectionError, InsufficientPermissionsError, InvalidSessionError, MissingAccessError, OAuth2AlreadyConnectedError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError, OwnerCannotLeaveCommunityError, ResourceNotFoundError, UnauthenticatedError } from "../errors";
+import { AlreadyAMemberError, BadFileError, BadRequestError, CannotRemoveLastUserConnectionError, CoverCanOnlyBeImageError, InsufficientPermissionsError, InvalidSessionError, MissingAccessError, OAuth2AlreadyConnectedError, OAuth2InvalidCodeError, OAuth2ProviderUnavailableError, OwnerCannotLeaveCommunityError, ResourceNotFoundError, UnauthenticatedError } from "../errors";
 import Logger from "../Logger";
 
 export const genericErrorResponse = (res: Response, err: any) => {
@@ -37,6 +37,7 @@ export const genericErrorResponse = (res: Response, err: any) => {
             return res.status(403).json({
                 error: 'missing_permissions'
             })
+        case CoverCanOnlyBeImageError:
         case BadRequestError:
             return res.status(400).json({
                 error: 'bad_request'

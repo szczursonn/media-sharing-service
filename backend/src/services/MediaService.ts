@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 import { Media } from "../models/Media";
-import { MediaPublic, MediaType } from "../types";
+import { AlbumPublic, MediaPublic, MediaType } from "../types";
 import { fromBuffer } from "file-type";
 import { Album } from "../models/Album";
 import { BadFileError, InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError } from "../errors";

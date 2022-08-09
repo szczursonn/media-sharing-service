@@ -15,10 +15,11 @@ export class Media {
     @PrimaryColumn()
     albumId!: number
 
-    @ManyToOne(()=>User, {onDelete: 'SET NULL'})
+    @ManyToOne(()=>User, {onDelete: 'SET NULL', nullable: true})
+    //@JoinColumn({name: 'authorId', referencedColumnName: 'id'})
     author!: Promise<User>
 
-    @Column()
+    @Column({nullable: true})
     authorId!: number
 
     @Column()

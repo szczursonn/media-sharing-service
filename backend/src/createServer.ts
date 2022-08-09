@@ -30,6 +30,8 @@ export const createServer = async (services: AppServices) => {
 export const createTestServer = async () => {
     const dataSource = await createTestDataSource()
     
+    const mediaStorage = new MockMediaStorage()
+
     const authService = new AuthService({
         dataSource,
         jwtSecret: 'abcdefg',
@@ -40,8 +42,8 @@ export const createTestServer = async () => {
     const userService = new UserService(dataSource)
     const communityService = new CommunityService(dataSource)
     const inviteService = new InviteService(dataSource)
-    const albumService = new AlbumService(dataSource)
-    const mediaService = new MediaService(dataSource, new MockMediaStorage())
+    const albumService = new AlbumService(dataSource, mediaStorage)
+    const mediaService = new MediaService(dataSource, mediaStorage)
 
     const app = await createServer({
         userService,

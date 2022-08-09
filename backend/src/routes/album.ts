@@ -11,6 +11,8 @@ import { genericErrorResponse } from '../utils'
  * - DELETE /<albumId> - removes an album
  * - GET /<albumId>/media - get album media
  * - POST /<albumId>/media - upload new media
+ * - DELETE /<albumId>/media/<filename> - remove media
+ * - POST /<albumId>/cover - set album cover
  */
 export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albumService, mediaService}: AppServices) => {
     const router = Router()
@@ -78,6 +80,20 @@ export const setupAlbumRoutes = (app: Express, requiresAuth: requiresAuth, {albu
 
             await mediaService.remove(albumId, filename, userId)
             return res.sendStatus(204)
+        } catch (err) {
+            return genericErrorResponse(res, err)
+        }
+    }))
+
+    router.post('/:albumId/cover', requiresAuth(async (req, res, userId) => {
+        try {
+            const albumId = parseInt(req.params.albumId)
+            if (isNaN(albumId)) throw new BadRequestError()
+            const filename = req.body.filename
+            if (typeof filename !== 'string') throw new BadRequestError()
+
+            const album = await albumService.setCover(albumId, filename, userId)
+            return res.json(album)
         } catch (err) {
             return genericErrorResponse(res, err)
         }

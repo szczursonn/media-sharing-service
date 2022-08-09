@@ -95,7 +95,7 @@ const main = async () => {
     const userService = new UserService(dataSource)
     const communityService = new CommunityService(dataSource)
     const inviteService = new InviteService(dataSource)
-    const albumService = new AlbumService(dataSource)
+    const albumService = new AlbumService(dataSource, mediaStorage)
     const mediaService = new MediaService(dataSource, mediaStorage)
 
     const app = await createServer({
@@ -113,6 +113,7 @@ const main = async () => {
 }
 
 main().catch(err=>{
-    Logger.fatal(`Failed to start the app: ${err}`)
+    Logger.fatal(`Failed to start the app: `)
+    Logger.fatal(err)
     process.exit(-1)
 })

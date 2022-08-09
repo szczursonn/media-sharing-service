@@ -1,16 +1,19 @@
 import { DataSource } from "typeorm";
-import { InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError } from "../errors";
+import { CoverCanOnlyBeImageError, InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError } from "../errors";
 import { Album } from "../models/Album";
 import { Community } from "../models/Community";
 import { CommunityMember } from "../models/CommunityMember";
 import { Media } from "../models/Media";
-import { AlbumPublic, MediaPublic } from "../types";
+import { AlbumPublic } from "../types";
+import { MediaStorage } from "./MediaService";
 
 export class AlbumService {
     private dataSource: DataSource
+    private mediaStorage: MediaStorage
 
-    public constructor(dataSource: DataSource) {
+    public constructor(dataSource: DataSource, mediaStorage: MediaStorage) {
         this.dataSource = dataSource
+        this.mediaStorage = mediaStorage
     }
 
     public async getByCommunity(communityId: number, getterId: number): Promise<AlbumPublic[]> {
@@ -29,7 +32,7 @@ export class AlbumService {
             communityId
         })
 
-        return albums.map(a=>a.public())
+        return await Promise.all(albums.map(a=>a.public(this.mediaStorage)))
     }
 
     public async create(communityId: number, name: string, creatorId: number): Promise<AlbumPublic> {
@@ -51,7 +54,7 @@ export class AlbumService {
 
         const saved = await this.dataSource.manager.save(album)
 
-        return saved.public()
+        return await saved.public(this.mediaStorage)
     }
 
     public async rename(albumId: number, newName: string, getterId: number): Promise<AlbumPublic> {
@@ -71,7 +74,7 @@ export class AlbumService {
 
         const saved = await this.dataSource.manager.save(album)
 
-        return saved.public()
+        return await saved.public(this.mediaStorage)
     }
 
     public async remove(albumId: number, deleterId: number): Promise<void> {
@@ -93,5 +96,37 @@ export class AlbumService {
             id: albumId
         })
         if (typeof delResult.affected === 'number' && delResult.affected === 0) throw new ResourceNotFoundError()
+    }
+
+    public async setCover(albumId: number, filename: string, setterId: number): Promise<AlbumPublic> {
+        const album = await this.dataSource.manager.findOneBy(Album, {
+            id: albumId
+        })
+        if (!album) throw new ResourceNotFoundError()
+
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            userId: setterId,
+            communityId: album.communityId
+        })
+        if (!member) throw new MissingAccessError()
+        if (!member.canUpload) throw new InsufficientPermissionsError()
+
+        const media = await this.dataSource.manager.findOneBy(Media, {
+            albumId,
+            filename
+        })
+        if (!media) throw new ResourceNotFoundError()
+        if (media.type !== 'image') throw new CoverCanOnlyBeImageError()
+
+        await this.dataSource
+            .createQueryBuilder()
+            .relation(Album, 'cover')
+            .of(albumId)
+            .set(media)
+
+        const saved = this.dataSource.manager.findOneByOrFail(Album, {
+            id: albumId
+        })
+        return (await saved).public(this.mediaStorage)
     }
 }

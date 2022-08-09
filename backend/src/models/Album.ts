@@ -1,4 +1,5 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { MediaStorage } from "../services/MediaService";
 import { AlbumPublic } from "../types";
 import { Community } from "./Community";
 import { Media } from "./Media";
@@ -20,14 +21,21 @@ export class Album {
     @OneToMany(()=>Media, m=>m.album)
     media!: Promise<Media[]>
 
-    //@OneToOne(()=>Media)
-    //cover!: Promise<Media>
+    @OneToOne(()=>Media, {onDelete: 'SET NULL', nullable: true})
+    @JoinColumn()
+    cover!: Promise<Media>
 
-    public public(): AlbumPublic  {
+    @Column({nullable: true})
+    coverFilename!: string
+
+    @Column({nullable: true})
+    coverAlbumId!: number
+
+    public async public(mediaStorage: MediaStorage): Promise<AlbumPublic>  {
         return {
             id: this.id,
             name: this.name,
-            cover: null
+            cover: (await this.cover)?.public(mediaStorage) ?? null
         }
     }
 }
