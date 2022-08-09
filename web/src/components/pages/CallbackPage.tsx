@@ -32,7 +32,7 @@ export const CallbackPage = () => {
                 await userApi.loginOrRegisterWithOAuth2Provider(code, provider)
                 dispatch(fetchCurrentUser())
             }
-            navigate(localStorage.getItem('beforeLoginPage') ?? '/')
+            navigateBack()
         } catch (err) {
             if (err instanceof AppError) {
                 switch (err.type) {
@@ -54,6 +54,20 @@ export const CallbackPage = () => {
         setLoading(false)
     }
 
+    const navigateBack = ()=>{
+        const before = localStorage.getItem('beforeLoginPage')
+        if (before) {
+            localStorage.removeItem('beforeLoginPage')
+            if (!before.includes('/callback')) {
+                navigate(before)
+            } else {
+                navigate('/')
+            }
+        } else {
+            navigate('/')
+        }
+    }
+
     useEffect(()=>{
         if (!isProviderValid) setError(`Invalid OAuth2 Provider: ${provider}`)
         else if (code === null) setError(`Missing code in query params`)
@@ -72,7 +86,7 @@ export const CallbackPage = () => {
         return <Grid container alignItems='center' justifyItems='center' direction='column' marginTop='10vh'>
             <Paper elevation={5} sx={{padding: '15px', display: 'flex', justifyItems: 'center', flexDirection: 'column'}}>
                 <Typography variant="h5" color='error'>ERROR: {error}</Typography>
-                <Button variant="contained" onClick={()=>navigate(localStorage.getItem('beforeLoginPage') ?? '/')}>GO BACK</Button>
+                <Button variant="contained" onClick={navigateBack}>GO BACK</Button>
             </Paper>
         </Grid>
     }

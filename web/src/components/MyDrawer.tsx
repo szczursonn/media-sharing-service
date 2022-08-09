@@ -23,7 +23,7 @@ export const MyDrawer = () => {
         if (leavingError !== null) setLeavingErrorOpened(true)
     }, [leavingError])
 
-    return <Box sx={{borderColor: '#111', borderWidth: 2, borderStyle: 'solid', borderRightColor: '#333', height: '93.5vh'}}>
+    return <Box sx={{borderColor: '#111', borderWidth: 2, borderStyle: 'solid', borderRightColor: '#333', height: '100%', minHeight: '93vh'}}>
         <List disablePadding>
         {
             user && <>{

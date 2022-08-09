@@ -37,6 +37,7 @@ export type Media = {
     filename: string,
     authorId: number,
     type: 'image' | 'video',
+    url: string,
     createdAt: string
 }
 

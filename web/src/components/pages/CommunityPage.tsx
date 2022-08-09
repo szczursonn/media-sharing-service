@@ -33,7 +33,7 @@ export const CommunityPage = () => {
         }
     }, [community])
 
-    return <Container maxWidth='lg' sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
+    return <Container maxWidth={false} sx={{display: 'flex', alignItems: 'center', flexDirection: 'column', maxWidth: '80vw'}}>
         {
             loadingCommunities
             ? <CircularProgress />

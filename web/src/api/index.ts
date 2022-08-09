@@ -2,18 +2,15 @@ import { AppError } from "../errors"
 
 const API_URL = process.env.REACT_APP_API_URL
 
-export const customFetch = async (uri: string, {method, auth=true, body=undefined}: {method: string, auth?: boolean, body?: BodyInit|null}) => {
+export const customFetch = async (uri: string, {method, auth=true, body=undefined, contentType='application/json'}: {method: string, auth?: boolean, body?: BodyInit|null, contentType?: string|null}) => {
 
     const token = localStorage.getItem('token')
 
     if (auth && !token) throw new AppError('unauthenticated')
 
-    const headers: any = auth ? {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    } : {
-        'Content-Type': 'application/json'
-    }
+    const headers: any = {}
+    if (auth) headers['Authorization'] = `Bearer ${token}`
+    if (contentType) headers['Content-Type'] = contentType
 
     const res = await fetch(`${API_URL}${uri}`, {
         headers,
