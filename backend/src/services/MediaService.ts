@@ -31,7 +31,7 @@ export class MediaService {
         if (!album) throw new ResourceNotFoundError()
 
         const uploaderAsMember = await this.dataSource.manager.findOneBy(CommunityMember, {
-            userId: albumId,
+            userId: uploaderId,
             communityId: album.communityId
         })
 
