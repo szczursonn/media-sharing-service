@@ -55,9 +55,10 @@ export const createDataSource = async (dbOptions: MariaDbOptions|SqliteOptions):
 }
 
 export const createTestDataSource = async (useMockData: boolean = true): Promise<DataSource> => {
-    const dataSource = await createDataSource({
-        type: 'sqlite',
-        filename: ':memory:'
+    const dataSource = new DataSource({
+        type: 'better-sqlite3',
+        entities: ['src/models/*.ts'],
+        database: ':memory:'
     })
 
     await dataSource.initialize()

@@ -3,16 +3,20 @@ import { createTestDataSource } from "../createDataSource"
 import { InsufficientPermissionsError, MissingAccessError } from "../errors"
 import { Album } from "../models/Album"
 import { AlbumService } from "./AlbumService"
+import { MediaStorage } from "./MediaService"
+import { MockMediaStorage } from "./MediaStorages/MockMediaStorage"
 
 describe('AlbumService tests', () => {
     
     let dataSource: DataSource
     let albumService: AlbumService
+    let mediaStorage: MediaStorage
 
     beforeEach((done)=>{
         createTestDataSource().then((ds)=>{
             dataSource = ds
-            albumService = new AlbumService(dataSource)
+            mediaStorage = new MockMediaStorage()
+            albumService = new AlbumService(dataSource, mediaStorage)
             done()
         })
     })
