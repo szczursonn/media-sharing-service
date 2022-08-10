@@ -7,6 +7,7 @@ import { UserConnectionType } from "./types";
 import { CommunityMember } from "./models/CommunityMember";
 import { CommunityInvite } from "./models/CommunityInvite";
 import { Album } from "./models/Album";
+import { Media } from "./models/Media";
 
 type MariaDbOptions = {
     type: 'mariadb'
@@ -25,7 +26,7 @@ export const createDataSource = async (dbOptions: MariaDbOptions|SqliteOptions):
 
     let dataSource: DataSource
 
-    const entities = ['src/models/*.ts']
+    const entities = [Album, Community, CommunityInvite, CommunityMember, Media, Session, User, UserConnection]
 
     switch (dbOptions.type) {
         case 'sqlite':

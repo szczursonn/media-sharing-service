@@ -23,6 +23,9 @@ const main = async () => {
     Logger.info('Starting app...')
     const config = loadConfig()
 
+    Logger.info(`Enviroment: ${config.enviroment}`)
+    if (config.enviroment === 'production') Logger.debugEnabled = false
+
     if (!config.port) {
         config.port = DEFAULT_PORT
         Logger.warn(`Port defaulted to ${config.port}`)

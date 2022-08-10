@@ -10,6 +10,7 @@ enum LogLevel {
 
 class Logger {
     private constructor() {}
+    public static debugEnabled = true
 
     private static colorLabel(label: LogLevel): string {
         switch (label) {
@@ -55,7 +56,7 @@ class Logger {
     }
 
     public static debug(msg: any) {
-        this._log(msg, LogLevel.DEBUG)
+        if(this.debugEnabled) this._log(msg, LogLevel.DEBUG)
     }
 
 }

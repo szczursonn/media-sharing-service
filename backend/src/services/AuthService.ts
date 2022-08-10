@@ -6,6 +6,7 @@ import { AccessToken, OAuth2Profile, SessionPublic, TokenPayload, UserConnection
 import jwt from 'jsonwebtoken'
 import { validateTokenPayload } from "../types/validators";
 import { DataSource } from "typeorm";
+import Logger from "../Logger";
 
 export interface OAuth2Provider {
     exchange(code: string): Promise<OAuth2Profile>
@@ -33,6 +34,7 @@ export class AuthService {
     }
 
     public async loginOrRegisterWithOAuth2(code: string, type: UserConnectionType, deviceName: string): Promise<AccessToken> {
+        Logger.debug(`loginOrRegisterWithOAuth2: ${code}@${type} as ${deviceName}`)
         const oauthProvider = this.getOAuth2Service(type)
 
         const profile = await oauthProvider.exchange(code)
@@ -41,6 +43,7 @@ export class AuthService {
         
         const token = await this.createSession(user.id, deviceName)
 
+        Logger.debug(`Token ${token.token} for ${user.username}(${user.id}), session ${token.sessionId}`)
         return token
     }
 
