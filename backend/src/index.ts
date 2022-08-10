@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { createDataSource } from './createDataSource'
 import { createServer } from "./createServer"
 import Logger from "./Logger"
-import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider, MockOAuth2Provider } from './services/OAuth2Providers'
+import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider } from './services/OAuth2Providers'
 import { loadConfig } from './config'
 import { AuthService } from './services/AuthService'
 import { UserService } from './services/UserService'
@@ -24,7 +24,7 @@ const main = async () => {
     const config = loadConfig()
 
     Logger.info(`Enviroment: ${config.enviroment}`)
-    if (config.enviroment === 'production') Logger.debugEnabled = false
+    if (config.debug) Logger.debugEnabled = false
 
     if (!config.port) {
         config.port = DEFAULT_PORT
@@ -44,7 +44,7 @@ const main = async () => {
             dataSource = await createDataSource({
                 type: 'sqlite',
                 filename: config.database.filename ?? ':memory:'
-            })
+            }, config.resetDb)
             break
         case 'mariadb':
             const host = config.database.host
@@ -71,7 +71,7 @@ const main = async () => {
                 username,
                 password,
                 databaseName
-            })
+            }, config.resetDb)
             break
         default:
             Logger.fatal(`Invalid database type: ${dbType}`)

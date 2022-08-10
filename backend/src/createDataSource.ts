@@ -22,7 +22,7 @@ type SqliteOptions = {
     filename: string
 }
 
-export const createDataSource = async (dbOptions: MariaDbOptions|SqliteOptions): Promise<DataSource> => {
+export const createDataSource = async (dbOptions: MariaDbOptions|SqliteOptions, reset: boolean): Promise<DataSource> => {
 
     let dataSource: DataSource
 
@@ -50,7 +50,7 @@ export const createDataSource = async (dbOptions: MariaDbOptions|SqliteOptions):
 
     await dataSource.initialize()
     
-    await dataSource.synchronize(true)
+    await dataSource.synchronize(reset)
 
     return dataSource
 }
