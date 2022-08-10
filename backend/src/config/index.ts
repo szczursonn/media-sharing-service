@@ -17,17 +17,20 @@ export const loadConfig = () => {
         discord: {
             clientId: process.env['DISCORD_CLIENTID'],
             clientSecret: process.env['DISCORD_CLIENTSECRET'],
-            redirectUri: process.env['DISCORD_REDIRECTURI']
+            redirectUri: process.env['DISCORD_REDIRECTURI'],
+            mock: process.env['DISCORD_MOCK'] === 'true'
         },
         github: {
             clientId: process.env['GITHUB_CLIENTID'],
             clientSecret: process.env['GITHUB_CLIENTSECRET'],
-            redirectUri: process.env['GITHUB_REDIRECTURI']
+            redirectUri: process.env['GITHUB_REDIRECTURI'],
+            mock: process.env['GITHUB_MOCK'] === 'true'
         },
         google: {
             clientId: process.env['GOOGLE_CLIENTID'],
             clientSecret: process.env['GOOGLE_CLIENTSECRET'],
-            redirectUri: process.env['GOOGLE_REDIRECTURI']
+            redirectUri: process.env['GOOGLE_REDIRECTURI'],
+            mock: process.env['GOOGLE_MOCK'] === 'true'
         },
         database: {
             type: process.env['DB_TYPE'],

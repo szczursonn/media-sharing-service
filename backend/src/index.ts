@@ -2,9 +2,9 @@ import 'reflect-metadata'
 import { createDataSource } from './createDataSource'
 import { createServer } from "./createServer"
 import Logger from "./Logger"
-import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider } from './services/OAuth2Providers'
+import { DiscordOAuth2Provider, GithubOAuth2Provider, GoogleOAuth2Provider, MockOAuth2Provider } from './services/OAuth2Providers'
 import { loadConfig } from './config'
-import { AuthService } from './services/AuthService'
+import { AuthService, OAuth2Provider } from './services/AuthService'
 import { UserService } from './services/UserService'
 import { CommunityService } from './services/CommunityService'
 import { InviteService } from './services/InviteService'
@@ -79,27 +79,42 @@ const main = async () => {
     }
     Logger.info(`Connected to database (${dataSource.driver.options.type}${config.database.type==='sqlite'?'':`@${config.database.host}`})`)
     
-    const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
-        ? new DiscordOAuth2Provider({
+    let discordOAuth2Provider: OAuth2Provider|undefined
+    if (config.discord.mock) {
+        discordOAuth2Provider = new MockOAuth2Provider()
+        Logger.warn('Initialized Mock OAuth2 Provider for Discord')
+    } else if (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri) {
+        discordOAuth2Provider = new DiscordOAuth2Provider({
             clientId: config.discord.clientId,
             clientSecret: config.discord.clientSecret,
             redirectUri: config.discord.redirectUri
         })
-        : undefined
-    if (!discordOAuth2Provider) Logger.warn('Discord OAuth2 configuration missing, will be unavailable')
-    else Logger.info('Discord OAuth2 configuration OK!')
+        Logger.info('Discord OAuth2 configuration OK!')
+    } else {
+        Logger.warn('Discord OAuth2 configuration missing, will be unavailable')
+    }
 
-    const googleOAuth2Provider = (config.google.clientId && config.google.clientSecret && config.google.redirectUri)
-        ? new GoogleOAuth2Provider(config.google.clientId, config.google.clientSecret, config.google.redirectUri)
-        : undefined
-    if (!googleOAuth2Provider) Logger.warn('Google OAuth2 configuration missing, will be unavailable')
-    else Logger.info('Google OAuth2 configuration OK!')
+    let googleOAuth2Provider: OAuth2Provider|undefined
+    if (config.google.mock) {
+        googleOAuth2Provider = new MockOAuth2Provider()
+        Logger.warn('Initialized Mock OAuth2 Provider for Google')
+    } else if (config.google.clientId && config.google.clientSecret && config.google.redirectUri) {
+        googleOAuth2Provider = new GoogleOAuth2Provider(config.google.clientId, config.google.clientSecret, config.google.redirectUri)
+        Logger.info('Google OAuth2 configuration OK!')
+    } else {
+        Logger.warn('Google OAuth2 configuration missing, will be unavailable')
+    }
 
-    const githubOAuth2Provider = (config.github.clientId && config.github.clientSecret && config.github.redirectUri)
-        ? new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)
-        : undefined
-    if (!githubOAuth2Provider) Logger.warn('Github OAuth2 configuration missing, will be unavailable')
-    else Logger.info('Github OAuth2 configuration OK!')
+    let githubOAuth2Provider: OAuth2Provider|undefined
+    if (config.github.mock) {
+        githubOAuth2Provider = new MockOAuth2Provider()
+        Logger.warn('Initialized Mock OAuth2 Provider for Github')
+    } else if (config.github.clientId && config.github.clientSecret && config.github.redirectUri) {
+        githubOAuth2Provider = new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)
+        Logger.info('Github OAuth2 configuration OK!')
+    } else {
+        Logger.warn('Github OAuth2 configuration missing, will be unavailable')
+    }
 
     let mediaStorage: MediaStorage
     switch (config.mediaStorage.type) {
