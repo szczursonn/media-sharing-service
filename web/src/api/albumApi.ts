@@ -29,8 +29,15 @@ const renameAlbum = async (albumId: number, name: string) => {
     return body as Album
 }
 
-const deleteAlbum = async (albumId: number) => {
+const deleteAlbum = async (albumId: number): Promise<void> => {
     await customFetch(`/albums/${albumId}`, {method: 'DELETE'})
+}
+
+const setAlbumCover = async (albumId: number, filename: string): Promise<Album> => {
+    const res = await customFetch(`/albums/${albumId}/cover`, {method: 'POST', body: JSON.stringify({filename})})
+
+    const body = await res.json()
+    return body as Album
 }
 
 const albumApi = {
@@ -38,7 +45,8 @@ const albumApi = {
     uploadMedia,
     deleteMedia,
     renameAlbum,
-    deleteAlbum
+    deleteAlbum,
+    setAlbumCover
 }
 
 export default albumApi

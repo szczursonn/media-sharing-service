@@ -1,4 +1,4 @@
-import { Button, Card, CardActionArea, CardContent, CardMedia, CircularProgress, Grid, Typography } from "@mui/material"
+import { Button, Card, CardActionArea, CardContent, CardMedia, Divider, Grid, Skeleton, Typography } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import { openAlbumCreateDialog } from "../../redux/dialogSlice"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
@@ -17,29 +17,31 @@ export const CommunityHomePage = ({community}: {community: Community}) => {
         <Typography variant="h4">Albums</Typography>
         {
             loading
-            ? <CircularProgress />
+            ? <Grid container>
+                <Grid item xs={3}><Skeleton variant="rectangular" width={345} height={253}/></Grid>
+                <Grid item xs={3}><Skeleton variant="rectangular" width={345} height={253}/></Grid>
+                <Grid item xs={3}><Skeleton variant="rectangular" width={345} height={253}/></Grid>
+                <Grid item xs={3}><Skeleton variant="rectangular" width={345} height={253}/></Grid>
+            </Grid>
             : <>
                 {
                     albums
                     ? <>
                         <Grid container>
-                            {albums.map((album)=><Grid item key={album.id} xs={4}>
+                            {albums.map((album)=><Grid item key={album.id} xs={3}>
                                 <Card sx={{ maxWidth: 345 }} onClick={()=>navigate(`albums/${album.id}`)}>
                                     <CardActionArea>
                                         <CardMedia
-                                        component="img"
-                                        height="140"
-                                        image="/logo512.png"
-                                        alt="green iguana"
+                                            component="img"
+                                            height="180"
+                                            image={album.cover ? album.cover.url : "/logo512.png"}
+                                            alt={album.name}
                                         />
+                                        <Divider />
                                         <CardContent>
-                                        <Typography gutterBottom variant="h5" component="div">
-                                            {album.name}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Lizards are a widespread group of squamate reptiles, with over 6,000
-                                            species, ranging across all continents except Antarctica
-                                        </Typography>
+                                            <Typography gutterBottom variant="h5" component="div">
+                                                {album.name}
+                                            </Typography>
                                         </CardContent>
                                     </CardActionArea>
                                 </Card>

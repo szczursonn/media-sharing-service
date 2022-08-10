@@ -1,9 +1,9 @@
-import { Add, ArrowBack, Delete, PlayCircle, Settings } from "@mui/icons-material";
+import { Add, ArrowBack, Delete, PhotoSizeSelectLarge, PlayCircle, Settings } from "@mui/icons-material";
 import { Avatar, Button, CircularProgress, Container, Dialog, Divider, Fab, IconButton, ImageList, ImageListItem, Paper, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import albumApi from "../../api/albumApi";
-import { selectAlbum } from "../../redux/albumSlice";
+import { selectAlbum, setAlbums } from "../../redux/albumSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { Community, Media } from "../../types";
 import { AlbumSettingsDialog } from "../dialogs/AlbumSettingsDialog";
@@ -17,6 +17,7 @@ export const AlbumPage = ({community}: {community: Community}) => {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
 
+    const albums = useAppSelector(state=>state.albumReducer.albums)
     const album = useAppSelector(state=>state.albumReducer.albums?.find(a=>a.id===albumId))
     const albumsLoading = useAppSelector(state=>state.albumReducer.loading)
     const albumsError = useAppSelector(state=>state.albumReducer.error)
@@ -68,6 +69,21 @@ export const AlbumPage = ({community}: {community: Community}) => {
             setSelectedMedia(null)
             setOpenSelectedMediaDialog(false)
             setMedia(newMedia)
+        } catch (err) {
+            setDeletingError(String(err))
+        }
+        setDeleting(false)
+    }
+    const setCover = async () => {
+        if (!selectedMedia || !media || !albums) return
+        setDeleting(true)
+        setDeletingError(null)
+        try {
+            const a = await albumApi.setAlbumCover(albumId, selectedMedia.filename)
+            const newAlbums = [...albums]
+            const i = newAlbums.findIndex(al=>al.id===a.id)
+            if (i !== -1) newAlbums[i] = a
+            dispatch(setAlbums(newAlbums))
         } catch (err) {
             setDeletingError(String(err))
         }
@@ -143,6 +159,11 @@ export const AlbumPage = ({community}: {community: Community}) => {
                                                     <Avatar src={selectedMediaUploader?.avatarUrl ?? undefined}/>
                                                     <Typography>{selectedMediaUploader?.username}</Typography>
                                                 </Container>
+                                                {selectedMedia?.type === 'image' && <Tooltip title={`Set as album cover`}>
+                                                    <IconButton disabled={deleting} onClick={setCover}>
+                                                        <PhotoSizeSelectLarge />
+                                                    </IconButton>
+                                                </Tooltip>}
                                                 <Tooltip title={`Remove ${selectedMedia?.type}`}>
                                                     <IconButton color="error" disabled={deleting} onClick={()=>setAreYouSureOpen(true)}>
                                                         <Delete />

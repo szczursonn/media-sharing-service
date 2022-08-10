@@ -30,7 +30,7 @@ export type Community = {
 export type Album = {
     id: number,
     name: string,
-    cover: null
+    cover: Media|null
 }
 
 export type Media = {
