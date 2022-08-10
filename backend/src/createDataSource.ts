@@ -8,26 +8,43 @@ import { CommunityMember } from "./models/CommunityMember";
 import { CommunityInvite } from "./models/CommunityInvite";
 import { Album } from "./models/Album";
 
-export const createDataSource = async (): Promise<DataSource> => {
+type MariaDbOptions = {
+    type: 'mariadb'
+    host: string
+    port?: number
+    username: string
+    password?: string
+    databaseName: string
+}
+type SqliteOptions = {
+    type: 'sqlite'
+    filename: string
+}
+
+export const createDataSource = async (dbOptions: MariaDbOptions|SqliteOptions): Promise<DataSource> => {
 
     let dataSource: DataSource
-    
-    if (true) {
-        dataSource = new DataSource({
-            entities: ['src/models/*.ts'],
-            type: 'mariadb',
-            host: '192.168.56.10',
-            port: 3306,
-            username: 'gigauser',
-            password: undefined,
-            database: 'media_sharing_service'
-        })
-    } else {
-        dataSource = new DataSource({
-            type: 'better-sqlite3',
-            database: ':memory:',
-            entities: ['src/models/*.ts']
-        })
+
+    const entities = ['src/models/*.ts']
+
+    switch (dbOptions.type) {
+        case 'sqlite':
+            dataSource = new DataSource({
+                entities,
+                type: 'better-sqlite3',
+                database: dbOptions.filename
+            })
+            break
+        case 'mariadb':
+            dataSource = new DataSource({
+                entities,
+                type: 'mariadb',
+                database: dbOptions.databaseName,
+                host: dbOptions.host,
+                port: dbOptions.port,
+                username: dbOptions.username,
+                password: dbOptions.password
+            })
     }
 
     await dataSource.initialize()
@@ -38,10 +55,9 @@ export const createDataSource = async (): Promise<DataSource> => {
 }
 
 export const createTestDataSource = async (useMockData: boolean = true): Promise<DataSource> => {
-    const dataSource = new DataSource({
-        type: 'better-sqlite3',
-        database: ':memory:',
-        entities: ['src/models/*.ts']
+    const dataSource = await createDataSource({
+        type: 'sqlite',
+        filename: ':memory:'
     })
 
     await dataSource.initialize()

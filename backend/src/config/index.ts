@@ -6,6 +6,10 @@ export const loadConfig = () => {
     if (isNaN(port)) {
         port = undefined
     }
+    let dbPort: number | undefined = parseInt(process.env['DB_PORT'] ?? '')
+    if (isNaN(dbPort)) {
+        dbPort = undefined
+    }
 
     return {
         port,
@@ -26,7 +30,13 @@ export const loadConfig = () => {
             redirectUri: process.env['GOOGLE_REDIRECTURI']
         },
         database: {
-
+            type: process.env['DB_TYPE'],
+            filename: process.env['DB_FILENAME'],
+            host: process.env['DB_HOST'],
+            port: dbPort,
+            username: process.env['DB_USERNAME'],
+            password: process.env['DB_PASSWORD'],
+            name: process.env['DB_NAME']
         },
         mediaStorage: {
             type: process.env['MEDIASTORAGE_TYPE'],

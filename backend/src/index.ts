@@ -14,6 +14,7 @@ import { GCPMediaStorage } from './services/MediaStorages/GCPMediaStorage'
 import { Storage } from '@google-cloud/storage'
 import { LocalMediaStorage } from './services/MediaStorages/LocalMediaStorage'
 import { MockMediaStorage } from './services/MediaStorages/MockMediaStorage'
+import { DataSource } from 'typeorm'
 
 const DEFAULT_PORT = 3000
 
@@ -32,8 +33,48 @@ const main = async () => {
         process.exit(-1)
     }
 
-    const dataSource = await createDataSource()
-    Logger.info(`Connected to database (type: ${dataSource.driver.options.type})`)
+    const dbType = config.database.type
+    let dataSource: DataSource
+
+    switch (dbType) {
+        case 'sqlite':
+            dataSource = await createDataSource({
+                type: 'sqlite',
+                filename: config.database.filename ?? ':memory:'
+            })
+            break
+        case 'mariadb':
+            const host = config.database.host
+            const port = config.database.port
+            const username = config.database.username
+            const password = config.database.password
+            const databaseName = config.database.name
+            if (!host) {
+                Logger.fatal('Missing configuration: DB_HOST')
+                process.exit(-1)
+            }
+            if (!username) {
+                Logger.fatal('Missing configuration: DB_USERNAME')
+                process.exit(-1)
+            }
+            if (!databaseName) {
+                Logger.fatal('Missing configuration: DB_NAME')
+                process.exit(-1)
+            }
+            dataSource = await createDataSource({
+                type: 'mariadb',
+                host,
+                port,
+                username,
+                password,
+                databaseName
+            })
+            break
+        default:
+            Logger.fatal(`Invalid database type: ${dbType}`)
+            process.exit(-1)
+    }
+    Logger.info(`Connected to database (${dataSource.driver.options.type}${config.database.type==='sqlite'?'':`@${config.database.host}`})`)
     
     const discordOAuth2Provider = (config.discord.clientId && config.discord.clientSecret && config.discord.redirectUri)
         ? new DiscordOAuth2Provider({
@@ -43,22 +84,21 @@ const main = async () => {
         })
         : undefined
     if (!discordOAuth2Provider) Logger.warn('Discord OAuth2 configuration missing, will be unavailable')
-    else Logger.info('Discord OAuth2 OK!')
+    else Logger.info('Discord OAuth2 configuration OK!')
 
     const googleOAuth2Provider = (config.google.clientId && config.google.clientSecret && config.google.redirectUri)
         ? new GoogleOAuth2Provider(config.google.clientId, config.google.clientSecret, config.google.redirectUri)
         : undefined
     if (!googleOAuth2Provider) Logger.warn('Google OAuth2 configuration missing, will be unavailable')
-    else Logger.info('Google OAuth2 OK!')
+    else Logger.info('Google OAuth2 configuration OK!')
 
     const githubOAuth2Provider = (config.github.clientId && config.github.clientSecret && config.github.redirectUri)
         ? new GithubOAuth2Provider(config.github.clientId, config.github.clientSecret, config.github.redirectUri)
         : undefined
     if (!githubOAuth2Provider) Logger.warn('Github OAuth2 configuration missing, will be unavailable')
-    else Logger.info('Github OAuth2 OK!')
+    else Logger.info('Github OAuth2 configuration OK!')
 
     let mediaStorage: MediaStorage
-
     switch (config.mediaStorage.type) {
         case 'google':
             if (config.mediaStorage.googleBucketName === undefined) {
@@ -66,7 +106,7 @@ const main = async () => {
                 process.exit(-1)
             }
             mediaStorage = new GCPMediaStorage(new Storage(), config.mediaStorage.googleBucketName)
-            Logger.info(`Initialized GCP Media Storage (bucket: ${config.mediaStorage.googleBucketName})`)
+            Logger.info(`Media Storage configuration OK! (type: GCP Media Storage, bucket: ${config.mediaStorage.googleBucketName})`)
             break
         case 'local':
             if (config.mediaStorage.localDirectory === undefined) {
@@ -74,11 +114,11 @@ const main = async () => {
                 process.exit(-1)
             }
             mediaStorage = new LocalMediaStorage(config.mediaStorage.localDirectory)
-            Logger.info(`Initialized Local Media Storage (directory: ${config.mediaStorage.localDirectory})`)
+            Logger.info(`Media Storage configuration OK (type: local, directory: ${config.mediaStorage.localDirectory})`)
             break
         case 'mock':
             mediaStorage = new MockMediaStorage()
-            Logger.info('Initialized Mock Media Storage')
+            Logger.info('Media Storage configuration OK (type: mock)')
             break
         default:
             Logger.fatal(`No such media storage type: ${config.mediaStorage.type}`)
@@ -88,7 +128,7 @@ const main = async () => {
     const authService = new AuthService({
         dataSource,
         jwtSecret: config.jwtSecret,
-        discordOAuth2Provider: new MockOAuth2Provider(),    // dev tmp
+        discordOAuth2Provider,
         googleOAuth2Provider,
         githubOAuth2Provider
     })
