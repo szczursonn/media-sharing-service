@@ -8,7 +8,7 @@ import { ErrorDialog } from "../dialogs/ErrorDialog"
 import githubIcon from '../../svg/githubIcon.svg'
 import discordIcon from '../../svg/discordIcon.svg'
 import googleIcon from '../../svg/googleIcon.svg'
-import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL } from "../../constants"
+import { DISCORD_OAUTH_URL, GITHUB_OAUTH_URL, GOOGLE_OAUTH_URL, MOCK_LOGIN_ENABLED } from "../../constants"
 import { useAppDispatch, useAppSelector } from "../../redux/hooks"
 import { deleteCurrentUser, setCurrentUser, updateCurrentUser } from "../../redux/userSlice"
 import { AppError } from "../../errors"
@@ -133,7 +133,7 @@ export const SettingsPage = () => {
                         <ConnectionListItem connections={connections} type='discord' onDelete={()=>removeConnection('discord')} />
                         <ConnectionListItem connections={connections} type='google' onDelete={()=>removeConnection('google')} />
                         <ConnectionListItem connections={connections} type='github' onDelete={()=>removeConnection('github')} />
-                        {process.env.REACT_APP_ENABLE_MOCK_LOGIN === 'true' && <ListItem>
+                        {MOCK_LOGIN_ENABLED && <ListItem>
                                 <Button sx={{padding: 1, display: 'flex', alignItems: 'center', backgroundColor: 'orange'}} onClick={()=>dispatch(openMockLoginDialog())}>
                                 <Typography variant="subtitle2" color={'#111'}>
                                     [DEV] mock OAuth2 login

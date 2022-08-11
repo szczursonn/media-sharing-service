@@ -1,6 +1,5 @@
+import { API_URL } from "../constants"
 import { AppError } from "../errors"
-
-const API_URL = process.env.REACT_APP_API_URL
 
 export const customFetch = async (uri: string, {method, auth=true, body=undefined, contentType='application/json'}: {method: string, auth?: boolean, body?: BodyInit|null, contentType?: string|null}) => {
 
