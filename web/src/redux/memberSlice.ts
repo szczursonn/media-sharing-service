@@ -9,6 +9,8 @@ type MemberState = {
     error: string|null
     removing: boolean
     removingError: string|null
+    updating: boolean
+    updatingError: string|null
 }
 
 const initialState: MemberState = {
@@ -16,7 +18,9 @@ const initialState: MemberState = {
     loading: false,
     error: null,
     removing: false,
-    removingError: null
+    removingError: null,
+    updating: false,
+    updatingError: null
 }
 
 export const memberSlice = createSlice({
@@ -55,6 +59,21 @@ export const memberSlice = createSlice({
             }
             state.removing = false
         })
+
+        builder.addCase(updateMember.pending, (state) => {
+            state.updating = true
+            state.updatingError = null
+        })
+        builder.addCase(updateMember.fulfilled, (state, action) => {
+            const err = action.payload.err
+            if (err) {
+                state.updatingError = err
+            } else if (state.members && action.payload.data) {
+                const i = state.members.findIndex(m=>m.user.id===action.payload.data?.user.id)
+                if (i !== -1) state.members[i] = action.payload.data
+            }
+            state.updating = false
+        })
     },
 })
 
@@ -83,6 +102,25 @@ export const kickMember = createAsyncThunk('member/kickMember', async ({communit
         return {
             err: null,
             data: userId
+        }
+    } catch (err) {
+        let e: string
+        if (err instanceof AppError) {
+            e = err.type
+        } else e = String(err)
+        return {
+            err: e,
+            data: null
+        }
+    }
+})
+
+export const updateMember = createAsyncThunk('member/updateMember', async ({communityId, userId, canUpload}: {communityId: number, userId: number, canUpload: boolean}): Promise<ThunkResult<Member>> => {
+    try {
+        const member = await communityApi.updateMember(communityId, userId, canUpload)
+        return {
+            err: null,
+            data: member
         }
     } catch (err) {
         let e: string

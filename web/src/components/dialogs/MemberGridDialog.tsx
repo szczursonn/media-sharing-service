@@ -11,7 +11,7 @@ export const MemberGridDialog = ({open, community, onClose}: {open: boolean, com
           Members of {community.name}
         </DialogTitle>
         <DialogContent>
-            <MemberGrid community={community} showRemove={false} />
+            <MemberGrid community={community} showRemove={false} showUpload={false} />
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} autoFocus>

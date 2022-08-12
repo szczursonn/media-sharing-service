@@ -69,7 +69,7 @@ export const CommunitySettingsPage = ({community}: {community: Community}) => {
 
     return <Container maxWidth='lg' sx={{display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
         <Typography variant="h4">Members</Typography>
-        <MemberGrid showRemove={isOwner} community={community} />
+        <MemberGrid showRemove={isOwner} showUpload={true} community={community} />
         <Divider light sx={{width: '100%', marginTop: 2, marginBottom: 2}}/>
         <Typography variant="h4">Invites</Typography>
         {

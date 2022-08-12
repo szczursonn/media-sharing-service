@@ -40,6 +40,13 @@ const createInvite = async (communityId: number, maxUses: number|null, expiresIn
     return body as Invite
 }
 
+const updateMember = async (communityId: number, userId: number, canUpload: boolean) => {
+    const res = await customFetch(`/communities/${communityId}/members/${userId}`, {method: 'PATCH', body: JSON.stringify({canUpload})})
+
+    const body = await res.json()
+    return body as Member
+}
+
 const removeMember = async (communityId: number, userId: number) => {
     await customFetch(`/communities/${communityId}/members/${userId}`, {method: 'DELETE'})
 }
@@ -64,7 +71,8 @@ const communityApi = {
     createInvite,
     removeMember,
     getCommunityInvites,
-    removeCommunity
+    removeCommunity,
+    updateMember
 }
 
 export default communityApi
