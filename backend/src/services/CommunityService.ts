@@ -62,6 +62,7 @@ export class CommunityService {
         if (!member) throw new MissingAccessError()
 
         if (community.ownerId !== modifierId) throw new InsufficientPermissionsError()
+        if (community.ownerId === userId) throw new InsufficientPermissionsError()
 
         member.canUpload = newPermission
         const saved = await this.dataSource.manager.save(member)
