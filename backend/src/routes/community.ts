@@ -11,6 +11,7 @@ import { genericErrorResponse } from '../utils'
  * - GET /<communityId/invities - returns community invites
  * - POST /<communityId>/invites - creates new invite
  * - GET /<communityId/members - returns community members
+ * - PATCH /<communityId>/members/<memberId> - modify a member (allow/disallow someone to upload)
  * - DELETE /<communityId>/members/<memberId> - kicks user from community
  * - GET /<communityId>/albums - returns community albums
  * - POST /<communityId>/albums - creates an album
@@ -82,6 +83,20 @@ export const setupCommunityRoutes = (app: Express, requiresAuth: requiresAuth, {
 
             const members = await communityService.getCommunityMembers(communityId, userId)
             return res.json(members)
+        } catch (err) {
+            return genericErrorResponse(res, err)
+        }
+    }))
+
+    router.patch('/:communityId/members/:userId', requiresAuth(async (req, res, userId) => {
+        try {
+            const communityId = parseInt(req.params.communityId)
+            const patchedId = parseInt(req.params.userId)
+            const newPermission = req.body.canUpload
+            if (isNaN(communityId) || isNaN(patchedId) || typeof newPermission !== 'boolean') throw new BadRequestError()
+
+            const member = await communityService.modifyMember(communityId, patchedId, newPermission, userId)
+            return res.json(member)
         } catch (err) {
             return genericErrorResponse(res, err)
         }

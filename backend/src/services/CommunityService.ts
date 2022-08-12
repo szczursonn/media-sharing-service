@@ -49,6 +49,25 @@ export class CommunityService {
         return mem
     }
 
+    public async modifyMember(communityId: number, userId: number, newPermission: boolean, modifierId: number): Promise<CommunityMemberPublic> {
+        const community = await this.dataSource.manager.findOneBy(Community, {
+            id: communityId
+        })
+        if (!community) throw new ResourceNotFoundError()
+        
+        const member = await this.dataSource.manager.findOneBy(CommunityMember, {
+            communityId,
+            userId
+        })
+        if (!member) throw new MissingAccessError()
+
+        if (community.ownerId !== modifierId) throw new InsufficientPermissionsError()
+
+        member.canUpload = newPermission
+        const saved = await this.dataSource.manager.save(member)
+        return await saved.public()
+    }
+
     public async kickUser(communityId: number, userId: number, kickerId: number): Promise<void> {
         const community = await this.dataSource.manager.findOneBy(Community, {
             id: communityId
