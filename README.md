@@ -1,12 +1,16 @@
 # media-sharing-service
-Service for sharing media (images/videos) with other people
-![album page with some media inside](docs/doc_img2.jpg)
-![user settings page](docs/doc_img3.jpg)  
+Service for sharing media (images/videos) with other people  
+![list of albums](docs/doc_img2.jpg)
+![contents of an album with a video playing](docs/doc_img3.jpg)  
+## Table of contents
+1. [Live demo](#live-demo)
+2. [Features](#features)
+3. [Technologies/Libraries used](#technologieslibraries-used)
 ## [Live demo](http://adhesive-invention.surge.sh/)
-⚠️ Live Demo doesn't use HTTPS  
-❗ **Logging in with Google is disabled for easier showcasing: use mock login option**  
+⚠️ **Logging in with Google is disabled for easier showcasing: use mock login option and enter a random number/string as foreign id**  
+⚠️ Live demo doesn't use HTTPS  
 ![mock login window](docs/doc_img1.jpg)  
-Invite to example commmunity: [qKXQ1sf-](http://adhesive-invention.surge.sh/i/qKXQ1sf-) (maxUses: inf, expires: never)
+- Invite to example commmunity: [qKXQ1sf-](http://adhesive-invention.surge.sh/i/qKXQ1sf-) (maxUses: inf, expires: never)
 ### Live demo deployment details
 - React frontend: [surge.sh](https://surge.sh/)
 - Node.js backend: Google Cloud Compute Engine instance

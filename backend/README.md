@@ -1,6 +1,13 @@
 # media-sharing-service backend
 Node.js backend for media-sharing-service
 
+## Table of contents
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+3. [Source code structure](#source-code-structure-src)
+4. [Mock OAuth2 Provider behaviour](#mock-oauth2-provider-behaviour)
+5. [Auth solution overview](#auth-solution-overview)
+
 ## Installation
 1. Clone this repository  
 `git clone https://github.com/szczursonn/media-sharing-service`  
@@ -48,3 +55,27 @@ Configuration is done using enviroment variables
 |DISCORD_MOCK|set to `true` to use mock oauth2 provider with Discord|NO|false|
 |GOOGLE_MOCK|set to `true` to use mock oauth2 provider with Google|NO|false|
 |GITHUB_MOCK|set to `true` to use mock oauth2 provider with Github|NO|false|
+
+## Source code structure (`/src`)
+- `/config`: app configuration loader
+- `/errors`: directory for custom errors
+- `/middlewares`: custom express middlewares
+- `/models`: TypeORM Entities
+- `/routes`: routes + http controllers
+- `/services`: services divided by entities they mainly handle excluding AuthService which is for auth
+  - `/MediaStorages`: implementations of media storage
+  - `/OAuth2Provider`: handlers for different OAuth2 providers
+- `/types`: Typescript type declarations + validator functions
+- `/utils`
+- `/createDataSource.ts`: functions for creating a TypeORM datasource with or without sample data (for testing)
+- `/createServer.ts`: functions for creating an express.js server, a real one or one for testing
+- `/Logger.ts`: custom logger
+- `/index.ts`: app's entry point
+
+## Mock OAuth2 Provider behaviour
+Mock OAuth2 Provider always returns a profile where foreign id is the code from the request, excluding `'invalidcode'` which simulates an invalid OAuth2 Code response.
+
+## Auth solution overview
+After the user logs in, a session is created in a database with an unique id.
+The session id is then placed inside a JSON Web Token, which is then returned to the client.
+The client then authenticates using Authorization header on every request that requires authentication. User logout is handled by deleting the session from the database.
