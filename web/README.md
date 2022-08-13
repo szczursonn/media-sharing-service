@@ -2,6 +2,10 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Table of contents
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+
 ## Installation
 1. Clone this repository  
 `git clone https://github.com/szczursonn/media-sharing-service`  
@@ -12,8 +16,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 `nano .env`  
 4. Run  
 `npm run start`  
-
-#### Build  
+5. (Optional) Build  
 `npm run build`
 
 ## Configuration
