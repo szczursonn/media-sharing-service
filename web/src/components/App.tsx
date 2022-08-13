@@ -50,11 +50,11 @@ const App = () => {
         </Grid>
         <Grid item xs={11.5}>
           <Routes>
-            <Route path='/' element={<HomePage />} />
-            <Route path='/communities/:communityId/*' element={user ? <CommunityPage /> : <RequireLoginPage />}/>
-            <Route path='/settings' element={user ? <SettingsPage /> : <RequireLoginPage />} />
-            <Route path='/i/:inviteId' element={<InvitePage />} />
-            <Route path='/callback/:provider' element={<CallbackPage />} />
+            <Route index element={<HomePage />} />
+            <Route path='communities/:communityId/*' element={user ? <CommunityPage /> : <RequireLoginPage />}/>
+            <Route path='settings' element={user ? <SettingsPage /> : <RequireLoginPage />} />
+            <Route path='i/:inviteId' element={<InvitePage />} />
+            <Route path='callback/:provider' element={<CallbackPage />} />
             <Route path='*' element={<NotFoundPage />} />
           </Routes>
         </Grid>

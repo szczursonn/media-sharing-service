@@ -16,7 +16,7 @@ export const MockLoginDialog = () => {
     }
 
     const onMockLogin = () => {
-        window.location.href=`/callback/${provider}?code=${foreignId}`
+        window.location.href=`callback/${provider}?code=${foreignId}`
     }
 
     return <Dialog open={open} onClose={onClose}>
