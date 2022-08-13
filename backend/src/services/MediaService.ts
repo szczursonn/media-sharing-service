@@ -6,6 +6,7 @@ import { Album } from "../models/Album";
 import { BadFileError, InsufficientPermissionsError, MissingAccessError, ResourceNotFoundError } from "../errors";
 import { CommunityMember } from "../models/CommunityMember";
 import { Community } from "../models/Community";
+import Logger from "../Logger";
 
 export interface MediaStorage {
     save(media: Media, file: Buffer): Promise<void>
@@ -38,6 +39,7 @@ export class MediaService {
         if (!uploaderAsMember) throw new MissingAccessError()
         if (!uploaderAsMember.canUpload) throw new InsufficientPermissionsError()
 
+        Logger.debug(`Reading filetype of ${filename}`)
         const filetype = await fromBuffer(content)
         if (!filetype) throw new BadFileError()
         if (filetype.mime.startsWith('image')) type = 'image'
@@ -63,6 +65,7 @@ export class MediaService {
             media.type = type
             const saved = await transaction.save(media)
 
+            Logger.debug(`Saving ${filename}`)
             await this.storage.save(saved, content)
 
             return saved
